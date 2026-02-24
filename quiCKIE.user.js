@@ -181,7 +181,7 @@ const settingsPanelEntries = {
     'animebytes': 'AnimeBytes',
     'anthelion': 'Anthelion', // @malefis
     'bakabt': 'BakaBT', 
-    'beyond-hd': 'BeyondHD', // @empDM
+    'beyond-hd': 'Beyond-HD', // @empDM
     'bibliotik': 'Bibliotik',
     'bitporn': 'BitPorn',
     'broadcasthe': 'BroadcasTheNet',
