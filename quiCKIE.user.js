@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     0.98.7
+// @version     0.99
 // @description A UserScript to quickly send torrents from a tracker to qui, with customizable per-site settings and presets 🐰 
 //              To be used with a running instance of qui: https://getqui.com/
 //              Written on LibreWolf via Violentmonkey
@@ -245,7 +245,7 @@ if ( trackerDomain == 'animebytes' ) {
         // ---------- REQUIRED ----------
 
         // A CSS selector that is unique to ONLY the download elements (download buttons)
-        downloadElementsSelector: 'a[href^="/torrent/"][title="Download torrent"]', // REQUIRED: Any valid CSS selector unique to only the download elements
+        downloadElementsSelector: 'a[href^="/torrent/"][title="Download torrent"]', // Any valid CSS selector unique to only the download elements
 
         // ---------- OPTIONAL ----------
         
@@ -253,13 +253,13 @@ if ( trackerDomain == 'animebytes' ) {
         bunnyButtonfontSize: 'inherit', // Default == 'inherit' || Options == Any percentile
         
         // The text that will be displayed by this bunnyButton
-        bunnyButtonText: ' 🐰 ', // Default == ' 🐰 ' || Options == Any string (text) (Usually just using this to remove the surrounding spaces when the other buttons don't have any; '🐰')
+        bunnyButtonText: ' 🐰 ', // Default == ' 🐰 ' || Options == Any string (text) (Usually this is just used to remove the surrounding spaces when the other buttons on the tracker don't have any; '🐰')
 
         // The attribute name that contains the torrentURL
         torrentURLAttribute: 'href', // Default == 'href' || Options == Any string corresponding to the attribute name
 
         // The separator used between the bunnyButton and the download button
-        separator: 'automatic', // Default == 'automatic' || options == 'automatic' | Any String (text) | false
+        separator: 'automatic', // Default == 'automatic' || options == 'automatic' | Any string (text) | false
 
         // If the bunnyButton should be placed after the downloadElement.parentElement, which may put it on the same row as the downloadElement
         bunnyButtonParentPlacement: false, // Default == false || Options == true|false
@@ -312,7 +312,7 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Beyond-HD -----------------------------------
     // Browse | Details | Homepage | Library
 
-    unit3dTrackerHandling('a[href^="https://beyond-hd.me/download/"]')
+    unit3dTrackerHandler('a[href^="https://beyond-hd.me/download/"]')
 
 } else if ( trackerDomain == 'bibliotik' ) {
     // ----------------------------------- Bibliotik -----------------------------------
@@ -328,7 +328,7 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- BitPorn -----------------------------------
     // Browse | Details
 
-    unit3dTrackerHandling('a[href^="https://bitporn.eu/torrents/download/"]')
+    unit3dTrackerHandler('a[href^="https://bitporn.eu/torrents/download/"]')
 
 } else if ( trackerDomain == 'broadcasthe' ) {
     // ----------------------------------- BroadcasTheNet -----------------------------------
@@ -514,7 +514,7 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- OldToons -----------------------------------
     // Browse | Details | Homepage | Playlists | Similar
 
-    unit3dTrackerHandling('a[href^="https://oldtoons.world/torrents/download/"]')
+    unit3dTrackerHandler('a[href^="https://oldtoons.world/torrents/download/"]')
 
 } else if ( trackerDomain == 'orpheus' ) {
     // ----------------------------------- Orpheus -----------------------------------
@@ -540,7 +540,7 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Portugas -----------------------------------
     // Browse | Album | Artist
     
-    unit3dTrackerHandling('a[href^="https://portugas.org/torrents/download/"]')
+    unit3dTrackerHandler('a[href^="https://portugas.org/torrents/download/"]')
 
 } else if ( trackerDomain == 'redacted' ) {
     // ----------------------------------- Redacted -----------------------------------
@@ -2097,7 +2097,7 @@ function quickieTrackerHandler({
 
 }
 
-function unit3dTrackerHandling(torrentURLSelector) {
+function unit3dTrackerHandler(torrentURLSelector) {
     // A site using the UNIT3D Framework, first generate bunnyButtons and then see if this page has a mutable object that can be observed
     // ! This function used 'Oldtoons' as the model and is not WirlyWirly tested for other sites
 
