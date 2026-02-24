@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     0.97
+// @version     0.98
 // @description A UserScript to quickly send torrents from a tracker to qui, with customizable per-site settings and presets 🐰 
 //              To be used with a running instance of qui: https://getqui.com/
 //              Written on LibreWolf via Violentmonkey
@@ -14,24 +14,23 @@
 // @run-at      document-end
 
 // @resource    settingsPanelCSS https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/quiCKIE.css?raw=true
-// @resource    contextMenuCSS https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/contextMenu.css?raw=true
+// @resource    presetsMenuCSS https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/contextMenu.css?raw=true
 
 // @require     https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/contextMenu.js?raw=true
 // @require     https://cdn.jsdelivr.net/gh/sizzlemctwizzle/GM_config@43fd0fe4de1166f343883511e53546e87840aeaf/gm_config.js
 
-// ----------------------------------- Permissions --------------------------------------
+// ----------------------------------- Development --------------------------------------
+// When working on this UserScript, I like to use MiniServe to serve the resource files over http, that way they become accessible with these urls.
+// I will then remove the '@' from the gitHub urls above and put it on these instead while I'm working.
+// MiniServe: https://github.com/svenstaro/miniserve
 
-// @grant   GM_addStyle
-// @grant   GM_getResourceText
-// @grant   GM_getValue
-// @grant   GM_listValues
-// @grant   GM_registerMenuCommand
-// @grant   GM_setValue
-// @grant   GM_xmlhttpRequest
+// resource    settingsPanelCSS http://localhost:12345/quiCKIE.css
+// resource    presetsMenuCSS http://localhost:12345/ContextMenu.css
+// require     http://localhost:12345/ContextMenu.js
 
 // ----------------------------------- Matches --------------------------------------
 
-// How to add new trackers: https://github.com/WirlyWirly/quiCKIE/wiki/The-3-Steps-to-Adding-a-New-Tracker-to-quiCKIE
+// Adding a New Tracker: https://github.com/WirlyWirly/quiCKIE/wiki/Adding-a-New-Tracker
 
 // @match   https://alpharatio.cc/top10.php*
 // @match   https://alpharatio.cc/torrents.php*
@@ -133,25 +132,29 @@
 
 // @match   https://tv-vault.me/torrents.php?id=*
 
-// ----------------------------------- Development --------------------------------------
+// ----------------------------------- Permissions --------------------------------------
 
-// resource    settingsPanelCSS http://localhost:12345/quiCKIE.css
-// resource    contextMenuCSS http://localhost:12345/ContextMenu.css
-// require     http://localhost:12345/ContextMenu.js
+// @grant   GM_addStyle
+// @grant   GM_getResourceText
+// @grant   GM_getValue
+// @grant   GM_listValues
+// @grant   GM_registerMenuCommand
+// @grant   GM_setValue
+// @grant   GM_xmlhttpRequest
 
 // ----------------------------------- Script Links --------------------------------------
-//
+
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @updateURL   https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/quiCKIE.user.js?raw=true
 // @downloadURL https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/quiCKIE.user.js?raw=true
 // ==/UserScript==
 
-// This string helps prevent various JS oddities when working with variables
+// This string helps prevent various JavaScript oddities when working with variables
 'use strict'
 
 // =================================== SETTINGS PANEL ENTRIES ======================================
 
-// @trackerSettingsPanelEntries
+// @quickieSettingsPanelEntries
 const settingsPanelEntries = {
     // Each entry below uses the tracker's unique domain (lowercase) as the property, followed by the row label (TitleCase) as the value.
     // Keep the list alphabetical, as these entries will be used to generate a row for each tracker in the settings panel.
@@ -187,93 +190,40 @@ const settingsPanelEntries = {
 }
 
 
-// =================================== GENERATE SETTINGS ======================================
+// =================================== GM_CONIFG ======================================
 
-// Determine the saved number of preset fields that should be generated in the settings panel and context-menu
-
-let presetCount
-if ( GM_getValue('quiCKIE_config') !== undefined ) {
-    // Parse the existing GM_config() settings object
-    let quiCKIESettingsObject = JSON.parse(GM_getValue('quiCKIE_config'))
-
-    // Get the previously specified presetCount to determine how many preset rows should be generated
-    presetCount = quiCKIESettingsObject['presetCount']
-
-} 
-
-// New installs will not have a presetCount, so default to 3
-if ( presetCount == undefined ) {
-    presetCount = 3
-}
-
-// Reverse the settingsPanelEntries object so that the values (labels) become the new keys and the keys (trackerDomains) become the new values
-// This will later allow us to get the trackerDomain when we know the settings label
-let swappedSettingsPanelEntries = Object.entries(settingsPanelEntries).map (
-    ([key, value]) => [value.toLowerCase(), key]
-
-)
-swappedSettingsPanelEntries = Object.fromEntries(swappedSettingsPanelEntries)    
-    
-// For the sake of code-cleanliness, everything related to GM_config.init() has been done in this function and moved further down the script
-createGMConfigSettingsPanel()
+// For the sake of code-cleanliness, everything related to GM_config.init() (The Settings Panel) has been done in this function and moved further down the script
+let [presetCount, swappedSettingsPanelEntries] = createGMConfigSettingsPanel()
 
 
-// =================================== CURRENT SETTINGS ======================================
+// =================================== TRACKER SETTINGS ======================================
 
-// To save resources while allowing for cross-site compatibility, the unique domain of the site is used when saving\getting settings and for determing how to handle the current tracker
+// The current trackerDomain should match one of the keys in the settingsPanelEntries object
 // Example: https://broadcasthe.net/ --> broadcasthe
-
 let trackerDomain = document.location.hostname.match(/^(\w+\.)?(.*?)(\.\w+)$/)[2].toLowerCase()
 
-// @trackerSettings
-let SETTINGS = {
-    // The global qui saved settings
-    quiURL: GM_config.get('quiURL'),
-    quiApiKey: GM_config.get('quiApiKey'),
-    globalLeftClickAction: GM_config.get('globalLeftClickAction'),
-    globalMiddleClickAction: GM_config.get('globalMiddleClickAction'),
-    thirdPartyDelay: GM_config.get('thirdPartyDelay'),
-    
-    // If qui fails to download an authenticated torrentURL, change this property to 'true' at the start of the if block to force downloading the .torrent through the browser
-    forceTorrentFile: false,
+// Get the global and all trackerDomain specific settings
+let SETTINGS = getTrackerSettings(trackerDomain)
 
-    // The saved settings of the current tracker
-    category: GM_config.get(`${trackerDomain}-category`),
-    savePath: GM_config.get(`${trackerDomain}-savePath`),
-    tags: GM_config.get(`${trackerDomain}-tags`),
-    ratioLimit: GM_config.get(`${trackerDomain}-ratioLimit`),
-    seedTime: GM_config.get(`${trackerDomain}-seedTime`),
-    instance: GM_config.get(`${trackerDomain}-instance`),
-    leftClick: GM_config.get(`${trackerDomain}-leftClick`),
-    startPaused: GM_config.get(`${trackerDomain}-startPaused`),
-    subFolder: GM_config.get(`${trackerDomain}-subFolder`),
-    seqPieces: GM_config.get(`${trackerDomain}-seqPieces`),
-    skipHash: GM_config.get(`${trackerDomain}-skipHash`),
-    
-}
+// If qui fails to download an authenticated torrentURL, change this property to 'true' at the start of the tracker's if block to force downloading the .torrent file through the browser
+SETTINGS.forceTorrentFile = false
 
-// GM_config() saves what should be blank int/float fields as 0, which is qbitTorrent interprets problematically, so set 0 to ''
-SETTINGS.ratioLimit == 0 ? SETTINGS.ratioLimit = '' : null
-SETTINGS.seedTime == 0 ? SETTINGS.seedTime = '' : null
-SETTINGS.instance == 0 ? SETTINGS.instance = '' : null
 
-// =================================== TRACKER HANDLING ======================================
+// =================================== TRACKER SPECIFIC HANDLING ======================================
 
-// @trackerIfBlocks
-// Because the site's domain is unique, we can use it to determine what tracker this is and how to proceed from there
-
-// ! This is the same domain used when entering the tracker as a line in the @trackerSettingsPanelEntries
+// @trackerSpecificHandling
+// Because the trackerDomain is unique for each site, we can use it to determine what tracker this is and how to proceed from there 
 if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- AnimeBytes -----------------------------------
     // Browse | Collages | Company | Series 
 
-    // Get a list of all the downloadElements (download buttons) on the page
+    // Get a list of all the downloadElements (download buttons) on the page using the provided CSS Selector
     let allDownloadElements = document.querySelectorAll('a[href^="/torrent/"][title="Download torrent"]')
 
     // Process each downloadElement in the list one at a time, generating a bunnyButton for each and then inserting it after the downloadElement
     for (let downloadElement of allDownloadElements) {
 
-        // Use the value (torrentURL) of the downloadElement's 'href' attribute to create a bunnyButton for this downloadElement
+        // Use the 'href' value of the downloadElement (which should be a torrentURL) to create a bunnyButton for this downloadElement
         let bunnyButton = createBunnyButton(downloadElement.href)
 
         // Insert the bunnyButton after the page's downloadElement
@@ -516,7 +466,7 @@ if ( trackerDomain == 'animebytes' ) {
 
         downloadButton.insertAdjacentElement('afterend', bunnyButton)
 
-        generatePresetsContextMenu('a.quickie_bunnyButton')
+        createPresetsMenu('a.quickie_bunnyButton')
 
     } else {
         // The Browse or Homepage, both of which require a MutationObserver
@@ -536,8 +486,8 @@ if ( trackerDomain == 'animebytes' ) {
 
                 }
 
-                // Now that the bunnyButtons are in-place, generate the right-click context-menu (Presets)
-                generatePresetsContextMenu('a.quickie_bunnyButton')
+                // Now that the bunnyButtons are in-place, generate the right-click presets-menu
+                createPresetsMenu('a.quickie_bunnyButton')
 
             } catch(error) {
                 // console.log(error)
@@ -645,7 +595,7 @@ if ( trackerDomain == 'animebytes' ) {
 
         }
 
-        generatePresetsContextMenu('a.quickie_bunnyButton')
+        createPresetsMenu('a.quickie_bunnyButton')
 
     } else {
         // This is a collage page, which loads DL buttons only after the '+' button of the album is clicked. Setup nested observation.
@@ -678,8 +628,8 @@ if ( trackerDomain == 'animebytes' ) {
 
                         }
 
-                        // Now that the bunnyButtons are in-place, generate the right-click context-menu (Presets)
-                        generatePresetsContextMenu('a.quickie_bunnyButton')
+                        // Now that the bunnyButtons are in-place, generate the right-click presets-menu
+                        createPresetsMenu('a.quickie_bunnyButton')
 
                     })
 
@@ -749,21 +699,22 @@ if ( trackerDomain == 'animebytes' ) {
 }
 
 
+// =================================== PRESETS-MENU ======================================
+
+// A list of trackerDomains on which to NOT generate the presets-menu, because it will be done elsewhere in the script
+let skipTrackerDomains = ['myanonamouse', 'redacted']
+
+if ( !skipTrackerDomains.includes(trackerDomain) ) {
+    // After the bunnyButtons have been created, generate and attach to them the right-click presets-menu
+    createPresetsMenu('a.quickie_bunnyButton')
+}
+
+
 // =================================== THIRD-PARTY INTEGRATIONS ======================================
 
 // After a brief delay, query the document for any thirdParty '[data-quickie_torrenturl]' elements for which a bunnyButton should be created
-if ( SETTINGS.thirdPartyDelay <= 0 ) { SETTINGS.thirdPartyDelay = 1000 }
+SETTINGS.thirdPartyDelay <= 0 ? SETTINGS.thirdPartyDelay = 500 : null
 scanForThirdPartyTorrentURLS(SETTINGS.thirdPartyDelay)
-
-// =================================== CONTEXT-MENU ======================================
-
-// A list of trackerDomains on which to NOT generate the contextMenu, because it will be done elsewhere in the script
-let skipTrackerDomains = ['redacted', 'myanonamouse',]
-
-if ( !skipTrackerDomains.includes(trackerDomain) ) {
-    // After the bunnyButtons exist, generate and attach to them the right-click context-menu (Presets)
-    generatePresetsContextMenu('a.quickie_bunnyButton')
-}
 
 
 // =================================== SCRIPT FUNCTIONS ======================================
@@ -771,9 +722,34 @@ if ( !skipTrackerDomains.includes(trackerDomain) ) {
 function createGMConfigSettingsPanel() {
     // Generate and initialize the GM_config settings panel. It has been done in this function for code cleanliness.
     
+    // Determine the saved number of preset fields that should be generated in the settings panel and presets-menu
+    let presetCount
+    if ( GM_getValue('quiCKIE_config') !== undefined ) {
+        // Parse the existing GM_config() settings object
+        let quiCKIESettingsObject = JSON.parse(GM_getValue('quiCKIE_config'))
+
+        // Get the previously specified presetCount to determine how many preset rows should be generated
+        presetCount = quiCKIESettingsObject['presetCount']
+
+    } 
+
+    // New installs will not have a presetCount, so default to 3
+    if ( presetCount == undefined ) {
+        presetCount = 3
+    }
+
+    // Reverse the settingsPanelEntries object so that the values (labels) become the new keys and the keys (trackerDomains) become the new values
+    // This will later allow us to get the trackerDomain when we know the settings label
+    let swappedSettingsPanelEntries = Object.entries(settingsPanelEntries).map (
+        ([key, value]) => [value.toLowerCase().trim(), key]
+
+    )
+
+    swappedSettingsPanelEntries = Object.fromEntries(swappedSettingsPanelEntries)    
+
     // @trackerFieldGeneration
     // This array will later be used to generate the <th> for each column in the settings panel. Create an entry in 
-    const trackerFieldSuffixes = ['category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'instance', 'leftClick', 'startPaused', 'subFolder', 'seqPieces', 'skipHash']
+    const trackerFieldSuffixes = ['category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'instance', 'leftClick', 'startPaused', 'subFolder', 'seqPieces', 'autoTMM', 'skipHash']
     let gmConfigTrackerFields = {}
     let trackerDomains = Object.keys(settingsPanelEntries)
     for ( let trackerDomain of trackerDomains ) {
@@ -827,6 +803,10 @@ function createGMConfigSettingsPanel() {
             [`${trackerDomain}-${trackerFieldSuffixes[10]}`]: {
                 'type': 'checkbox',
                 'default': false
+            },
+            [`${trackerDomain}-${trackerFieldSuffixes[11]}`]: {
+                'type': 'checkbox',
+                'default': false
             }
         }
 
@@ -835,7 +815,7 @@ function createGMConfigSettingsPanel() {
     }
 
     // @presetFieldGeneration
-    const presetFieldSuffixes = ['preset', 'presetTrackers', 'category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'instance', 'startPaused', 'subFolder', 'seqPieces', 'skipHash']
+    const presetFieldSuffixes = ['preset', 'presetTrackers', 'category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'instance', 'startPaused', 'subFolder', 'seqPieces', 'autoTMM', 'skipHash']
     let gmConfigPresetsFields = {}
     for (let i = 1; i <= presetCount; i++) {
         // --- GM_config() Fields ---
@@ -885,14 +865,18 @@ function createGMConfigSettingsPanel() {
             [`preset-${i}-${presetFieldSuffixes[11]}`]: {
                 'type': 'checkbox',
                 'default': false
+            },
+            [`preset-${i}-${presetFieldSuffixes[12]}`]: {
+                'type': 'checkbox',
+                'default': false
             }
         }
 
             gmConfigPresetsFields = {...gmConfigPresetsFields, ...genereatedPresetFields}
     }
 
-    // The data that will be used as the '.textContent' and '.title' in the settings panel's <th> elements. The property names are the '.toLowerCase()' of trackerFieldSuffixes and presetFieldSuffixes.
     const tableHeaderData = {
+        // The data that will be used as the '.textContent' and '.title' in the settings panel's <th> elements. The key names are the '.toLowerCase()' of trackerFieldSuffixes and presetFieldSuffixes items.
         'columnText': {
             'tracker': '🌎 Tracker',
 
@@ -909,6 +893,7 @@ function createGMConfigSettingsPanel() {
             'startpaused': '⏸️',
             'subfolder': '📁',
             'seqpieces': '🧩',
+            'autotmm': '🤖',
             'skiphash': '🛡️',
 
         },
@@ -930,7 +915,8 @@ function createGMConfigSettingsPanel() {
             // 'startpaused': "─── ⏸️ Start Paused ⏸️ ───\n\nPause torrents when they are added so as to not automatically begin downloading\n\nℹ️ Performing a 'Space-Click' on a BunnyButton will force the torrent to Start Paused",
             'subfolder': '─── 📁 SubFolder 📁 ───\n\nFor single-file torrents, create a subfolder where the file will be saved into\n\nℹ️ This does not affect multi-file torrents that are already in a folder\n\nExample: audioBookFile.m4b --> audioBookFile/audioBookFile.m4b',
             'seqpieces': '─── 🧩 Sequential Piece Download 🧩 ───\n\nDownload torrent pieces sequentially to allow for media playback while the file is downloading\n\n⚠️ This may impact download speed',
-            'skiphash': '─── 🛡️ Skip Hash Check 🛡️ ───\n\nWhen Adding torrents, skip the initial hash check\n\n⚠️ Hash checks are used to verify file integrity and prevent corrupted data, although this check may take a long time with larger torrents. Know what you are doing before enabling this.'
+            'autotmm': "─── 🤖 Auto Torrent Management 🤖 ───\n\nFor these torrents, enable Auto Torrent Management\n\n⚠️ This will download the torrent to a folder based on the '🗃️ Category', ignoring whatever is specified in the '💾 Save Path'",
+            'skiphash': '─── 🛡️ Skip Hash Check 🛡️ ───\n\nWhen Adding torrents, skip the initial hash check\n\n⚠️ Hash checks are used to verify file integrity and prevent corrupted data, although this check may take a long time with larger torrents. Know what you are doing before enabling this.',
 
         }
 
@@ -962,7 +948,7 @@ function createGMConfigSettingsPanel() {
         'frame': configFrame,
         'title': `
             <div>
-                <div style="padding: 30px 0 0 0"></div>
+                <div style="padding: 30px 0px 0px 0px"></div>
                 🐰
                 <span style="user-select: none; background: none; background-color: #FFFFFF; -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-filter: brightness(110%); filter: brightness(110%); text-shadow: 0 0 20px rgba(0, 124, 255, 0.60); transition: all 0.3s; font-weight: bold; padding: 10px 0px 10px 0px">
                     <a href="${GM_info.script.homepage}" target="_blank" style="font-family: 'Lilita One', 'Roboto Condensed', Tahoma, Geneva, sans-serif; font-size: 35px; font-weight: 400; font-style: normal; color: #FFFFFF; text-decoration: none; background: none; line-height: 30px">quiCKIE</a>
@@ -1033,7 +1019,7 @@ function createGMConfigSettingsPanel() {
                 panelStyle.padding = '0px 0px'
                 panelStyle.position = 'fixed'
                 panelStyle.transform = 'translate(-50%,-50%)'
-                panelStyle.width = '1250px'
+                panelStyle.width = '1300px'
                 
                 // ----------------------------------- TRACKERS TABLE -----------------------------------
                 // Convert the various trackerDomain <div> elements created by GM_config() into a <table> with columns/rows
@@ -1270,8 +1256,8 @@ function createGMConfigSettingsPanel() {
                 for ( let trackerLabel of GM_config.get('hiddenTrackers').split(',') ) {
                     trackerLabel = trackerLabel.toLowerCase().trim()
                     let trackerDomain = swappedSettingsPanelEntries[trackerLabel]
-                    let tableRow = document.getElementById(`quiCKIE_config_tracker_table_tr_${trackerDomain}`)
-                    tableRow ? tableRow.remove() : null
+                    let trackerRow = document.getElementById(`quiCKIE_config_tracker_table_tr_${trackerDomain}`)
+                    trackerRow ? trackerRow.remove() : null
                 }
                 
                 // Set the placeholder examples for the various input fields
@@ -1307,8 +1293,9 @@ function createGMConfigSettingsPanel() {
                     document.getElementById('quiCKIE_config_field_secret-cinema-ratioLimit').placeholder = '3.25'
                     document.getElementById('quiCKIE_config_field_secret-cinema-seedTime').placeholder = '80640'
                     document.getElementById('quiCKIE_config_field_secret-cinema-instance').placeholder = '3'
+
                 } catch (error) {
-                    // Likely an error from the trackerRow having been removed already
+                    // Likely an error from the trackerRow having been hidden already
                 }
 
                 // Move global settings below the header
@@ -1321,7 +1308,7 @@ function createGMConfigSettingsPanel() {
                 let quiURLLabel = document.getElementById('quiCKIE_config_quiURL_field_label')
                 let quiURLField = document.getElementById('quiCKIE_config_field_quiURL')
                 quiURLLabel.classList.add('settingsDivLabel')
-                let quiURLTooltip = '─── 🔗 quiURL 🔗 ───\n\nThe full URL to a qui instance\n\nThis is usually the same URL you can copy-paste from your browser\n\nExample: http://localhost:7476/qui/instances/1\n\nSeedbox\\Swizzin users might try...\nhttps://username:password@seedboxDomain.com/qui/instances/1'
+                let quiURLTooltip = "─── 🔗 quiURL 🔗 ───\n\nThe full URL to a qui instance\n\nThis is usually the same URL you can copy-paste from your browser\n\nℹ️ Unless otherwise specified in the '🎯' column, this is the instance that all torrents will be sent to\n\nExample: http://localhost:7476/qui/instances/1\n\n────────────────\n\nSeedbox\\Swizzin users might try...\n\nhttps://username:password@seedboxDomain.com/qui/instances/1"
                 quiURLLabel.title = quiURLTooltip
                 quiURLField.title = quiURLTooltip
                 settingsDivFirst.appendChild(quiURLLabel)
@@ -1331,6 +1318,7 @@ function createGMConfigSettingsPanel() {
                 let quiApiKeyLabel = document.getElementById('quiCKIE_config_quiApiKey_field_label')
                 let quiApiKeyField = document.getElementById('quiCKIE_config_field_quiApiKey')
                 quiApiKeyLabel.classList.add('settingsDivLabel')
+                quiApiKeyLabel.title = "─── 🔑 qui ApiKey 🔑 ───\n\nA valid and active ApiKey created by qui\n\nFrom the qui interface, you can generate a ApiKey by going to...\n\nSettings > API Keys > Create API Key"
                 settingsDivFirst.appendChild(quiApiKeyLabel)
                 settingsDivFirst.appendChild(quiApiKeyField)
 
@@ -1338,7 +1326,7 @@ function createGMConfigSettingsPanel() {
                 let presetCountLabel = document.getElementById('quiCKIE_config_presetCount_field_label')
                 let presetCountField = document.getElementById('quiCKIE_config_field_presetCount')
                 presetCountLabel.classList.add('settingsDivLabel')
-                presetCountLabel.title = '─── 🚀 Presets 🚀 ───\n\nThe number of presets that will be generated and available for use from the right-click context-menu of a BunnyButton\n\nHover over the preset column headers for details on how each field can be filled in\n\n⚠️ Lowering this number will REMOVE that many rows which will DELETE the settings of those rows'
+                presetCountLabel.title = "─── 🚀 Presets 🚀 ───\n\nThe number of presets that will be generated and available for use from the presets menu (right-click) of a BunnyButton\n\nHover over '🚀 Preset' header for details on how each field can be filled in\n\n⚠️ Lowering this number will REMOVE those rows which will DELETE the settings of the removed rows"
                 settingsDivFirst.appendChild(presetCountLabel)
                 settingsDivFirst.appendChild(presetCountField)
 
@@ -1346,7 +1334,7 @@ function createGMConfigSettingsPanel() {
                 let leftClickLabel = document.getElementById('quiCKIE_config_globalLeftClickAction_field_label')
                 let leftClickField = document.getElementById('quiCKIE_config_field_globalLeftClickAction')
                 leftClickLabel.classList.add('settingsDivLabel')
-                leftClickLabel.title = '─── 🖱️ Left-Click \\ Tap 🖱️ ───\n\nThe action to take when left-clicking on a Bunny button or tapping on a mobile'
+                leftClickLabel.title = "─── 🖱️ Left-Click \\ Tap 🖱️ ───\n\nThe default action to take when performing a Left-Click\\Tap on a Bunny button\n\nℹ️ Affects all BuunyButtons with the 'Global' setting"
                 settingsDivFirst.appendChild(leftClickLabel)
                 settingsDivFirst.appendChild(leftClickField)
 
@@ -1354,7 +1342,7 @@ function createGMConfigSettingsPanel() {
                 let middleClickLabel = document.getElementById('quiCKIE_config_globalMiddleClickAction_field_label')
                 let middleClickField = document.getElementById('quiCKIE_config_field_globalMiddleClickAction')
                 middleClickLabel.classList.add('settingsDivLabel')
-                middleClickLabel.title = '─── 🖱️ Middle-Click 🖱️ ───\n\nThe action to take when middle-clicking on a BunnyButton'
+                middleClickLabel.title = '─── 🖱️ Middle-Click 🖱️ ───\n\nThe action to take performing a Middle-Click on a BunnyButton'
                 settingsDivFirst.appendChild(middleClickLabel)
                 settingsDivFirst.appendChild(middleClickField)
 
@@ -1473,7 +1461,48 @@ function createGMConfigSettingsPanel() {
         GM_config.open()
     })
 
+    return [presetCount, swappedSettingsPanelEntries]
+
 }
+
+
+function getTrackerSettings(trackerDomain) {
+    // Define the main SETTINGS object and populate it with the current trackerDomain specific settings
+    
+    // @trackerSettings
+    let SETTINGS = {
+        // The global qui saved settings
+        quiURL: GM_config.get('quiURL'),
+        quiApiKey: GM_config.get('quiApiKey'),
+        globalLeftClickAction: GM_config.get('globalLeftClickAction'),
+        globalMiddleClickAction: GM_config.get('globalMiddleClickAction'),
+        thirdPartyDelay: GM_config.get('thirdPartyDelay'),
+        
+        // The saved settings of the current tracker
+        category: GM_config.get(`${trackerDomain}-category`),
+        savePath: GM_config.get(`${trackerDomain}-savePath`),
+        tags: GM_config.get(`${trackerDomain}-tags`),
+        ratioLimit: GM_config.get(`${trackerDomain}-ratioLimit`),
+        seedTime: GM_config.get(`${trackerDomain}-seedTime`),
+        instance: GM_config.get(`${trackerDomain}-instance`),
+        leftClick: GM_config.get(`${trackerDomain}-leftClick`),
+        startPaused: GM_config.get(`${trackerDomain}-startPaused`),
+        subFolder: GM_config.get(`${trackerDomain}-subFolder`),
+        seqPieces: GM_config.get(`${trackerDomain}-seqPieces`),
+        autoTMM: GM_config.get(`${trackerDomain}-autoTMM`),
+        skipHash: GM_config.get(`${trackerDomain}-skipHash`),
+        
+    }
+
+    // GM_config() saves what should be blank int/float fields as 0, which is qbitTorrent interprets problematically, so set 0 to ''
+    SETTINGS.ratioLimit == 0 ? SETTINGS.ratioLimit = '' : null
+    SETTINGS.seedTime == 0 ? SETTINGS.seedTime = '' : null
+    SETTINGS.instance == 0 ? SETTINGS.instance = '' : null
+
+    return SETTINGS
+
+}
+
 
 function createBunnyButton(torrentURL, fontSize = 'inherit', buttonText = ' 🐰 ') {
     // Create the bunnyButton that will be displayed on the site
@@ -1493,6 +1522,7 @@ function createBunnyButton(torrentURL, fontSize = 'inherit', buttonText = ' 🐰
  ⏸️ = ${SETTINGS.startPaused}
  📁 = ${SETTINGS.subFolder}
  🧩 = ${SETTINGS.seqPieces}
+ 🤖 = ${SETTINGS.autoTMM}
  🛡️ = ${SETTINGS.skipHash}`
 
     bunnyButton.setAttribute('style', `font-size: ${fontSize}; text-align: center; text-decoration: none; text-shadow: none`)
@@ -1559,14 +1589,14 @@ function createBunnyButton(torrentURL, fontSize = 'inherit', buttonText = ' 🐰
 }
 
 
-function bunnyButtonClickedActions(bunnyButton, settingsProperty) {
-    // Depending on what mouse button was clicked, perform the saved action
+function bunnyButtonClickedActions(bunnyButton, settingsValue) {
+    // Determine what action to take depending on the mouse button settings
 
-    let buttonAction = settingsProperty
+    let buttonAction = settingsValue
 
     if ( buttonAction.match(/^global/) ) {
-        // From the SETTINGS object, get the global action saved for this button
-        buttonAction = SETTINGS[`${settingsProperty}`]
+        // From the SETTINGS object, get the global action that matches this settingsValue
+        buttonAction = SETTINGS[`${settingsValue}`]
     }
 
     if ( buttonAction == 'Tracker' ) {
@@ -1582,12 +1612,12 @@ function bunnyButtonClickedActions(bunnyButton, settingsProperty) {
             bunnyButton.id = '__CLICKED__'
             bunnyButton.textContent = ' 🕓 '
 
-            quiAddTorrent(SETTINGS.quiURL, SETTINGS.quiApiKey, bunnyButton.dataset.torrenturl, SETTINGS.instance, SETTINGS.category, SETTINGS.savePath, SETTINGS.tags, SETTINGS.ratioLimit, SETTINGS.seedTime, SETTINGS.startPaused, SETTINGS.subFolder, SETTINGS.seqPieces, SETTINGS.skipHash)
+            addTorrent(SETTINGS.quiURL, SETTINGS.quiApiKey, bunnyButton.dataset.torrenturl, SETTINGS.instance, SETTINGS.category, SETTINGS.savePath, SETTINGS.tags, SETTINGS.ratioLimit, SETTINGS.seedTime, SETTINGS.startPaused, SETTINGS.subFolder, SETTINGS.seqPieces, SETTINGS.autoTMM, SETTINGS.skipHash)
 
         }
 
     } else if ( buttonAction == 'Presets' ) {
-        // Simultate a right-click to open the context-menu
+        // Simultate a right-click to open the presets-menu
         
         // *** NOT WORKING ***
 
@@ -1612,13 +1642,14 @@ function bunnyButtonClickedActions(bunnyButton, settingsProperty) {
 
     } else if ( buttonAction == 'Nothing') {
         // Do nothing, a null button
+        null
 
     }
 }
 
 
-function quiAddTorrent(quiURL, quiApiKey, torrentURL, instance = '', category = '', savePath = '', tags = '', ratioLimit = '', seedTime = '', startPaused = false, subFolder = false, seqPieces = false, skipHash = false) {
-    // Using the provided parameters, create a object containing all the info needed to POST a new torrent to the client (qui), then pass that object to the appropriate POST function depending on if the torrentURL has authentication
+function addTorrent(quiURL, quiApiKey, torrentURL, instance = '', category = '', savePath = '', tags = '', ratioLimit = '', seedTime = '', startPaused = false, subFolder = false, seqPieces = false, autoTMM = false, skipHash = false) {
+    // Using the provided parameters, create a object containing all the info needed to POST a new torrent to the client, then pass that object to the appropriate POST function depending on if the torrentURL has authentication
 
     try {
         // Using the saved quiURL, parse and generate the API endpoint to send the POST request
@@ -1640,7 +1671,7 @@ function quiAddTorrent(quiURL, quiApiKey, torrentURL, instance = '', category = 
     }
 
     // ----- POST form ----- 
-    // The form data that will be passed to the client (qui)
+    // The form data that will be passed to the client
 
     let form = new FormData()
     form.append('urls', torrentURL)
@@ -1694,6 +1725,11 @@ function quiAddTorrent(quiURL, quiApiKey, torrentURL, instance = '', category = 
         form.append('firstLastPiecePrio', true)
     }
 
+    if ( autoTMM == true ) {
+        // SETTINGS.autoTMM: Enable Auto Torrent Management for these torrents
+        form.append('autoTMM', true)
+    }
+
     if ( skipHash == true ) {
         // SETTINGS.skipHash: Skip the initial hash check that is invoked when adding a new torrent
         form.append('skip_checking', true)
@@ -1708,22 +1744,20 @@ function quiAddTorrent(quiURL, quiApiKey, torrentURL, instance = '', category = 
 
     // ----- Finalized POST object ----- 
     let torrentPostData = {
-        // The object containing the finalized data needed to POST a torrent to qui
+        // The object containing the finalized data needed to POST a torrent
         'quiApiURL': quiApiAddTorrentURL,
         'quiApiKey': quiApiKey,
         'form': form,
         'torrentURL': torrentURL
     }
 
-    console.log(torrentPostData)
-
-    // ----- torrentURL Handling ----- 
+    // ----- torrentURL Authentication ----- 
     if ( torrentPostData.torrentURL.match(/(auth=|authkey=|magnet:\?xt=urn:btih:)/) && SETTINGS.forceTorrentFile == false ) {
-        // This is an authenticated url or magnet link, so send it directly to the client (qui)
-        clientPOST(torrentPostData)
+        // Yes, this is an authenticated url or magnet link, so send it directly to the client
+        quiPOST(torrentPostData)
 
     } else {
-        // This url has not authentication, so download the .torrent file through the browser before sending it to the client (qui)
+        // No, this url has no authentication (or 'SETTINGS.forceTorrentFile == true'), so download the .torrent file through the browser before sending it to the client
         document.getElementById('__CLICKED__').textContent = ' 💾 '
         getFileBlob(torrentPostData)
 
@@ -1748,7 +1782,7 @@ function getFileBlob(torrentPostData) {
             torrentPostData.form.append('torrent', blobData)
             document.getElementById('__CLICKED__').textContent = ' 🕓 '
 
-            clientPOST(torrentPostData)
+            quiPOST(torrentPostData)
         },
         onerror: function(response) {
             // There was an error getting the .torrent file
@@ -1756,7 +1790,7 @@ function getFileBlob(torrentPostData) {
             document.getElementById('__CLICKED__').textContent = ' ❌ '
             document.getElementById('__CLICKED__').removeAttribute('id')
 
-            window.alert(`❌ quiCKIE ❌\n\nThere was a problem getting the .torrent file. \n\nStatus Code: ${response.status}\n\n${response.responseText}`)
+            window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nThere was a problem getting the .torrent file from the tracker's server\n\nThe full response has been printed in the console`)
 
         },
         ontimeout: function(response) {
@@ -1765,7 +1799,7 @@ function getFileBlob(torrentPostData) {
             document.getElementById('__CLICKED__').textContent = ' ❌ '
             document.getElementById('__CLICKED__').removeAttribute('id')
 
-            window.alert(`❌ quiCKIE ❌\n\nThe connection when getting the .torrent timedout\n\nStatus Code: ${response.status}\n\n${response.responseText}`)
+            window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nThe connection when getting the .torrent file from the tracker's server timedout\n\nThe full response has been printed in the console`)
 
         }
     }) 
@@ -1773,8 +1807,8 @@ function getFileBlob(torrentPostData) {
 }
 
 
-function clientPOST(torrentPostData) {
-// Using the properties of the paramater object, send a POST to the torrent client (qui)
+function quiPOST(torrentPostData) {
+// Using the properties of the paramater object, send a POST to qui
 
     GM_xmlhttpRequest({
         // Use the internal GM function to prevent source-origin errors
@@ -1803,9 +1837,9 @@ function clientPOST(torrentPostData) {
                 if (response.status == 401) {
                     // Unauthorized
 
-                    window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\nVerify that your ApiKey is correct\n\nApiKey: ${quiApiKey}`)
+                    window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\nThis usually means a bad ApiKey. Check it for typos...\n\nApiKey: ${torrentPostData.quiApiKey}\n\nThe full response has been printed in the console`)
                 } else {
-                    window.alert(`❌ quiCKIE ❌\n\nFailed to Add the Torrent to qui\n\nStatus Code: ${response.status}\n\n${response.responseText}`)
+                    window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nFailed to Add the Torrent to qui\n\nThe full response has been printed in the console`)
                 }
 
             }
@@ -1817,7 +1851,7 @@ function clientPOST(torrentPostData) {
             document.getElementById('__CLICKED__').textContent = ' ❌ '
             document.getElementById('__CLICKED__').removeAttribute('id')
 
-            window.alert(`❌ quiCKIE ❌\n\nThere was a problem connecting with qui. Verify that qui is running and check your quiURL and ApiKey for any typos\n\nStatus Code: ${response.status}\n\n${response.responseText}`)
+            window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nThere was a problem connecting to qui. This is usually caused by a bad quiURL. Check it for typos, usually it's the same url you can copy-paste from your browser...\n\nquiURL: ${SETTINGS.quiURL}\n\nThe full response has been printed in the console`)
 
         },
         ontimeout: function(response) {
@@ -1826,7 +1860,7 @@ function clientPOST(torrentPostData) {
             document.getElementById('__CLICKED__').textContent = ' ❌ '
             document.getElementById('__CLICKED__').removeAttribute('id')
 
-            window.alert(`❌ quiCKIE ❌\n\nThe connection to qui timedout\n\nApiUrl: ${quiApiAddTorrentURL}\n\nStatus Code: ${response.status}\n\n${response.responseText}`)
+            window.alert(`❌ quiCKIE ❌\n\nThe connection to qui timedout\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nquiURL: ${SETTINGS.quiURL}\n\nThe full response has been printed in the console`)
 
         }
     })
@@ -1846,22 +1880,20 @@ function scanForThirdPartyTorrentURLS(delay) {
         if ( allThirdPartyElements.length > 0 ) {
 
             // Use an existing BunnyButton as the base for which to pull styles from
-            let existingBB = document.querySelector('a.quickie_bunnyButton')
+            let existingBB = document.querySelector('a.quickie_bunnyButton:not(a.quickie_thirdParty)')
 
-            let newThirdParties = false
             for (let downloadElement of allThirdPartyElements) {
                 // For each thirdPartyElement, create a BunnyButton using the elements 'data-quickie_torrenturl' attribute
 
-                // Check if the thirdParty element has specified that the torrentURL be downloaded through the browser instead of being determined by quiCKIE
-                if ( downloadElement.dataset.quickie_forcetorrentfile == 'true' ) {
-                    SETTINGS.forceTorrentFile = true
-                }
+                // [quickie_forcetorrentfile] : Check if the thirdParty element has specified that the torrentURL be downloaded through the browser instead of being determined by quiCKIE
+                downloadElement.dataset.quickie_forcetorrentfile == 'true' ? SETTINGS.forceTorrentFile = true : null
 
-                // Check if the thirdParty element would like to use a specific text separator between the element and the bunnyButton
-                let separatorText = existingBB.previousSibling.textContent
-                if ( downloadElement.dataset.quickie_separator ) {
-                    separatorText = downloadElement.dataset.quickie_separator
-                }
+                // [quickie_separator] : Check if the thirdParty element would like to use a specific text separator between the element and the bunnyButton
+                let separatorText
+                let separatorNode = existingBB.previousSibling
+                separatorNode.nodeType != 3 ? separatorText = ' ' : separatorText = separatorNode.textContent
+
+                downloadElement.dataset.quickie_separator ? separatorText = downloadElement.dataset.quickie_separator : null
 
                 // Create a bunnyButton using the unique 'quickie_torrenturl' attribute of the thirdParty element
                 let bunnyButton = createBunnyButton(downloadElement.dataset.quickie_torrenturl)
@@ -1878,15 +1910,14 @@ function scanForThirdPartyTorrentURLS(delay) {
                 // Remove the attribute that would match it as a thirdParty element in future loops
                 downloadElement.removeAttribute('data-quickie_torrenturl')
 
-                // Signify that there were new thirdParty elements, so the context-menu function should run
+                // Signify that there were new thirdParty elements, so the presets-menu function should run
                 newThirdParties = true
 
             }
 
-            if ( newThirdParties == true ) {
-                // There were new thirdParty elements, so append to them the context-menu (presets)
-                generatePresetsContextMenu('a.quickie_thirdParty')
-            }
+            // Append the presets-menu to the newly created bunnyButtons
+            createPresetsMenu('a.quickie_thirdParty')
+
         }
 
         // Repeat this function after 5000ms
@@ -1897,36 +1928,35 @@ function scanForThirdPartyTorrentURLS(delay) {
 }
 
 
-GM_addStyle(GM_getResourceText('contextMenuCSS'))
-function generatePresetsContextMenu(targetSelector) {
-    // Generate and initilize the right-click context-menu that will display all the presets
+GM_addStyle(GM_getResourceText('presetsMenuCSS'))
+function createPresetsMenu(targetSelector) {
+    // Generate and initilize the right-click presets-menu that will display all the presets
 
 
     let menuItems = []
     for ( let i=1; i <= presetCount; i++ ) {
-        // for each preset, create a menuItem object to put in the right-click context-menu
+        // for each preset, create a menuItem object to put in the right-click presets-menu
 
         let presetName = GM_config.get(`preset-${i}-preset`)
 
         if ( presetName == '' ) {
-            // A empty preset name, so don't add it to the context-menu
+            // A empty preset name, so don't add it to the presets-menu
             continue
         }
 
-        // Check if one of the items in the presetTrackers field contains a match against the domain of the current tracker
-        let presetTrackers = GM_config.get(`preset-${i}-presetTrackers`).toLowerCase().replace(' ', '').split(',')
+        // Check if one of the items in the presetTrackers field contains a match against the domain of the current site
+        let presetTrackersArray = GM_config.get(`preset-${i}-presetTrackers`).toLowerCase().replace(' ', '').split(',')
         let domainMatch = false
 
-        for (let presetListItem of presetTrackers) {
-            if ( presetListItem == '*' || swappedSettingsPanelEntries[`${presetListItem}`] == trackerDomain ) {
+        for (let presetTrackersItem of presetTrackersArray) {
+            if ( presetTrackersItem == '*' || swappedSettingsPanelEntries[`${presetTrackersItem}`] == trackerDomain ) {
                 domainMatch = true
                 break
             }
 
         }
 
-
-        if ( domainMatch == false || presetTrackers == '' /* empty field */ ) {
+        if ( domainMatch == false || presetTrackersArray == '' /* empty field */ ) {
             // This preset is not to be displayed on this tracker
             continue
 
@@ -1953,7 +1983,7 @@ function generatePresetsContextMenu(targetSelector) {
             }
 
         } else {
-            // For this preset, create a menuItem entry to be clickable in the context-menu
+            // For this preset, create a menuItem entry to be clickable in the presets-menu
             let presetSettings = {
                 category: GM_config.get(`preset-${i}-category`),
                 savePath: GM_config.get(`preset-${i}-savePath`),
@@ -1964,6 +1994,7 @@ function generatePresetsContextMenu(targetSelector) {
                 startPaused: GM_config.get(`preset-${i}-startPaused`),
                 subFolder: GM_config.get(`preset-${i}-subFolder`),
                 seqPieces: GM_config.get(`preset-${i}-seqPieces`),
+                autoTMM: GM_config.get(`preset-${i}-autoTMM`),
                 skipHash: GM_config.get(`preset-${i}-skipHash`),
             }
 
@@ -1982,7 +2013,7 @@ function generatePresetsContextMenu(targetSelector) {
 
                         let torrentURL = bunnyButton.dataset.torrenturl
 
-                        quiAddTorrent(SETTINGS.quiURL, SETTINGS.quiApiKey, torrentURL, presetSettings.instance, presetSettings.category, presetSettings.savePath, presetSettings.tags, presetSettings.ratioLimit, presetSettings.seedTime, presetSettings.startPaused, presetSettings.subFolder, presetSettings.seqPieces, presetSettings.skipHash)
+                        addTorrent(SETTINGS.quiURL, SETTINGS.quiApiKey, torrentURL, presetSettings.instance, presetSettings.category, presetSettings.savePath, presetSettings.tags, presetSettings.ratioLimit, presetSettings.seedTime, presetSettings.startPaused, presetSettings.subFolder, presetSettings.seqPieces, presetSettings.autoTMM, presetSettings.skipHash)
 
                     },
                     mouseover: function(event) {
@@ -1996,6 +2027,7 @@ function generatePresetsContextMenu(targetSelector) {
  ⏸️ = ${presetSettings.startPaused}
  📁 = ${presetSettings.subFolder}
  🧩 = ${presetSettings.seqPieces}
+ 🤖 = ${presetSettings.autoTMM}
  🛡️ = ${presetSettings.skipHash}`
 
                     }
@@ -2039,7 +2071,7 @@ function generatePresetsContextMenu(targetSelector) {
     const presetsMenu = new ContextMenu({
         // targetSelector == CSS Selector
         target: targetSelector,
-        // An array of objects to display in the context-menu
+        // An array of objects to display in the presets-menu
         menuItems
     })
     
@@ -2052,7 +2084,9 @@ function generatePresetsContextMenu(targetSelector) {
 // =================================== SOURCED FUNCTIONS ======================================
 
 function waitForElement(selector) {
+    // Wait until the target CSS selector exists and then proceed with the `.then()` function
     // Source: https://stackoverflow.com/a/61511955
+    
     return new Promise(resolve => {
         if (document.querySelector(selector)) {
             return resolve(document.querySelector(selector));
