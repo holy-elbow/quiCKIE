@@ -240,76 +240,73 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- AnimeBytes -----------------------------------
     // Browse | Collages | Company | Series 
 
-    // Get a list of all the downloadElements (download buttons) on the page using the provided CSS Selector
-    let allDownloadElements = document.querySelectorAll('a[href^="/torrent/"][title="Download torrent"]')
-
-    // Determine what style separator is to the right of the downloadElements
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    // Process each downloadElement in the list one at a time, generating a bunnyButton for each and then inserting it after the downloadElement
-    for (let downloadElement of allDownloadElements) {
-
-        // Use the 'href' value of the downloadElement (which should be a torrentURL) to create a bunnyButton for this downloadElement
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        // Insert the bunnyButton after the page's downloadElement
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
+    let trackerHandlingOptions = {
         
-        // Insert a separator between the downloadElement and the bunnyButton
-        downloadElement.insertAdjacentText('afterend', separator)
+        // ---------- REQUIRED ----------
+
+        // A CSS selector that is unique to ONLY the download elements (download buttons)
+        downloadElementsSelector: 'a[href^="/torrent/"][title="Download torrent"]', // REQUIRED: Any valid CSS selector unique to only the download elements
+
+        // ---------- OPTIONAL ----------
+        
+        // The font-size of the BunnyButton, for re-sizing the displayed bunnyButton
+        bunnyButtonfontSize: 'inherit', // Default == 'inherit' || Options == Any percentile
+        
+        // The text that will be displayed by this bunnyButton
+        bunnyButtonText: ' 🐰 ', // Default == ' 🐰 ' || Options == Any string (text) (Usually just using this to remove the surrounding spaces when the other buttons don't have any; '🐰')
+
+        // The attribute name that contains the torrentURL
+        torrentURLAttribute: 'href', // Default == 'href' || Options == Any string corresponding to the attribute name
+
+        // The separator used between the bunnyButton and the download button
+        separator: 'automatic', // Default == 'automatic' || options == 'automatic' | Any String (text) | false
+
+        // If the bunnyButton should be placed after the downloadElement.parentElement, which may put it on the same row as the downloadElement
+        bunnyButtonParentPlacement: false, // Default == false || Options == true|false
+
+        // If quiCKIE should ALWAYS download the .torrent file through the browser before sending it to qui
+        forceTorrentFile: false, // Default == false || Options == true|false
+
+        // If quiCKIE should attach the right-click PresetsMenu to the new bunnyButtons
+        callAttachPresetsMenu: true, // Default == true || Options == true|false
+
+        // If quiCKIE should mark and keep track of already processed downloadElements (Only useful when dealing with advanced pagination)
+        trackProcessedDownloadElements: false, // Default == false || Options == true|false
 
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
+
 
 } else if ( trackerDomain == 'alpharatio' ) {
     // ----------------------------------- AlphaRatio -----------------------------------
     // Browse | Details | Top 10
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'anthelion' ) {
     // ----------------------------------- Anthelion -----------------------------------
     // Browse | Collages | Film
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'bakabt' ) {
     // ----------------------------------- BakaBT -----------------------------------
     // Details
 
-    let allDownloadElements = document.querySelectorAll('a.download_link[href^="/download/"]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a.download_link[href^="/download/"]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'beyond-hd' ) {
     // ----------------------------------- Beyond-HD -----------------------------------
@@ -321,18 +318,11 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Bibliotik -----------------------------------
     // Browse | Details
 
-    let allDownloadElements = document.querySelectorAll('a[href^="/torrents/"][title="Download"]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="/torrents/"][title="Download"]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'bitporn' ) {
     // ----------------------------------- BitPorn -----------------------------------
@@ -344,57 +334,46 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- BroadcasTheNet -----------------------------------
     // Browse | Series | Season\Episodes
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'deepbassnine' ) {
     // ----------------------------------- DeepBassNine -----------------------------------
     // Album | Artist | Browse
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'empornium' ) {
     // ----------------------------------- Empornium -----------------------------------
     // Browse | Collages | Details | Top10 
     
-    let allDownloadElements = document.querySelectorAll('a[href^="/torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href, '130%', '🐰')
-
-        if ( document.location.pathname.match(/\/collage\/\d+/) ) {
-            // Collage Page: Insert bunnyButton in the same row as the other buttons
-            
-            downloadElement.parentElement.insertAdjacentElement('afterend', bunnyButton)
-
-        } else {
-            downloadElement.insertAdjacentElement('afterend', bunnyButton)
-            downloadElement.insertAdjacentText('afterend', separator)
+    if ( !document.location.pathname.match(/\/collage\/\d+/) ) {
+        // This is not a collage page
+        
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
+            bunnyButtonFontSize: '130%',
         }
+
+        quickieTrackerHandler(trackerHandlingOptions)
+
+    } else {
+        // This is a collage page
+
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
+            bunnyButtonFontSize: '130%',
+            bunnyButtonParentPlacement: true,
+        }
+
+        quickieTrackerHandler(trackerHandlingOptions)
 
     }
 
@@ -402,105 +381,68 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- GazelleGames -----------------------------------
     // Browse | Bundles | Game
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'happyfappy' ) {
     // ----------------------------------- HappyHappy -----------------------------------
     // Browse | Collages | Details | Top10 
 
-    let allDownloadElements = document.querySelectorAll('a[href^="/torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href, '125%', '🐰')
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
+        bunnyButtonFontSize: '125%',
+        bunnyButtonText: '🐰',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'hdbits' ) {
     // ----------------------------------- HDBits -----------------------------------
     // Browse | Details | Film  
 
-    let allDownloadElements = document.querySelectorAll('a.js-download[href^="/download.php/"]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href, '140%', '🐰')
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a.js-download[href^="/download.php/"]',
+        bunnyButtonFontSize: '140%',
+        bunnyButtonText: '🐰',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'iptorrents' ) {
     // ----------------------------------- IP-Torrents -----------------------------------
     // Browse | Details 
 
-    let allDownloadElements = document.querySelectorAll('a[href*="download.php"]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href, '160%', '🐰')
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href*="download.php"]',
+        bunnyButtonFontSize: '160%',
+        bunnyButtonText: '🐰',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'jpopsuki' ) {
     // ----------------------------------- JpopSuki -----------------------------------
     // Album | Artist | Browse
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'materialize' ) {
     // ----------------------------------- Materialize -----------------------------------
     // Browse | Collages | Details | Top10
 
-    SETTINGS.forceTorrentFile = true
-
-    let allDownloadElements = document.querySelectorAll('a[href*="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href*="torrents.php?action=download&id="]',
+        forceTorrentFile: true,
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'myanonamouse' ) {
     // ----------------------------------- MyAnonaMouse -----------------------------------
@@ -509,13 +451,13 @@ if ( trackerDomain == 'animebytes' ) {
     if ( document.URL.match(/\/t\/\d+/) ) {
         // The book details page, which doesn't require a MutationObserver
 
-        let downloadButton = document.querySelector('a[href^="/tor/download.php/"][title*="Download"]')
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/tor/download.php/"][title*="Download"]',
+            bunnyButtonFontSize: '150%',
+            bunnyButtonText: '🐰',
+        }
 
-        let bunnyButton = createBunnyButton(downloadButton.href, '150%', '🐰')
-
-        downloadButton.insertAdjacentElement('afterend', bunnyButton)
-
-        attachPresetsMenu('a.quickie_newBunnyButton')
+        quickieTrackerHandler(trackerHandlingOptions)
 
     } else {
         // The Browse or Homepage, both of which require a MutationObserver
@@ -525,18 +467,13 @@ if ( trackerDomain == 'animebytes' ) {
 
             try {
 
-                let allDownloadElements = document.querySelectorAll('a[href^="/tor/download.php/"][title*="Download"]')
-
-                for (let downloadElement of allDownloadElements) {
-
-                    let bunnyButton = createBunnyButton(downloadElement.href, '150%', '🐰')
-
-                    downloadElement.insertAdjacentElement('afterend', bunnyButton)
-
+                let trackerHandlingOptions = {
+                    downloadElementsSelector: 'a[href^="/tor/download.php/"][title*="Download"]',
+                    bunnyButtonFontSize: '150%',
+                    bunnyButtonText: '🐰',
                 }
 
-                // Now that the bunnyButtons are in-place, generate the right-click presets-menu
-                attachPresetsMenu('a.quickie_newBunnyButton')
+                quickieTrackerHandler(trackerHandlingOptions)
 
             } catch(error) {
                 // console.log(error)
@@ -556,35 +493,22 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Nebulance -----------------------------------
     // Browse | Bookmarks | Top 10
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href, '115%')
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
+        bunnyButtonFontSize: '115%',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'nyaa' ) {
     // ----------------------------------- Nyaa -----------------------------------
     // Browse | Details
 
-    let allDownloadElements = document.querySelectorAll('a[href^="magnet:?xt\=urn:btih:"]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="magnet:?xt\=urn:btih:"]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'oldtoons' ) {
     // ----------------------------------- OldToons -----------------------------------
@@ -596,35 +520,21 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Orpheus -----------------------------------
     // Album | Artist | Browse | Collages
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'passthepopcorn' ) {
     // ----------------------------------- PassThepopcorn -----------------------------------
     // Film
     
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'portugas' ) {
     // ----------------------------------- Portugas -----------------------------------
@@ -639,20 +549,11 @@ if ( trackerDomain == 'animebytes' ) {
     if ( !document.URL.match(/collages?\.php\?id=\d+/) ) {
         // This is NOT a collage page, so it doesn't require a MutationObserver
         
-        let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-        let separator = getPageSeparator(allDownloadElements[0])
-
-        for (let downloadElement of allDownloadElements) {
-
-            let bunnyButton = createBunnyButton(downloadElement.href)
-
-            downloadElement.insertAdjacentElement('afterend', bunnyButton)
-            downloadElement.insertAdjacentText('afterend', separator)
-
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
         }
 
-        attachPresetsMenu('a.quickie_newBunnyButton')
+        quickieTrackerHandler(trackerHandlingOptions)
 
     } else {
         // This is a collage page, which loads DL buttons only after the '+' button of the album is clicked. Setup nested observation.
@@ -668,27 +569,12 @@ if ( trackerDomain == 'animebytes' ) {
                     let tbodyObserver = new MutationObserver(function(tbodyMutations) {
                         // The actions to take when the '+' button of a <tr> is clicked, which will load the DL buttons onto the page
                         
-                        let allDownloadElements = tbodyMutations[0].target.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-                        let separator = getPageSeparator(allDownloadElements[0])
-
-                        for (let downloadElement of allDownloadElements) {
-
-                            if ( downloadElement.dataset.quickie_elementprocessed != 'true' ) {
-                                // This is a new DL element that has not yet been processed by quiCKIE
-
-                                let bunnyButton = createBunnyButton(downloadElement.href)
-
-                                downloadElement.insertAdjacentElement('afterend', bunnyButton)
-                                downloadElement.insertAdjacentText('afterend', separator)
-
-                                downloadElement.setAttribute('data-quickie_elementprocessed', 'true')
-                            }
-
+                        let trackerHandlingOptions = {
+                            downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
+                            trackProcessedDownloadElements: true,
                         }
 
-                        // Now that the bunnyButtons are in-place, generate the right-click presets-menu
-                        attachPresetsMenu('a.quickie_newBunnyButton')
+                        quickieTrackerHandler(trackerHandlingOptions)
 
                     })
 
@@ -714,64 +600,32 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Secret-Cinema -----------------------------------
     // Artist (no DL links as of script creation) | Browse | Movie
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'thegeeks' ) {
     // ----------------------------------- TheGeeks -----------------------------------
     // Browse | Details
 
-    let allDownloadElements = document.querySelectorAll('a[href^="download.php/"]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="download.php/"]',
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'tv-vault' ) {
     // ----------------------------------- TV-Vault -----------------------------------
     // Series
 
-    let allDownloadElements = document.querySelectorAll('a[href^="torrents.php?action=download&id="]')
-
-    let separator = getPageSeparator(allDownloadElements[0])
-
-    for (let downloadElement of allDownloadElements) {
-
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        downloadElement.insertAdjacentElement('afterend', bunnyButton)
-        downloadElement.insertAdjacentText('afterend', separator)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
 
-}
+    quickieTrackerHandler(trackerHandlingOptions)
 
-
-// =================================== PRESETS-MENU ======================================
-
-// A list of trackerDomains on which to NOT generate the presets-menu, because it will be done elsewhere in the script
-let skipTrackerDomains = ['myanonamouse', 'redacted']
-
-if ( !skipTrackerDomains.includes(trackerDomain) ) {
-    // After the bunnyButtons have been created, generate and attach to them the right-click presets-menu
-    attachPresetsMenu('a.quickie_newBunnyButton')
 }
 
 
@@ -2189,6 +2043,59 @@ function attachPresetsMenu(targetSelector) {
 
 }
 
+
+function quickieTrackerHandler({
+    downloadElementsSelector,
+    torrentURLAttribute = 'href',
+    bunnyButtonFontSize = 'inherit',
+    bunnyButtonText = ' 🐰 ' ,
+    separator = 'automatic',
+    bunnyButtonParentPlacement = false,
+    forceTorrentFile = false,
+    callAttachPresetsMenu = true,
+    trackProcessedDownloadElements = false}) {
+    // Using the provided arguments, generate bunnyButtons for this page
+
+    let allDownloadElements = document.querySelectorAll(downloadElementsSelector)
+
+    // If the .torrent file should be forced to download through the browser
+    forceTorrentFile == true ? SETTINGS.forceTorrentFile = true : null
+    
+    // The separator used between the DL button and the BunnyButton
+    separator == true ? separator = 'automatic' : null
+    separator == 'automatic' ? separator = getPageSeparator(allDownloadElements[0]) : null
+
+    // Process each downloadElement in the list one at a time, generating a bunnyButton for each and then inserting it after the downloadElement
+    for (let downloadElement of allDownloadElements) {
+
+        if ( trackProcessedDownloadElements ) {
+            // Check if this downloadElement has already been processed
+            if ( downloadElement.dataset.quickie_elementprocessed == 'true' ) { continue }
+        }
+
+        // Use the supplied attribute (which should be a torrentURL) to create a bunnyButton for this downloadElement
+        let bunnyButton = createBunnyButton(downloadElement[torrentURLAttribute], bunnyButtonFontSize, bunnyButtonText)
+
+        let placementElement
+        bunnyButtonParentPlacement == true ? placementElement = downloadElement.parentElement : placementElement = downloadElement
+        
+        // Insert the bunnyButton after the placementElement
+        placementElement.insertAdjacentElement('afterend', bunnyButton)
+        
+        // Insert the separator between the placementElement and the bunnyButton
+        separator == false ? null : placementElement.insertAdjacentText('afterend', separator)
+
+        if ( trackProcessedDownloadElements ) {
+            // Keep track of this downloadElement as having been processed my marking it with a unique attribute
+            downloadElement.setAttribute('data-quickie_elementprocessed', 'true')
+        }
+    }
+
+    // After the bunnyButtons have been generated, call the function that will attach to them the right-click presetsMenu
+    callAttachPresetsMenu == true ? attachPresetsMenu('a.quickie_newBunnyButton') : null
+
+
+}
 
 function unit3dTrackerHandling(torrentURLSelector) {
     // A site using the UNIT3D Framework, first generate bunnyButtons and then see if this page has a mutable object that can be observed
