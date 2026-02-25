@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     0.99.1
+// @version     0.99.2
 // @description A UserScript to quickly send torrents from a tracker to qui, with customizable per-site settings and presets 🐰 
 //              To be used with a running instance of qui: https://getqui.com/
 //              Written on LibreWolf via Violentmonkey
@@ -536,7 +536,7 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Redacted -----------------------------------
     // Album | Artist | Bookmarks | Browse | Collages | Top10
 
-    if ( !urlPath.match(/collages?\.php\?id=\d+/) ) {
+    // if ( !urlPath.match(/collages?\.php\?id=\d+/) ) {
         // This is NOT a collage page, so it doesn't require a MutationObserver
         
         let trackerHandlingOptions = {
@@ -545,46 +545,46 @@ if ( trackerDomain == 'animebytes' ) {
 
         quickieTrackerHandler(trackerHandlingOptions)
 
-    } else {
-        // This is a collage page, which loads DL buttons only after the '+' button of the album is clicked. Setup nested observation.
+    // } else {
+    //     // This is a collage page, which loads DL buttons only after the '+' button of the album is clicked. Setup nested observation.
         
-        let pageObserver = new MutationObserver(function(pageMutations) {
-            // The actions to take when new PAGES are loaded
+    //     let pageObserver = new MutationObserver(function(pageMutations) {
+    //         // The actions to take when new PAGES are loaded
 
-            waitForElement('#discog_table tbody').then((tbodyElement) => {
-                // After a new page is loaded, wait until the <tbody> containing the <tr> torrent rows is loaded
+    //         waitForElement('#discog_table tbody').then((tbodyElement) => {
+    //             // After a new page is loaded, wait until the <tbody> containing the <tr> torrent rows is loaded
 
-                try {
+    //             try {
 
-                    let tbodyObserver = new MutationObserver(function(tbodyMutations) {
-                        // The actions to take when the '+' button of a <tr> is clicked, which will load the DL buttons onto the page
+    //                 let tbodyObserver = new MutationObserver(function(tbodyMutations) {
+    //                     // The actions to take when the '+' button of a <tr> is clicked, which will load the DL buttons onto the page
                         
-                        let trackerHandlingOptions = {
-                            downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
-                            trackProcessedDownloadElements: true,
-                        }
+    //                     let trackerHandlingOptions = {
+    //                         downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
+    //                         trackProcessedDownloadElements: true,
+    //                     }
 
-                        quickieTrackerHandler(trackerHandlingOptions)
+    //                     quickieTrackerHandler(trackerHandlingOptions)
 
-                    })
+    //                 })
 
-                    tbodyObserver.observe(tbodyElement, { childList: true })
+    //                 tbodyObserver.observe(tbodyElement, { childList: true })
 
-                } catch(error) {
-                    // console.log(error)
-                    return
+    //             } catch(error) {
+    //                 // console.log(error)
+    //                 return
 
-                }
-            })
+    //             }
+    //         })
 
-        })
+    //     })
 
-        let target = document.querySelector('[data-component="TorrentCollageView"]')
-        let config = { childList: true }
+    //     let target = document.querySelector('[data-component="TorrentCollageView"]')
+    //     let config = { childList: true }
 
-        pageObserver.observe(target, config)
+    //     pageObserver.observe(target, config)
 
-    }
+    // }
 
 } else if ( trackerDomain == 'secret-cinema' ) {
     // ----------------------------------- Secret-Cinema -----------------------------------
@@ -659,7 +659,7 @@ function createGMConfigSettingsPanel() {
 
     // @trackerFieldGeneration
     // This array will later be used to generate the <th> for each column in the settings panel. Create an entry in 
-    const trackerFieldSuffixes = ['category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'instance', 'leftClick', 'hideDL', 'startPaused', 'subFolder', 'seqPieces', 'autoTMM', 'skipHash']
+    const trackerFieldSuffixes = ['category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'instance', 'paginationLoop', 'leftClick', 'hideDL', 'startPaused', 'subFolder', 'seqPieces', 'autoTMM', 'skipHash']
     let gmConfigTrackerFields = {}
     let trackerDomains = Object.keys(settingsPanelEntries)
     for ( let trackerDomain of trackerDomains ) {
@@ -694,13 +694,14 @@ function createGMConfigSettingsPanel() {
                 'default': ''
             },
             [`${trackerDomain}-${trackerFieldSuffixes[6]}`]: {
+                'label': 'Instance',
+                'type': 'int',
+                'default': ''
+            },
+            [`${trackerDomain}-${trackerFieldSuffixes[7]}`]: {
                 'type': 'select',
                 'options': ['Global', 'Tracker', 'Settings', 'quiTab', 'Nothing'],
                 'default': 'Global',
-            },
-            [`${trackerDomain}-${trackerFieldSuffixes[7]}`]: {
-                'type': 'checkbox',
-                'default': false
             },
             [`${trackerDomain}-${trackerFieldSuffixes[8]}`]: {
                 'type': 'checkbox',
@@ -719,6 +720,10 @@ function createGMConfigSettingsPanel() {
                 'default': false
             },
             [`${trackerDomain}-${trackerFieldSuffixes[12]}`]: {
+                'type': 'checkbox',
+                'default': false
+            },
+            [`${trackerDomain}-${trackerFieldSuffixes[13]}`]: {
                 'type': 'checkbox',
                 'default': false
             }
@@ -804,6 +809,7 @@ function createGMConfigSettingsPanel() {
             'ratiolimit': '⚖️',
             'seedtime': '🌱',
             'instance': '🎯',
+            'paginationloop': '🔁',
             'leftclick': '🖱️',
             'hidedl': '🙈',
             'startpaused': '⏸️',
@@ -826,6 +832,7 @@ function createGMConfigSettingsPanel() {
             'ratiolimit': '─── ⚖️ Ratio Limit ⚖️ ───\n\nStop the torrents when they have seeded to the specified ratio limit\n\nℹ️ Use -1 to stop the torrents immediately after downloading is complete',
             'seedtime': '─── 🌱 Seed Time 🌱 ───\n\nStop the torrents when they have seeded the specified number of minutes\n\nℹ️ Use -1 to stop the torrents immediately after downloading is complete\n\n⚠️ A clients reported seedtime and a trackers recorded seedtime are not always equal. Use caution to avoid Hit-and-Runs.',
             'instance': '─── 🎯 Target Instance 🎯 ───\n\nSpecify a particular qui instance ID for where to send these torrents\n\nLeave this field blank to use the global instance saved as the quiURL\n\nℹ️ This does NOT support a full url, only a qui instance ID number',
+            'paginationloop': "─── 🔁 Pagination Loop 🔁 ───\n\nSpecify a time in milliseconds to repeatedly scan the page for new download buttons\n\nThis is useful for sites with pagination, which is when the browser doesn't do a full refresh when going to the next page of new torrents or searches. Since the page isn't actually refreshing, quiCKIE won't be triggered to scan for new download buttons.\n\n⚠️ You should NOT enable this unless you are on a site that actually has pagination\n\n⚠️ Setting this too low can impact your browser, so the recommended time is +2000ms while the minimum is 500ms",
             'leftclick' : "─── 🖱️ Left-Click \\ Tap 🖱️ ───\n\nSpecify what action should be taken when the BunnyButton is left-clicked on a PC or tapped on a mobile\n\nℹ️ The 'Global' option will use the setting specified above",
             'hidedl': "─── 🙈 Hide Download Button 🙈 ───\n\nHide the trackers download button from view\n\nThis will NOT apply to any 3rd Party quiCKIE links\n\nℹ️ Hiding is not the same as removing. The button will still be there, it will just have a css style of 'display: none' applied making it hidden and unclickable. This may result in weird gaps\\results on some pages",
             'startpaused': "─── ⏸️ Start Paused ⏸️ ───\n\nPause torrents when they are added so that they do not automatically begin downloading\n\nℹ️ Useful for when you want to give yourself a chance to pick which files of the torrent should be downloaded",
@@ -1351,6 +1358,10 @@ function createGMConfigSettingsPanel() {
                 for ( let field of document.getElementById('quiCKIE_config').querySelectorAll('input[data-fieldtype="instance"]') ) {
                     field.value == 0 ? field.value = '' : null
                 }
+
+                for ( let field of document.getElementById('quiCKIE_config').querySelectorAll('input[data-fieldtype="paginationLoop"]') ) {
+                    field.value < 500 ? field.value = '' : null
+                }
                 
                 // Create GitHub version element
                 let githubSVG = '<svg width="16" height="16" viewBox="0 0 98 96" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_730_27136)"><path d="M41.4395 69.3848C28.8066 67.8535 19.9062 58.7617 19.9062 46.9902C19.9062 42.2051 21.6289 37.0371 24.5 33.5918C23.2559 30.4336 23.4473 23.7344 24.8828 20.959C28.7109 20.4805 33.8789 22.4902 36.9414 25.2656C40.5781 24.1172 44.4062 23.543 49.0957 23.543C53.7852 23.543 57.6133 24.1172 61.0586 25.1699C64.0254 22.4902 69.2891 20.4805 73.1172 20.959C74.457 23.543 74.6484 30.2422 73.4043 33.4961C76.4668 37.1328 78.0937 42.0137 78.0937 46.9902C78.0937 58.7617 69.1934 67.6621 56.3691 69.2891C59.623 71.3945 61.8242 75.9883 61.8242 81.252L61.8242 91.2051C61.8242 94.0762 64.2168 95.7031 67.0879 94.5547C84.4102 87.9512 98 70.6289 98 49.1914C98 22.1074 75.9883 6.69539e-07 48.9043 4.309e-07C21.8203 1.92261e-07 -1.9479e-07 22.1074 -4.3343e-07 49.1914C-6.20631e-07 70.4375 13.4941 88.0469 31.6777 94.6504C34.2617 95.6074 36.75 93.8848 36.75 91.3008L36.75 83.6445C35.4102 84.2188 33.6875 84.6016 32.1562 84.6016C25.8398 84.6016 22.1074 81.1563 19.4277 74.7441C18.375 72.1602 17.2266 70.6289 15.0254 70.3418C13.877 70.2461 13.4941 69.7676 13.4941 69.1934C13.4941 68.0449 15.4082 67.1836 17.3223 67.1836C20.0977 67.1836 22.4902 68.9063 24.9785 72.4473C26.8926 75.2227 28.9023 76.4668 31.2949 76.4668C33.6875 76.4668 35.2187 75.6055 37.4199 73.4043C39.0469 71.7773 40.291 70.3418 41.4395 69.3848Z" fill="white"/></g><defs><clipPath id="clip0_730_27136"><rect width="98" height="96" fill="white"/></clipPath></defs></svg>'
@@ -1444,6 +1455,7 @@ function getTrackerSettings(trackerDomain) {
         ratioLimit: GM_config.get(`${trackerDomain}-ratioLimit`),
         seedTime: GM_config.get(`${trackerDomain}-seedTime`),
         instance: GM_config.get(`${trackerDomain}-instance`),
+        paginationLoop: GM_config.get(`${trackerDomain}-paginationLoop`),
         leftClick: GM_config.get(`${trackerDomain}-leftClick`),
         hideDL: GM_config.get(`${trackerDomain}-hideDL`),
         startPaused: GM_config.get(`${trackerDomain}-startPaused`),
@@ -2096,6 +2108,8 @@ function attachPresetsMenu(targetSelector) {
 
 // @quickieTrackerHandler
 function quickieTrackerHandler({
+    // A universal tracker handler, use the provided options to generate bunnyButtons for all the queries downloadElements
+    
     downloadElementsSelector,
     torrentURLAttribute = 'href',
     bunnyButtonFontSize = 'inherit',
@@ -2107,129 +2121,113 @@ function quickieTrackerHandler({
     trackProcessedDownloadElements = false}) {
     // Using the provided arguments, generate bunnyButtons for this page
 
-    let allDownloadElements = document.querySelectorAll(downloadElementsSelector)
+    // If there is a paginationLoop timer, mark the processed elements so that bunnyButtons are not repeatedly generated
+    SETTINGS.paginationLoop >= 500 ? trackProcessedDownloadElements = true : null
 
+    function processDownloadElements(delay) {
+        // query and create a BunnyButton for all downloadElements
 
-    // If the .torrent file should be forced to download through the browser
-    forceTorrentFile == true ? SETTINGS.forceTorrentFile = true : null
-    
-    // The separator used between the DL button and the BunnyButton
-    separator == true ? separator = 'automatic' : null
-    separator == 'automatic' ? separator = getPageSeparator(allDownloadElements[0]) : null
+        setTimeout(() => {
+            // Using the provided CSS selector, get an array of all the downloadElements
+            let allDownloadElements = document.querySelectorAll(downloadElementsSelector)
 
-    let bunnyButtonPlacement
-    SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
+            console.log('scanning')
+            if ( allDownloadElements.length >= 1 ) {
+                // If the .torrent file should be forced to download through the browser
+                forceTorrentFile == true ? SETTINGS.forceTorrentFile = true : null
+                
+                // The separator used between the DL button and the BunnyButton
+                separator == true ? separator = 'automatic' : null
+                separator == 'automatic' ? separator = getPageSeparator(allDownloadElements[0]) : null
 
-    // Process each downloadElement in the list one at a time, generating a bunnyButton for each and then inserting it after the downloadElement
-    for (let downloadElement of allDownloadElements) {
+                let bunnyButtonPlacement
+                SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
 
-        if ( trackProcessedDownloadElements ) {
-            // Check if this downloadElement has already been processed
-            if ( downloadElement.dataset.quickie_elementprocessed == 'true' ) { continue }
-        }
+                // Process each downloadElement in the list one at a time, generating a bunnyButton for each and then inserting it after the downloadElement
+                for (let downloadElement of allDownloadElements) {
 
-        // Use the supplied attribute (which should be a torrentURL) to create a bunnyButton for this downloadElement
-        let bunnyButton = createBunnyButton(downloadElement[torrentURLAttribute], bunnyButtonFontSize, bunnyButtonText)
+                    if ( trackProcessedDownloadElements ) {
+                        // Check if this downloadElement has already been processed
+                        if ( downloadElement.dataset.quickie_elementprocessed == 'true' ) { continue }
+                    }
 
-        let placementElement
-        bunnyButtonParentPlacement == true ? placementElement = downloadElement.parentElement : placementElement = downloadElement
-        
-        // Insert the bunnyButton after the placementElement
-        placementElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
-        
-        if ( SETTINGS.hideDL == false ) {
-            // Insert the separator between the placementElement and the bunnyButton
-            separator == false ? null : placementElement.insertAdjacentText(bunnyButtonPlacement, separator)
-        } else {
-            // Hide the DL button and don't insert a separator
-            downloadElement.style.display = 'none'
-        }
+                    // Use the supplied attribute (which should be a torrentURL) to create a bunnyButton for this downloadElement
+                    let bunnyButton = createBunnyButton(downloadElement[torrentURLAttribute], bunnyButtonFontSize, bunnyButtonText)
 
-        if ( trackProcessedDownloadElements ) {
-            // Keep track of this downloadElement as having been processed my marking it with a unique attribute
-            downloadElement.setAttribute('data-quickie_elementprocessed', 'true')
-        }
+                    let placementElement
+                    bunnyButtonParentPlacement == true ? placementElement = downloadElement.parentElement : placementElement = downloadElement
+                    
+                    // Insert the bunnyButton after the placementElement
+                    placementElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
+                    
+                    if ( SETTINGS.hideDL == false ) {
+                        // Insert the separator between the placementElement and the bunnyButton
+                        separator == false ? null : placementElement.insertAdjacentText(bunnyButtonPlacement, separator)
+                    } else {
+                        // Hide the DL button and don't insert a separator
+                        downloadElement.style.display = 'none'
+                    }
+
+                    if ( trackProcessedDownloadElements ) {
+                        // Keep track of this downloadElement as having been processed my marking it with a unique attribute
+                        downloadElement.setAttribute('data-quickie_elementprocessed', 'true')
+                    }
+                }
+
+                // After the bunnyButtons have been generated, call the function that will attach to them the right-click presetsMenu
+                callAttachPresetsMenu == true ? attachPresetsMenu('a.quickie_newBunnyButton') : null
+            }
+
+            if ( SETTINGS.paginationLoop >= 500 ) {
+                // The tracker handler will continuosly scan the page for new downloadElements
+                processDownloadElements(SETTINGS.paginationLoop)
+            }
+
+        }, delay )
+
     }
 
-    // After the bunnyButtons have been generated, call the function that will attach to them the right-click presetsMenu
-    callAttachPresetsMenu == true ? attachPresetsMenu('a.quickie_newBunnyButton') : null
-
+    processDownloadElements(0)
 
 }
 
 function unit3dTrackerHandler(torrentURLSelector) {
-    // A site using the UNIT3D Framework, first generate bunnyButtons and then see if this page has a mutable object that can be observed
+    // A tracker handler focused on the layout of the UNIT3D Framework. Generate a bunnyButton for each queried DownloadElement
     // ! This function used 'Oldtoons' as the model and is not WirlyWirly tested for other sites
 
-    let allDownloadElements = document.querySelectorAll(torrentURLSelector)
+    // No reason to mark download elements by default
+    let trackProcessedDownloadElements = false
 
-    let separator = getPageSeparator(allDownloadElements[0])
+    // If there is a paginationLoop timer, mark the processed elements so that bunnyButtons are not repeatedly generated
+    SETTINGS.paginationLoop >= 500 ? trackProcessedDownloadElements = true : null
 
-    SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
+    function processDownloadElements(delay) {
+        // query and create a BunnyButton for all downloadElements
 
-    for (let downloadElement of allDownloadElements) {
+        setTimeout(() => {
+            let allDownloadElements = document.querySelectorAll(torrentURLSelector)
 
-        let bunnyButton = createBunnyButton(downloadElement.href)
-
-        if ( downloadElement.parentElement.nodeName == 'LI' ) {
-            // If the parent element is a list-item, this is likely a horizontal row, so place the bunnyButton after the parent element so that it shows up on the same row
-            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
-
-            // Hide the DL button if enabled
-            SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
-
-        } else {
-            downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
-
-            if ( SETTINGS.hideDL == false ) {
-                // Insert the separator between the placementElement and the bunnyButton
-                downloadElement.insertAdjacentText(bunnyButtonPlacement, separator)
-            } else {
-                // Hide the DL button and don't insert a separator
-                downloadElement.style.display = 'none'
-            }
-        }
-
-    }
-
-    attachPresetsMenu('a.quickie_newBunnyButton')
-
-    let target, config
-
-    if ( document.querySelector('section.torrent-search__results') ) {
-        // The Browse\Search page
-        target = document.querySelector('section.torrent-search__results') 
-        config = { subtree: true, attributeFilter: ['href']}
-    } else if ( document.querySelector('table.data-table tbody') ) {
-        // The Homepage
-        target = document.querySelector('table.data-table tbody')
-        config = { childList: true, attributeFilter: ['href']}
-    }
-
-    if ( target && config ) {
-        console.log(target)
-        console.log(config)
-        // One of the mutable objects has been found, so setup observation for it
-
-        let observer = new MutationObserver(function(mutations) {
-            // Functionality to run when changes are detected to the target element
-
-            try {
-
-                let allDownloadElements = document.querySelectorAll(torrentURLSelector)
-
+            if ( allDownloadElements.length >= 1 ) {
                 let separator = getPageSeparator(allDownloadElements[0])
 
+                SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
+
                 for (let downloadElement of allDownloadElements) {
+
+                    if ( trackProcessedDownloadElements ) {
+                        // Check if this downloadElement has already been processed
+                        if ( downloadElement.dataset.quickie_elementprocessed == 'true' ) { continue }
+                    }
 
                     let bunnyButton = createBunnyButton(downloadElement.href)
 
                     if ( downloadElement.parentElement.nodeName == 'LI' ) {
                         // If the parent element is a list-item, this is likely a horizontal row, so place the bunnyButton after the parent element so that it shows up on the same row
-                        downloadElement.parentElement.insertAdjacentElement('afterend', bunnyButton)
-                        
+                        downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
+
                         // Hide the DL button if enabled
                         SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
+
                     } else {
                         downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
 
@@ -2242,21 +2240,27 @@ function unit3dTrackerHandler(torrentURLSelector) {
                         }
                     }
 
+                    if ( trackProcessedDownloadElements ) {
+                        // Keep track of this downloadElement as having been processed my marking it with a unique attribute
+                        downloadElement.setAttribute('data-quickie_elementprocessed', 'true')
+                    }
+
                 }
 
                 attachPresetsMenu('a.quickie_newBunnyButton')
 
-            } catch(error) {
-                // console.log(error)
-                return
-
+                if ( SETTINGS.paginationLoop >= 500 ) {
+                    // The tracker handler will continuosly scan the page for new downloadElements
+                    processDownloadElements(SETTINGS.paginationLoop)
+                }
             }
 
-        })
 
-        observer.observe(target, config)
+        }, delay )
 
     }
+
+    processDownloadElements(0)
 
 }
 
