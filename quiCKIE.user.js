@@ -222,6 +222,9 @@ let [presetCount, swappedSettingsPanelEntries] = createGMConfigSettingsPanel()
 // Example: https://broadcasthe.net/ --> broadcasthe
 let trackerDomain = document.location.hostname.match(/^(\w+\.)?(.*?)(\.\w+)$/)[2].toLowerCase()
 
+// The tail-end of the URL after the trackerDomain, useful for figuring out what page you are on when doing more complex tasks
+let urlPath = document.location.pathname
+
 // Get the global and all trackerDomain specific settings
 let SETTINGS = getTrackerSettings(trackerDomain)
 
@@ -354,28 +357,15 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Empornium -----------------------------------
     // Browse | Collages | Details | Top10 
     
-    if ( !document.location.pathname.match(/\/collage\/\d+/) ) {
-        // This is not a collage page
-        
-        let trackerHandlingOptions = {
-            downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
-            bunnyButtonFontSize: '130%',
-        }
-
-        quickieTrackerHandler(trackerHandlingOptions)
-
-    } else {
-        // This is a collage page
-
-        let trackerHandlingOptions = {
-            downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
-            bunnyButtonFontSize: '130%',
-            bunnyButtonParentPlacement: true,
-        }
-
-        quickieTrackerHandler(trackerHandlingOptions)
-
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
+        bunnyButtonFontSize: '130%',
     }
+
+    // This is a collage page, so place the bunnyButton on the parentElement 
+    urlPath.match(/\/collage\/\d+/) ? trackerHandlingOptions.bunnyButtonParentPlacement = true : null
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'gazellegames' ) {
     // ----------------------------------- GazelleGames -----------------------------------
@@ -448,7 +438,7 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- MyAnonaMouse -----------------------------------
     // Browse | Details | Homepage
 
-    if ( document.URL.match(/\/t\/\d+/) ) {
+    if ( urlPath.match(/\/t\/\d+/) ) {
         // The book details page, which doesn't require a MutationObserver
 
         let trackerHandlingOptions = {
@@ -546,7 +536,7 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- Redacted -----------------------------------
     // Album | Artist | Bookmarks | Browse | Collages | Top10
 
-    if ( !document.URL.match(/collages?\.php\?id=\d+/) ) {
+    if ( !urlPath.match(/collages?\.php\?id=\d+/) ) {
         // This is NOT a collage page, so it doesn't require a MutationObserver
         
         let trackerHandlingOptions = {
@@ -650,7 +640,8 @@ function createGMConfigSettingsPanel() {
         // Get the previously specified presetCount to determine how many preset rows should be generated
         presetCount = quiCKIESettingsObject['presetCount']
 
-    } 
+    }
+        
 
     // New installs will not have a presetCount, so default to 3
     if ( presetCount == undefined ) {
@@ -836,7 +827,7 @@ function createGMConfigSettingsPanel() {
             'seedtime': '─── 🌱 Seed Time 🌱 ───\n\nStop the torrents when they have seeded the specified number of minutes\n\nℹ️ Use -1 to stop the torrents immediately after downloading is complete\n\n⚠️ A clients reported seedtime and a trackers recorded seedtime are not always equal. Use caution to avoid Hit-and-Runs.',
             'instance': '─── 🎯 Target Instance 🎯 ───\n\nSpecify a particular qui instance ID for where to send these torrents\n\nLeave this field blank to use the global instance saved as the quiURL\n\nℹ️ This does NOT support a full url, only a qui instance ID number',
             'leftclick' : "─── 🖱️ Left-Click \\ Tap 🖱️ ───\n\nSpecify what action should be taken when the BunnyButton is left-clicked on a PC or tapped on a mobile\n\nℹ️ The 'Global' option will use the setting specified above",
-            'hidedl': "─── 🙈 Hide DL Button 🙈 ───\n\nHide the trackers DL (download) button from view\n\nThis will NOT apply to any 3rd Party quiCKIE links\n\nℹ️ Hiding is not the same as removing, the button will still be there, it will just have a css style of 'display: none' applied making it hidden and unclickable. This may result in weird behaviour\\gaps on some pages",
+            'hidedl': "─── 🙈 Hide Download Button 🙈 ───\n\nHide the trackers download button from view\n\nThis will NOT apply to any 3rd Party quiCKIE links\n\nℹ️ Hiding is not the same as removing. The button will still be there, it will just have a css style of 'display: none' applied making it hidden and unclickable. This may result in weird gaps\\results on some pages",
             'startpaused': "─── ⏸️ Start Paused ⏸️ ───\n\nPause torrents when they are added so that they do not automatically begin downloading\n\nℹ️ Useful for when you want to give yourself a chance to pick which files of the torrent should be downloaded",
             // 'startpaused': "─── ⏸️ Start Paused ⏸️ ───\n\nPause torrents when they are added so as to not automatically begin downloading\n\nℹ️ Performing a 'Space-Click' on a BunnyButton will force the torrent to Start Paused",
             'subfolder': '─── 📁 SubFolder 📁 ───\n\nFor single-file torrents, create a subfolder where the file will be saved into\n\nℹ️ This does not affect multi-file torrents that are already in a folder\n\nExample: audioBookFile.m4b --> audioBookFile/audioBookFile.m4b',
@@ -912,8 +903,8 @@ function createGMConfigSettingsPanel() {
                 'options': ['Tracker', 'Settings', 'quiTab', 'Nothing'],
                 'default': 'quiTab',
             },
-            'bunnyButtonPosition': {
-                'label': '↔️ Position',
+            'bunnyButtonPlacement': {
+                'label': '↔️ Placement',
                 'type': 'select',
                 'options': ['Before', 'After'],
                 'default': 'After',
@@ -927,6 +918,17 @@ function createGMConfigSettingsPanel() {
                 'label': '🙈 Hidden Trackers:',
                 'type': 'text',
                 'default': '',
+            },
+            'globalForcedTorrentFile': {
+                'label': '💾 Torrent File:',
+                'type': 'checkbox',
+                'default': false
+            },
+
+
+            'welcomeMessage': {
+                'type': 'hidden',
+                'default': 'true',
             },
 
         }, ...gmConfigTrackerFields, ...gmConfigPresetsFields},
@@ -1236,24 +1238,6 @@ function createGMConfigSettingsPanel() {
                 settingsDivFirst.classList.add('quiCKIE_settingsDiv')
                 document.getElementById('quiCKIE_config_header').insertAdjacentElement('afterend', settingsDivFirst)
                 
-                // --- quiURL ---
-                let quiURLLabel = document.getElementById('quiCKIE_config_quiURL_field_label')
-                let quiURLField = document.getElementById('quiCKIE_config_field_quiURL')
-                quiURLLabel.classList.add('settingsDivLabel')
-                let quiURLTooltip = "─── 🔗 quiURL 🔗 ───\n\nThe full URL to a qui instance\n\nThis is usually the same URL you can copy-paste from your browser\n\nℹ️ Unless otherwise specified in the '🎯' column, this is the instance that all torrents will be sent to\n\nExample: http://localhost:7476/qui/instances/1\n\n────────────────\n\nSeedbox\\Swizzin users might try...\n\nhttps://username:password@seedboxDomain.com/qui/instances/1"
-                quiURLLabel.title = quiURLTooltip
-                quiURLField.title = quiURLTooltip
-                settingsDivFirst.appendChild(quiURLLabel)
-                settingsDivFirst.appendChild(quiURLField)
-
-                // --- apiKey ---
-                let quiApiKeyLabel = document.getElementById('quiCKIE_config_quiApiKey_field_label')
-                let quiApiKeyField = document.getElementById('quiCKIE_config_field_quiApiKey')
-                quiApiKeyLabel.classList.add('settingsDivLabel')
-                quiApiKeyLabel.title = "─── 🔑 qui ApiKey 🔑 ───\n\nA valid and active ApiKey created by qui\n\nFrom the qui interface, you can generate a ApiKey by going to...\n\nSettings > API Keys > Create API Key"
-                settingsDivFirst.appendChild(quiApiKeyLabel)
-                settingsDivFirst.appendChild(quiApiKeyField)
-
                 // --- Presets ---
                 let presetCountLabel = document.getElementById('quiCKIE_config_presetCount_field_label')
                 let presetCountField = document.getElementById('quiCKIE_config_field_presetCount')
@@ -1262,6 +1246,22 @@ function createGMConfigSettingsPanel() {
                 settingsDivFirst.appendChild(presetCountLabel)
                 settingsDivFirst.appendChild(presetCountField)
 
+                // --- Placement ---
+                let bunnyButtonPlacementLabel = document.getElementById('quiCKIE_config_bunnyButtonPlacement_field_label')
+                let bunnyButtonPlacementField = document.getElementById('quiCKIE_config_field_bunnyButtonPlacement')
+                bunnyButtonPlacementLabel.classList.add('settingsDivLabel')
+                bunnyButtonPlacementLabel.title = '─── ↔️ Placement  ↔️ ───\n\nThe placement of the BunnyButtons relative to the sites download buttons'
+                settingsDivFirst.appendChild(bunnyButtonPlacementLabel)
+                settingsDivFirst.appendChild(bunnyButtonPlacementField)
+
+                // --- ForcedTorrentFile ---
+                let globalForcedTorrentFileLabel = document.getElementById('quiCKIE_config_globalForcedTorrentFile_field_label')
+                let globalForcedTorrentFileField = document.getElementById('quiCKIE_config_field_globalForcedTorrentFile')
+                globalForcedTorrentFileLabel.classList.add('settingsDivLabel')
+                globalForcedTorrentFileLabel.title = '─── 💾 Torrent File  💾 ───\n\nForce all BunnyButtons to download the .torrent file through the browser before sending it to qui\n\nℹ️ By default, quiCKIE will determine for itself if the file should be sent directly or first downloaded'
+                settingsDivFirst.appendChild(globalForcedTorrentFileLabel)
+                settingsDivFirst.appendChild(globalForcedTorrentFileField)
+                
                 // --- Left-Click ---
                 let leftClickLabel = document.getElementById('quiCKIE_config_globalLeftClickAction_field_label')
                 let leftClickField = document.getElementById('quiCKIE_config_field_globalLeftClickAction')
@@ -1285,22 +1285,6 @@ function createGMConfigSettingsPanel() {
                 settingsDivSecond.id = 'quiCKIE_settingsDivSecond'
                 settingsDivFirst.insertAdjacentElement('afterend', settingsDivSecond)
                 
-                // --- 3rd Party Delay ---
-                let thirdPartyDelayLabel = document.getElementById('quiCKIE_config_thirdPartyDelay_field_label')
-                let thirdPartyDelayField = document.getElementById('quiCKIE_config_field_thirdPartyDelay')
-                thirdPartyDelayLabel.classList.add('settingsDivLabel')
-                thirdPartyDelayLabel.title = '─── 🤝 3rd Party Delay 🤝 ───\n\nThe delay in milliseconds for which to wait until scanning for 3rd Party quiCKIE links\n\nℹ️ This delay only affects the FIRST scan of 3rd Party quiCKIE links, not every scan thereafter'
-                settingsDivSecond.appendChild(thirdPartyDelayLabel)
-                settingsDivSecond.appendChild(thirdPartyDelayField)
-
-                // --- Position ---
-                let bunnyButtonPositionLabel = document.getElementById('quiCKIE_config_bunnyButtonPosition_field_label')
-                let bunnyButtonPositionField = document.getElementById('quiCKIE_config_field_bunnyButtonPosition')
-                bunnyButtonPositionLabel.classList.add('settingsDivLabel')
-                bunnyButtonPositionLabel.title = '─── ↔️ Position  ↔️ ───\n\nThe placement of the BunnyButtons relative to the sites download buttons'
-                settingsDivSecond.appendChild(bunnyButtonPositionLabel)
-                settingsDivSecond.appendChild(bunnyButtonPositionField)
-
                 // --- Hidden Trackers ---
                 let hiddenTrackersLabel = document.getElementById('quiCKIE_config_hiddenTrackers_field_label')
                 let hiddenTrackersField = document.getElementById('quiCKIE_config_field_hiddenTrackers')
@@ -1309,6 +1293,32 @@ function createGMConfigSettingsPanel() {
                 settingsDivSecond.appendChild(hiddenTrackersLabel)
                 settingsDivSecond.appendChild(hiddenTrackersField)
                 
+                // --- 3rd Party Delay ---
+                let thirdPartyDelayLabel = document.getElementById('quiCKIE_config_thirdPartyDelay_field_label')
+                let thirdPartyDelayField = document.getElementById('quiCKIE_config_field_thirdPartyDelay')
+                thirdPartyDelayLabel.classList.add('settingsDivLabel')
+                thirdPartyDelayLabel.title = '─── 🤝 3rd Party Delay 🤝 ───\n\nThe delay in milliseconds for which to wait until scanning for 3rd Party quiCKIE links\n\nℹ️ This delay only affects the FIRST scan of 3rd Party quiCKIE links, not every scan thereafter'
+                settingsDivSecond.appendChild(thirdPartyDelayLabel)
+                settingsDivSecond.appendChild(thirdPartyDelayField)
+
+                // --- quiURL ---
+                let quiURLLabel = document.getElementById('quiCKIE_config_quiURL_field_label')
+                let quiURLField = document.getElementById('quiCKIE_config_field_quiURL')
+                quiURLLabel.classList.add('settingsDivLabel')
+                let quiURLTooltip = "─── 🔗 quiURL 🔗 ───\n\nThe full URL to a qui instance\n\nThis is usually the same URL you can copy-paste from your browser\n\nℹ️ Unless otherwise specified in the '🎯' column, this is the instance that all torrents will be sent to\n\nExample: http://localhost:7476/qui/instances/1\n\n────────────────\n\nSeedbox\\Swizzin users might try...\n\nhttps://username:password@seedboxDomain.com/qui/instances/1"
+                quiURLLabel.title = quiURLTooltip
+                quiURLField.title = quiURLTooltip
+                settingsDivSecond.appendChild(quiURLLabel)
+                settingsDivSecond.appendChild(quiURLField)
+
+                // --- ApiKey ---
+                let quiApiKeyLabel = document.getElementById('quiCKIE_config_quiApiKey_field_label')
+                let quiApiKeyField = document.getElementById('quiCKIE_config_field_quiApiKey')
+                quiApiKeyLabel.classList.add('settingsDivLabel')
+                quiApiKeyLabel.title = "─── 🔑 qui ApiKey 🔑 ───\n\nA valid and active ApiKey created by qui\n\nFrom the qui interface, you can generate a ApiKey by going to...\n\nSettings > API Keys > Create API Key"
+                settingsDivSecond.appendChild(quiApiKeyLabel)
+                settingsDivSecond.appendChild(quiApiKeyField)
+
                 // Remove now empty <div> elements
                 document.getElementById('quiCKIE_config_quiURL_var').remove()
                 document.getElementById('quiCKIE_config_quiApiKey_var').remove()
@@ -1361,6 +1371,13 @@ function createGMConfigSettingsPanel() {
                     saveButton.classList.add('success')
                     setTimeout(() => saveButton.classList.remove('success'), 500)
                 })
+
+                // if ( this.get('welcomeMessage') == 'true' ) {
+                //     confirm("🐰 Welcome to quiCKIE! 🐰\n\nFirst off, this little project has been something of a love letter to the people and services that have made quiCKIE worth the time invested 😘\n\nMany of the trackers included with quiCKIE were provided by a user belonging to that tracker and not something I, the original author, was able to personally test. I might be biased, but knowing what I know about the code, I'm confident in their execution of it!\n\nquiCKIE was written to be flexible, independent, and easy for anyone to contribute towards.\n\nIf during your use you run into either a missing url, a broken tracker, or even a dead one, open an issue on the quiCKIE GitHub page.\n\nEnjoy your quiCKIE, hover over the emojis for details, and if there's a tracker that you'd like to see included, check the quiCKIE Wiki for a 3-step guide on how to get it added, no programming experience required!*\n\n* Probably, that was the goal anyways, but you know how it be sometimes 🙃\n\nP.S\nIf you're confident with CSS, this script needs a surgeon... It looks good on the surface, but the CSS is a dumpsterfire that I did my best to put out 😓")
+
+                //     this.set('welcomeMessage', 'false')
+
+                // }
 
             },
             'save': function () {
@@ -1417,7 +1434,8 @@ function getTrackerSettings(trackerDomain) {
         globalLeftClickAction: GM_config.get('globalLeftClickAction'),
         globalMiddleClickAction: GM_config.get('globalMiddleClickAction'),
         thirdPartyDelay: GM_config.get('thirdPartyDelay'),
-        bunnyButtonPosition: GM_config.get('bunnyButtonPosition'),
+        bunnyButtonPlacement: GM_config.get('bunnyButtonPlacement'),
+        globalForcedTorrentFile: GM_config.get('globalForcedTorrentFile'),
         
         // The saved settings of the current tracker
         category: GM_config.get(`${trackerDomain}-category`),
@@ -1731,12 +1749,12 @@ function addTorrent(quiURL, quiApiKey, torrentURL, instance = '', category = '',
     }
 
     // ----- torrentURL Authentication ----- 
-    if ( torrentPostData.torrentURL.match(/(auth=|authkey=|magnet:\?xt=urn:btih:)/) && SETTINGS.forceTorrentFile == false ) {
+    if ( torrentPostData.torrentURL.match(/(auth=|authkey=|magnet:\?xt=urn:btih:)/) && SETTINGS.globalForcedTorrentFile == false && SETTINGS.forceTorrentFile == false ) {
         // Yes, this is an authenticated url or magnet link, so send it directly to the client
         quiPOST(torrentPostData)
 
     } else {
-        // No, this url has no authentication (or 'SETTINGS.forceTorrentFile == true'), so download the .torrent file through the browser before sending it to the client
+        // No, this url has no authentication or is being forced to download the .torrentt file through the browser before sending it to the client
         document.getElementById('__CLICKED__').textContent = ' 💾 '
         getFileBlob(torrentPostData)
 
@@ -1869,7 +1887,7 @@ function scanForThirdPartyTorrentURLS(delay) {
 
                 // [quickie_separator] : Check if the thirdParty element would like to use a specific text separator between the element and the bunnyButton
                 let separatorNode
-                SETTINGS.bunnyButtonPosition == 'After' ? separatorNode = existingBB.previousSibling : separatorNode = existingBB.nextSibling
+                SETTINGS.bunnyButtonPlacement == 'After' ? separatorNode = existingBB.previousSibling : separatorNode = existingBB.nextSibling
 
                 let separatorText
                 if ( separatorNode == null ) {
@@ -1889,10 +1907,10 @@ function scanForThirdPartyTorrentURLS(delay) {
 
 
                 // Append the bunnyButton after the thirdParty element
-                let bunnyButonPosition
-                SETTINGS.bunnyButtonPosition == 'After' ? bunnyButtonPosition = 'afterend' : bunnyButtonPosition = 'beforebegin'
-                downloadElement.insertAdjacentElement(bunnyButtonPosition, bunnyButton)
-                downloadElement.insertAdjacentText(bunnyButtonPosition, separatorText)
+                let bunnyButtonPlacement
+                SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
+                downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
+                downloadElement.insertAdjacentText(bunnyButtonPlacement, separatorText)
 
                 // Remove the attribute that would match it as a thirdParty element in future loops
                 downloadElement.removeAttribute('data-quickie_torrenturl')
@@ -2099,8 +2117,8 @@ function quickieTrackerHandler({
     separator == true ? separator = 'automatic' : null
     separator == 'automatic' ? separator = getPageSeparator(allDownloadElements[0]) : null
 
-    let bunnyButtonPosition
-    SETTINGS.bunnyButtonPosition == 'After' ? bunnyButtonPosition = 'afterend' : bunnyButtonPosition = 'beforebegin'
+    let bunnyButtonPlacement
+    SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
 
     // Process each downloadElement in the list one at a time, generating a bunnyButton for each and then inserting it after the downloadElement
     for (let downloadElement of allDownloadElements) {
@@ -2117,11 +2135,11 @@ function quickieTrackerHandler({
         bunnyButtonParentPlacement == true ? placementElement = downloadElement.parentElement : placementElement = downloadElement
         
         // Insert the bunnyButton after the placementElement
-        placementElement.insertAdjacentElement(bunnyButtonPosition, bunnyButton)
+        placementElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
         
         if ( SETTINGS.hideDL == false ) {
             // Insert the separator between the placementElement and the bunnyButton
-            separator == false ? null : placementElement.insertAdjacentText(bunnyButtonPosition, separator)
+            separator == false ? null : placementElement.insertAdjacentText(bunnyButtonPlacement, separator)
         } else {
             // Hide the DL button and don't insert a separator
             downloadElement.style.display = 'none'
@@ -2147,7 +2165,7 @@ function unit3dTrackerHandler(torrentURLSelector) {
 
     let separator = getPageSeparator(allDownloadElements[0])
 
-    SETTINGS.bunnyButtonPosition == 'After' ? bunnyButtonPosition = 'afterend' : bunnyButtonPosition = 'beforebegin'
+    SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
 
     for (let downloadElement of allDownloadElements) {
 
@@ -2155,17 +2173,17 @@ function unit3dTrackerHandler(torrentURLSelector) {
 
         if ( downloadElement.parentElement.nodeName == 'LI' ) {
             // If the parent element is a list-item, this is likely a horizontal row, so place the bunnyButton after the parent element so that it shows up on the same row
-            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPosition, bunnyButton)
+            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
 
             // Hide the DL button if enabled
             SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
 
         } else {
-            downloadElement.insertAdjacentElement(bunnyButtonPosition, bunnyButton)
+            downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
 
             if ( SETTINGS.hideDL == false ) {
                 // Insert the separator between the placementElement and the bunnyButton
-                downloadElement.insertAdjacentText(bunnyButtonPosition, separator)
+                downloadElement.insertAdjacentText(bunnyButtonPlacement, separator)
             } else {
                 // Hide the DL button and don't insert a separator
                 downloadElement.style.display = 'none'
@@ -2213,11 +2231,11 @@ function unit3dTrackerHandler(torrentURLSelector) {
                         // Hide the DL button if enabled
                         SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
                     } else {
-                        downloadElement.insertAdjacentElement(bunnyButtonPosition, bunnyButton)
+                        downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
 
                         if ( SETTINGS.hideDL == false ) {
                             // Insert the separator between the placementElement and the bunnyButton
-                            downloadElement.insertAdjacentText(bunnyButtonPosition, separator)
+                            downloadElement.insertAdjacentText(bunnyButtonPlacement, separator)
                         } else {
                             // Hide the DL button and don't insert a separator
                             downloadElement.style.display = 'none'

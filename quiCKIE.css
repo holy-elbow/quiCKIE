@@ -3,6 +3,8 @@ font-family: "Roboto Condensed", Tahoma, Arial;
 }
 
 #quiCKIE_config .field_label {
+    font-size: 14px;
+    font-weight: normal
 }
 
 /* ----------------------------------- HEADER ----------------------------------- */
@@ -30,6 +32,7 @@ font-family: "Roboto Condensed", Tahoma, Arial;
 #quiCKIE_config_wrapper div.quiCKIE_settingsDiv .settingsDivLabel{
     /* qui row labels */
     margin: 0px 6px 0px 10px;
+    color: #ffffff
 }
 
 #quiCKIE_config_field_quiURL {
@@ -52,7 +55,7 @@ font-family: "Roboto Condensed", Tahoma, Arial;
 
 #quiCKIE_config_field_globalMiddleClickAction,
 #quiCKIE_config_field_globalLeftClickAction,
-#quiCKIE_config_field_bunnyButtonPosition {
+#quiCKIE_config_field_bunnyButtonPlacement {
     /* Click inputs */
     background: rgba(255, 255, 255, 0.9);
     border-radius: 3px;
@@ -274,6 +277,7 @@ tr.quiCKIE_config_table_tbody_tr:nth-child(even) td.quiCKIE_config_table_td_auto
     text-align: center;
 }
 
+#quiCKIE_config_field_globalForcedTorrentFile,
 td.quiCKIE_config_table_tbody_td_field input[type="checkbox"] {
     /* background: rgba(255, 255, 255, 0.9); */
     border-radius: 3px;
@@ -288,6 +292,7 @@ td.quiCKIE_config_table_tbody_td_field input[type="checkbox"] {
     transition: all 0.3s ease;
 }
 
+#quiCKIE_config_field_globalForcedTorrentFile input[type="checkbox"],
 td.quiCKIE_config_table_tbody_td_field input[type="checkbox"]:checked {
     background-color: #0060DF;
     border: 1px solid #0060DF;
@@ -328,6 +333,7 @@ td.quiCKIE_config_table_tbody_td_field input[type="text"]:focus {
     outline: none;
 }
 
+#quiCKIE_config_field_globalForcedTorrentFile input[type="checkbox"],
 td.quiCKIE_config_table_tbody_td_field input[type="checkbox"] {
     box-shadow: none;
     cursor: pointer;
