@@ -2134,8 +2134,6 @@ function addTorrent({
         'torrentURL': torrentURL
     }
 
-    console.debug(torrentPostData)
-
     // ----- torrentURL Authentication ----- 
     if ( torrentPostData.torrentURL.match(/(auth=|authkey=|magnet:\?xt=urn:btih:)/) && SETTINGS.globalForcedTorrentFile == false && SETTINGS.forceTorrentFile == false ) {
         // Yes, this is an authenticated url or magnet link, so send it directly to the client
@@ -2477,7 +2475,6 @@ function unit3dTrackerHandler(downloadElementsSelector) {
         setTimeout(() => {
             let allDownloadElements = document.querySelectorAll(`${downloadElementsSelector}:not([data-quickie_processed="true"])`)
 
-            console.log('scanning')
             if ( allDownloadElements.length >= 1 ) {
                 let separator = getPageSeparator(allDownloadElements[0])
 
