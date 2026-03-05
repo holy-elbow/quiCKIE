@@ -1807,7 +1807,8 @@ function createBunnyButton({
     torrentURL,
     fontSize = 'inherit',
     buttonText = ' 🐰 ',
-    torrentSettings = SETTINGS
+    torrentSettings = SETTINGS,
+    unit3dBarStyle = false,
 }) {
     // Create the bunnyButton that will be displayed on the site
 
@@ -1816,7 +1817,16 @@ function createBunnyButton({
     bunnyButton.classList.add('quickie_newBunnyButton')
     bunnyButton.href = 'javascript:undefined'
     bunnyButton.textContent = buttonText
-    bunnyButton.setAttribute('style', `font-size: ${fontSize}; text-align: center; text-decoration: none; text-shadow: none`)
+
+    styles = `font-size: ${fontSize}; text-align: center; text-decoration: none; text-shadow: none`
+
+    if ( unit3dBarStyle == false ) {
+        bunnyButton.setAttribute('style', styles)
+    } else {
+        bunnyButton.setAttribute('style', `${styles}; background: rgba(0, 0, 0, 0.70); backdrop-filter: blur(9px); color: rgb(203, 233, 255); font-weight: bold; border-radius: 999px; width: inherit; padding: 2%`)
+        bunnyButton.textContent = ' 🐰 quiCKIE '
+    }
+
     bunnyButton.setAttribute('data-torrenturl', torrentURL)
 
     bunnyButton.title = ` ─── 🌎 ${settingsPanelEntries[`${torrentSettings.trackerDomain}`]} 🌎 ─── 
@@ -2480,11 +2490,15 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
                 SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
 
+                let enableBarStyle = false
+                trackerURL.match(/\/torrents\/\d+/) ? enableBarStyle = true : null
+
                 for (let downloadElement of allDownloadElements) {
 
-                    let bunnyButton = createBunnyButton({torrentURL: downloadElement.href})
+                    if ( enableBarStyle ) {
 
-                    if ( downloadElement.parentElement.nodeName == 'LI' ) {
+                        let bunnyButton = createBunnyButton({torrentURL: downloadElement.href, unit3dBarStyle: true})
+                        
                         // If the parent element is a list-item, this is likely a horizontal row, so place the bunnyButton after the parent element so that it shows up on the same row
                         downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
 
@@ -2492,6 +2506,9 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                         SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
 
                     } else {
+
+                        let bunnyButton = createBunnyButton({torrentURL: downloadElement.href})
+
                         downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
 
                         if ( SETTINGS.hideDL == false ) {
