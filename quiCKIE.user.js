@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.07
+// @version     1.10
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to qui, with customizable per-site settings and presets 🐰 
 //              To be used with a running instance of qui: https://getqui.com/
@@ -879,8 +879,6 @@ function createGMConfigSettingsPanel() {
     const panelTextData = {
         // The data that will be used as the '.textContent' and '.title' in the settings panel's elements. The key names are the '.toLowerCase()' of trackerFieldSuffixes and presetFieldSuffixes items.
         'globalsKeys': [
-            'quiURL',
-            'quiApiKey',
             'presetCount',
             'globalLeftClickAction',
             'globalMiddleClickAction',
@@ -889,11 +887,19 @@ function createGMConfigSettingsPanel() {
             'hiddenTrackers',
             'globalForcedTorrentFile',
 
+            'quiURL',
+            'quiApiKey',
+            'qBitTorrentURL',
+            'qBitTorrentUsername',
+            'qBitTorrentPassword',
+            'transmissionURL',
+            'transmissionUsername',
+            'transmissionPassword',
+
         ],
 
         'globalsTitles': {
-            'quiURL': "─── 🔗 quiURL 🔗 ───\n\nThe full URL to a qui instance\n\nThis is usually the same URL you can copy-paste from your browser\n\nℹ️ Unless otherwise specified in the '🎯' column, this is the instance that all torrents will be sent to\n\nExample: http://localhost:7476/qui/instances/1\n\n────────────────\n\nSeedbox\\Swizzin users might try...\n\nhttps://username:password@seedboxDomain.com/qui/instances/1",
-            'quiApiKey': '─── 🔑 qui ApiKey 🔑 ───\n\nA valid and active ApiKey created by qui\n\nFrom the qui interface, you can generate a ApiKey by going to...\n\nSettings > API Keys > Create API Key',
+            'torrentClient': "─── 🖥️ Torrent Client 🖥️ ───\n\nThe torrent client for where to send torrents\n\nNot all clients will support all the available quiCKIE settings",
             'presetCount': "─── 🚀 Presets 🚀 ───\n\nThe number of presets that will be generated in the quiCKIE settings panel\n\n⚠️ Lowering this number will remove those rows, which in turn deletes their saved settings",
             'globalLeftClickAction': "─── 🖱️ Left-Click \\ Tap 🖱️ ───\n\nThe default action to take when performing a Left-Click\\Tap on a Bunny button\n\nℹ️ Affects all BuunyButtons with the 'Global' setting",
             'globalMiddleClickAction': '─── 🖱️ Middle-Click 🖱️ ───\n\nThe action to take when performing a Middle-Click on a BunnyButton',
@@ -902,6 +908,17 @@ function createGMConfigSettingsPanel() {
             'hiddenTrackers': "─── 🙈 Hidden trackers 🙈 ───\n\nA comma separated list of trackers to be removed from the quiCKIE settings panel\n\nUse the name (case-insensitive) displayed in the '🌎 Tracker' column\n\nHover over the tracker name for a '🙈' button that will quickly add the tracker to the hidden list\n\nℹ️ This does not disable the BunnyButtons from being generated on those trackers, it only hides the tracker from cluttering this settings Panel\n\nExample:  HDBits, secret-cinema, NYAA",
             'globalForcedTorrentFile': '─── 🧲 Torrent File  🧲 ───\n\nForce all BunnyButtons to download the .torrent file through the browser before sending it to qui\n\nℹ️ By default, quiCKIE will determine for itself if the torrentURL should be sent directly to qui or first downloaded through the browser',
 
+
+            'quiURL': "─── 🔗 quiURL 🔗 ───\n\nThe full URL to a qui instance\n\nThis is usually the same URL you can copy-paste from your browser\n\nℹ️ Unless otherwise specified in the '🎯' column, this is the instance that all torrents will be sent to\n\nExample: http://localhost:7476/qui/instances/1\n\n────────────────\n\nSeedbox\\Swizzin users might try...\n\nhttps://username:password@seedboxDomain.com/qui/instances/1",
+            'quiApiKey': '─── 🔑 qui ApiKey 🔑 ───\n\nA valid and active ApiKey created by qui\n\nFrom the qui interface, you can generate a ApiKey by going to...\n\nSettings > API Keys > Create API Key',
+
+            'qBitTorrentURL': "─── 🔗 qBitTorrentURL 🔗 ───\n\nThe full URL to a running qBitTorrent service\n\nThis is usually the same URL you can copy-paste from your browser\n\nExample: http://localhost:8080",
+            'qBitTorrentUsername': '─── 🔑 qBitTorrent Username 🔑 ───\n\nThe username for logging into qBitTorrent through the web interface',
+            'qBitTorrentPassword': '─── 🔑 qBitTorrent Password 🔑 ───\n\nThe password for logging into qBitTorrent through the web interface',
+
+            'transmissionURL': "─── 🔗 Transmission URL 🔗 ───\n\nThe full URL to a running Transmission service\n\nThis is usually the same URL you can copy-paste from your browser\n\nExample: http://localhost:9091",
+            'transmissionUsername': '─── 🔑 Transmission Username 🔑 ───\n\nThe username for logging into Transmission through the web interface',
+            'transmissionPassword': '─── 🔑 Transmission Password 🔑 ───\n\nThe password for logging into Transmission through the web interface',
         },
 
         'columnText': {
@@ -997,13 +1014,11 @@ function createGMConfigSettingsPanel() {
         'fields': {...{
             // Merge these two field objects so that GM_config reads them properly
 
-            'quiURL': {
-                'label': '🔗 quiURL:',
-                'type': 'text',
-            },
-            'quiApiKey': {
-                'label': '🔑 ApiKey:',
-                'type': 'text',
+            'torrentClient': {
+                'label': '🖥️ Client:',
+                'type': 'select',
+                'options': ['qui', 'qBitTorrent', 'Transmission'], //, 'Deluge'],
+                'default': 'qui',
             },
             'presetCount': {
                 'label': '🚀 Presets:',
@@ -1043,11 +1058,48 @@ function createGMConfigSettingsPanel() {
                 'type': 'checkbox',
                 'default': false
             },
-
-
             'welcomeMessage': {
                 'type': 'hidden',
                 'default': 'show',
+            },
+
+
+            // ----- qui -----
+            'quiURL': {
+                'label': '🔗 quiURL:',
+                'type': 'text',
+            },
+            'quiApiKey': {
+                'label': '🔑 ApiKey:',
+                'type': 'text',
+            },
+
+            // ----- qBitTorrent -----
+            'qBitTorrentURL': {
+                'label': '🔗 qBitTorrent:',
+                'type': 'text',
+            },
+            'qBitTorrentUsername': {
+                'label': '🧑 :',
+                'type': 'text',
+            },
+            'qBitTorrentPassword': {
+                'label': '🔑 :',
+                'type': 'text',
+            },
+
+            // ----- Transmission -----
+            'transmissionURL': {
+                'label': '🔗 Transmission:',
+                'type': 'text',
+            },
+            'transmissionUsername': {
+                'label': '🧑:',
+                'type': 'text',
+            },
+            'transmissionPassword': {
+                'label': '🔑:',
+                'type': 'text',
             },
 
         }, ...gmConfigTrackerFields, ...gmConfigPresetsFields},
@@ -1314,7 +1366,7 @@ function createGMConfigSettingsPanel() {
                 }
 
 
-                // For each tracker, add the element that will hide the tracker from view
+                // For each tracker, add the hideButton that will remove the table row and add the tracker to the hidden list
                 for ( let trackerLabelData of document.querySelectorAll('.quiCKIE_config_table_td_label') ) {
                     let trackerRow = trackerLabelData.parentElement
 
@@ -1345,8 +1397,16 @@ function createGMConfigSettingsPanel() {
                 try {
                     document.getElementById('quiCKIE_config_field_quiURL').placeholder = 'http://localhost:7476/qui/instances/1'
                     document.getElementById('quiCKIE_config_field_quiApiKey').placeholder = 'abc123'
-                    document.getElementById('quiCKIE_config_field_hiddenTrackers').placeholder = 'HDBits, secret-cinema, NYAA'
 
+                    document.getElementById('quiCKIE_config_field_qBitTorrentURL').placeholder = 'http://localhost:8080'
+                    document.getElementById('quiCKIE_config_field_qBitTorrentUsername').placeholder = 'abc123'
+                    document.getElementById('quiCKIE_config_field_qBitTorrentPassword').placeholder = 'abc123'
+
+                    document.getElementById('quiCKIE_config_field_transmissionURL').placeholder = 'http://localhost:9091'
+                    document.getElementById('quiCKIE_config_field_transmissionUsername').placeholder = 'abc123'
+                    document.getElementById('quiCKIE_config_field_transmissionPassword').placeholder = 'abc123'
+
+                    document.getElementById('quiCKIE_config_field_hiddenTrackers').placeholder = 'HDBits, secret-cinema, NYAA'
                     document.getElementById('quiCKIE_config_field_broadcasthe-savePath').placeholder = '/downloads/BroadcasTheNet'
                     document.getElementById('quiCKIE_config_field_broadcasthe-category').placeholder = 'BroadcasTheNet'
                     document.getElementById('quiCKIE_config_field_broadcasthe-tags').placeholder = 'series, media'
@@ -1397,6 +1457,14 @@ function createGMConfigSettingsPanel() {
                 settingsDivFirst.classList.add('quiCKIE_settingsDiv')
                 document.getElementById('quiCKIE_config_header').insertAdjacentElement('afterend', settingsDivFirst)
                 
+                // --- TorrentClient ---
+                let torrentClientLabel = document.getElementById('quiCKIE_config_torrentClient_field_label')
+                let torrentClientField = document.getElementById('quiCKIE_config_field_torrentClient')
+                torrentClientLabel.classList.add('settingsDivLabel')
+                torrentClientLabel.title = panelTextData.globalsTitles.torrentClient
+                settingsDivFirst.appendChild(torrentClientLabel)
+                settingsDivFirst.appendChild(torrentClientField)
+
                 // --- Presets ---
                 let presetCountLabel = document.getElementById('quiCKIE_config_presetCount_field_label')
                 let presetCountField = document.getElementById('quiCKIE_config_field_presetCount')
@@ -1437,6 +1505,22 @@ function createGMConfigSettingsPanel() {
                 settingsDivFirst.appendChild(middleClickLabel)
                 settingsDivFirst.appendChild(middleClickField)
 
+                // --- 3rd Party Delay ---
+                let thirdPartyDelayLabel = document.getElementById('quiCKIE_config_thirdPartyDelay_field_label')
+                let thirdPartyDelayField = document.getElementById('quiCKIE_config_field_thirdPartyDelay')
+                thirdPartyDelayLabel.classList.add('settingsDivLabel')
+                thirdPartyDelayLabel.title = panelTextData.globalsTitles.thirdPartyDelay
+                settingsDivFirst.appendChild(thirdPartyDelayLabel)
+                settingsDivFirst.appendChild(thirdPartyDelayField)
+
+                // --- Hidden Trackers ---
+                let hiddenTrackersLabel = document.getElementById('quiCKIE_config_hiddenTrackers_field_label')
+                let hiddenTrackersField = document.getElementById('quiCKIE_config_field_hiddenTrackers')
+                hiddenTrackersLabel.classList.add('settingsDivLabel')
+                hiddenTrackersLabel.title = panelTextData.globalsTitles.hiddenTrackers
+                settingsDivFirst.appendChild(hiddenTrackersLabel)
+                settingsDivFirst.appendChild(hiddenTrackersField)
+                
                 // ------ SECOND ROW ------
                 
                 let settingsDivSecond = document.createElement('div')
@@ -1444,84 +1528,170 @@ function createGMConfigSettingsPanel() {
                 settingsDivSecond.id = 'quiCKIE_settingsDivSecond'
                 settingsDivFirst.insertAdjacentElement('afterend', settingsDivSecond)
                 
-                // --- Hidden Trackers ---
-                let hiddenTrackersLabel = document.getElementById('quiCKIE_config_hiddenTrackers_field_label')
-                let hiddenTrackersField = document.getElementById('quiCKIE_config_field_hiddenTrackers')
-                hiddenTrackersLabel.classList.add('settingsDivLabel')
-                hiddenTrackersLabel.title = panelTextData.globalsTitles.hiddenTrackers
-                settingsDivSecond.appendChild(hiddenTrackersLabel)
-                settingsDivSecond.appendChild(hiddenTrackersField)
-                
-                // --- 3rd Party Delay ---
-                let thirdPartyDelayLabel = document.getElementById('quiCKIE_config_thirdPartyDelay_field_label')
-                let thirdPartyDelayField = document.getElementById('quiCKIE_config_field_thirdPartyDelay')
-                thirdPartyDelayLabel.classList.add('settingsDivLabel')
-                thirdPartyDelayLabel.title = panelTextData.globalsTitles.thirdPartyDelay
-                settingsDivSecond.appendChild(thirdPartyDelayLabel)
-                settingsDivSecond.appendChild(thirdPartyDelayField)
-
                 // --- quiURL ---
                 let quiURLLabel = document.getElementById('quiCKIE_config_quiURL_field_label')
                 let quiURLField = document.getElementById('quiCKIE_config_field_quiURL')
+                let quiURLTooltip = panelTextData.globalsTitles.quiURL
                 quiURLLabel.classList.add('settingsDivLabel')
-                quiURLTooltip = panelTextData.globalsTitles.quiURL
                 quiURLLabel.title = quiURLTooltip
                 quiURLField.title = quiURLTooltip
+                quiURLField.classList.add('quiCKIE_obfuscate')
                 settingsDivSecond.appendChild(quiURLLabel)
                 settingsDivSecond.appendChild(quiURLField)
 
-                // --- ApiKey ---
+                // --- quiApiKey ---
                 let quiApiKeyLabel = document.getElementById('quiCKIE_config_quiApiKey_field_label')
                 let quiApiKeyField = document.getElementById('quiCKIE_config_field_quiApiKey')
                 quiApiKeyLabel.classList.add('settingsDivLabel')
                 quiApiKeyLabel.title = panelTextData.globalsTitles.quiApiKey
+                quiApiKeyField.classList.add('quiCKIE_obfuscate')
                 settingsDivSecond.appendChild(quiApiKeyLabel)
                 settingsDivSecond.appendChild(quiApiKeyField)
 
+                // --- qBitTorrentURL ---
+                let qBitTorrentURLLabel = document.getElementById('quiCKIE_config_qBitTorrentURL_field_label')
+                let qBitTorrentURLField = document.getElementById('quiCKIE_config_field_qBitTorrentURL')
+                let qBitTorrentURLTooltip = panelTextData.globalsTitles.qBitTorrentURL
+                qBitTorrentURLLabel.classList.add('settingsDivLabel')
+                qBitTorrentURLLabel.title = qBitTorrentURLTooltip
+                qBitTorrentURLField.title = qBitTorrentURLTooltip
+                qBitTorrentURLField.classList.add('quiCKIE_obfuscate')
+                settingsDivSecond.appendChild(qBitTorrentURLLabel)
+                settingsDivSecond.appendChild(qBitTorrentURLField)
+
+                // --- qBitTorrentUsername ---
+                let qBitTorrentUsernameLabel = document.getElementById('quiCKIE_config_qBitTorrentUsername_field_label')
+                let qBitTorrentUsernameField = document.getElementById('quiCKIE_config_field_qBitTorrentUsername')
+                qBitTorrentUsernameLabel.classList.add('settingsDivLabel')
+                qBitTorrentUsernameLabel.title = panelTextData.globalsTitles.qBitTorrentUsername
+                qBitTorrentUsernameField.classList.add('quiCKIE_obfuscate')
+                settingsDivSecond.appendChild(qBitTorrentUsernameLabel)
+                settingsDivSecond.appendChild(qBitTorrentUsernameField)
+                
+                // --- qBitTorrentPassword ---
+                let qBitTorrentPasswordLabel = document.getElementById('quiCKIE_config_qBitTorrentPassword_field_label')
+                let qBitTorrentPasswordField = document.getElementById('quiCKIE_config_field_qBitTorrentPassword')
+                qBitTorrentPasswordLabel.classList.add('settingsDivLabel')
+                qBitTorrentPasswordLabel.title = panelTextData.globalsTitles.qBitTorrentPassword
+                qBitTorrentPasswordField.classList.add('quiCKIE_obfuscate')
+                settingsDivSecond.appendChild(qBitTorrentPasswordLabel)
+                settingsDivSecond.appendChild(qBitTorrentPasswordField)
+
+                // --- TransmissionURL ---
+                let transmissionURLLabel = document.getElementById('quiCKIE_config_transmissionURL_field_label')
+                let transmissionURLField = document.getElementById('quiCKIE_config_field_transmissionURL')
+                let transmissionURLTooltip = panelTextData.globalsTitles.transmissionURL
+                transmissionURLLabel.classList.add('settingsDivLabel')
+                transmissionURLLabel.title = transmissionURLTooltip
+                transmissionURLField.title = transmissionURLTooltip
+                transmissionURLField.classList.add('quiCKIE_obfuscate')
+                settingsDivSecond.appendChild(transmissionURLLabel)
+                settingsDivSecond.appendChild(transmissionURLField)
+
+                // --- TransmissionUsername ---
+                let transmissionUsernameLabel = document.getElementById('quiCKIE_config_transmissionUsername_field_label')
+                let transmissionUsernameField = document.getElementById('quiCKIE_config_field_transmissionUsername')
+                transmissionUsernameLabel.classList.add('settingsDivLabel')
+                transmissionUsernameLabel.title = panelTextData.globalsTitles.transmissionUsername
+                transmissionUsernameField.classList.add('quiCKIE_obfuscate')
+                settingsDivSecond.appendChild(transmissionUsernameLabel)
+                settingsDivSecond.appendChild(transmissionUsernameField)
+                
+                // --- TransmissionPassword ---
+                let transmissionPasswordLabel = document.getElementById('quiCKIE_config_transmissionPassword_field_label')
+                let transmissionPasswordField = document.getElementById('quiCKIE_config_field_transmissionPassword')
+                transmissionPasswordLabel.classList.add('settingsDivLabel')
+                transmissionPasswordLabel.title = panelTextData.globalsTitles.transmissionPassword
+                transmissionPasswordField.classList.add('quiCKIE_obfuscate')
+                settingsDivSecond.appendChild(transmissionPasswordLabel)
+                settingsDivSecond.appendChild(transmissionPasswordField)
+
                 // Remove now empty <div> elements
-                document.getElementById('quiCKIE_config_quiURL_var').remove()
-                document.getElementById('quiCKIE_config_quiApiKey_var').remove()
+                document.getElementById('quiCKIE_config_torrentClient_var').remove()
                 document.getElementById('quiCKIE_config_presetCount_var').remove()
+                document.getElementById('quiCKIE_config_bunnyButtonPlacement_var').remove()
+                document.getElementById('quiCKIE_config_globalForcedTorrentFile_var').remove()
                 document.getElementById('quiCKIE_config_globalLeftClickAction_var').remove()
                 document.getElementById('quiCKIE_config_globalMiddleClickAction_var').remove()
                 document.getElementById('quiCKIE_config_thirdPartyDelay_var').remove()
                 document.getElementById('quiCKIE_config_hiddenTrackers_var').remove()
+
+                document.getElementById('quiCKIE_config_quiURL_var').remove()
+                document.getElementById('quiCKIE_config_quiApiKey_var').remove()
+                document.getElementById('quiCKIE_config_qBitTorrentURL_var').remove()
+                document.getElementById('quiCKIE_config_qBitTorrentUsername_var').remove()
+                document.getElementById('quiCKIE_config_qBitTorrentPassword_var').remove()
+                document.getElementById('quiCKIE_config_transmissionURL_var').remove()
+                document.getElementById('quiCKIE_config_transmissionUsername_var').remove()
+                document.getElementById('quiCKIE_config_transmissionPassword_var').remove()
                 
-                // Obfuscate the quiURL and ApiKey on blur
-                quiURLField = document.getElementById('quiCKIE_config_field_quiURL')
-                
-                quiURLField.type = 'password'
-                quiURLField.addEventListener('focus', () => { quiURLField.type = 'text' })
-                quiURLField.addEventListener('blur', () => { quiURLField.type = 'password' })
+                // Obfuscate the client credentials on blur
+                for ( let inputField of document.querySelectorAll('.quiCKIE_obfuscate') ) {
+                    inputField.type = 'password'
+                    inputField.addEventListener('focus', () => { inputField.type = 'text' })
+                    inputField.addEventListener('blur', () => { inputField.type = 'password' })
 
-                quiApiKeyField.type = 'password'
-                quiApiKeyField.addEventListener('focus', (event) => { quiApiKeyField.type = 'text' })
-                quiApiKeyField.addEventListener('blur', (event) => { quiApiKeyField.type = 'password' })
-
-                // Remove 0 from 'int' and 'float' fields
-                for ( let field of document.getElementById('quiCKIE_config').querySelectorAll('input[data-fieldtype="ratioLimit"]') ) {
-                    field.value == 0 ? field.value = '' : null
                 }
 
-                for ( let field of document.getElementById('quiCKIE_config').querySelectorAll('input[data-fieldtype="seedTime"]') ) {
-                    field.value == 0 ? field.value = '' : null
+                // Set 'int' and 'float' fields to blank values when appropriate
+                for ( let fieldName of ['ratioLimit', 'seedTime', 'upLimit', 'dlLimit', 'instance', 'paginationLoop'] ) {
+
+                    for ( let inputField of document.getElementById('quiCKIE_config').querySelectorAll(`input[data-fieldtype=${fieldName}`) ) {
+
+                            if ( fieldName == 'paginationLoop' ) {
+                                inputField.value < 500 ? inputField.value = '' : null
+                            } else if (fieldName == 'ratioLimit' || fieldName == 'seedTime' ) {
+                                inputField.value == 0 ? inputField.value = '' : null
+                            } else {
+                                inputField.value <= 0 ? inputField.value = '' : null
+                            }
+
+                    }
                 }
 
-                for ( let field of document.getElementById('quiCKIE_config').querySelectorAll('input[data-fieldtype="dlLimit"]') ) {
-                    field.value <= 0 ? field.value = '' : null
+                // Disable Fields not applicable to the current torrentClient
+                function torrentClientChange() {
+                    // The torernt client was changed, so disable the quiCKIE fields that no longer apply
+
+                    let torrentClient = document.getElementById('quiCKIE_config_field_torrentClient').value
+
+                    if ( torrentClient.match(/(qui|qBitTorrent)/) ) {
+                        let allInputFields = document.querySelectorAll('input.quiCKIE_disabledField')
+
+                        for ( inputField of allInputFields ) {
+                            inputField.disabled = false
+                            inputField.classList.remove('quiCKIE_disabledField')
+                        }
+
+                        if ( torrentClient == 'qBitTorrent' ) {
+                            // qBitTorrent does not support instances
+                            for ( let inputField of document.querySelectorAll('input[data-fieldtype="instance"]') ) {
+                                inputField.disabled = true
+                                inputField.classList.add('quiCKIE_disabledField')
+                            }
+                        }
+
+                    } else if ( torrentClient == 'Transmission' ) {
+                        // Transmission is selected
+
+                        let fieldsToDisable = ['category', 'ratioLimit', 'seedTime', 'dlLimit', 'upLimit', 'instance', 'subFolder', 'autoTMM', 'skipHash']
+
+                        for ( field of fieldsToDisable ) {
+                            let allInputFields = document.querySelectorAll(`input[data-fieldtype="${field}"]`)
+
+                            for ( inputField of allInputFields ) {
+                                inputField.disabled = true
+                                inputField.classList.add('quiCKIE_disabledField')
+                            }
+                        }
+                    }
                 }
 
-                for ( let field of document.getElementById('quiCKIE_config').querySelectorAll('input[data-fieldtype="upLimit"]') ) {
-                    field.value <= 0 ? field.value = '' : null
-                }
+                document.getElementById('quiCKIE_config_field_torrentClient').addEventListener('change', function() {
+                    torrentClientChange()
+                })
 
-                for ( let field of document.getElementById('quiCKIE_config').querySelectorAll('input[data-fieldtype="instance"]') ) {
-                    field.value <= 0 ? field.value = '' : null
-                }
-
-                for ( let field of document.getElementById('quiCKIE_config').querySelectorAll('input[data-fieldtype="paginationLoop"]') ) {
-                    field.value < 500 ? field.value = '' : null
-                }
+                torrentClientChange() 
                 
                 // Create GitHub version element
                 let githubSVG = '<svg width="16" height="16" viewBox="0 0 98 96" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_730_27136)"><path d="M41.4395 69.3848C28.8066 67.8535 19.9062 58.7617 19.9062 46.9902C19.9062 42.2051 21.6289 37.0371 24.5 33.5918C23.2559 30.4336 23.4473 23.7344 24.8828 20.959C28.7109 20.4805 33.8789 22.4902 36.9414 25.2656C40.5781 24.1172 44.4062 23.543 49.0957 23.543C53.7852 23.543 57.6133 24.1172 61.0586 25.1699C64.0254 22.4902 69.2891 20.4805 73.1172 20.959C74.457 23.543 74.6484 30.2422 73.4043 33.4961C76.4668 37.1328 78.0937 42.0137 78.0937 46.9902C78.0937 58.7617 69.1934 67.6621 56.3691 69.2891C59.623 71.3945 61.8242 75.9883 61.8242 81.252L61.8242 91.2051C61.8242 94.0762 64.2168 95.7031 67.0879 94.5547C84.4102 87.9512 98 70.6289 98 49.1914C98 22.1074 75.9883 6.69539e-07 48.9043 4.309e-07C21.8203 1.92261e-07 -1.9479e-07 22.1074 -4.3343e-07 49.1914C-6.20631e-07 70.4375 13.4941 88.0469 31.6777 94.6504C34.2617 95.6074 36.75 93.8848 36.75 91.3008L36.75 83.6445C35.4102 84.2188 33.6875 84.6016 32.1562 84.6016C25.8398 84.6016 22.1074 81.1563 19.4277 74.7441C18.375 72.1602 17.2266 70.6289 15.0254 70.3418C13.877 70.2461 13.4941 69.7676 13.4941 69.1934C13.4941 68.0449 15.4082 67.1836 17.3223 67.1836C20.0977 67.1836 22.4902 68.9063 24.9785 72.4473C26.8926 75.2227 28.9023 76.4668 31.2949 76.4668C33.6875 76.4668 35.2187 75.6055 37.4199 73.4043C39.0469 71.7773 40.291 70.3418 41.4395 69.3848Z" fill="white"/></g><defs><clipPath id="clip0_730_27136"><rect width="98" height="96" fill="white"/></clipPath></defs></svg>'
@@ -1605,9 +1775,23 @@ function getTrackerSettings(trackerDomain) {
         forceTorrentFile: false,
         firstThirdPartyScan: true,
 
-        // The global qui saved settings
-        quiURL: GM_config.get('quiURL'),
-        quiApiKey: GM_config.get('quiApiKey'),
+        // The global quiCKIE saved settings
+        torrentClient: {
+            'client': GM_config.get('torrentClient'),
+
+            'quiURL': GM_config.get('quiURL'),
+            'quiApiKey': GM_config.get('quiApiKey'),
+
+            'qBitTorrentURL': GM_config.get('qBitTorrentURL'),
+            'qBitTorrentUsername': GM_config.get('qBitTorrentUsername'),
+            'qBitTorrentPassword': GM_config.get('qBitTorrentPassword'),
+
+            'transmissionURL': GM_config.get('transmissionURL'),
+            'transmissionUsername': GM_config.get('transmissionUsername'),
+            'transmissionPassword': GM_config.get('transmissionPassword'),
+        },
+
+
         globalLeftClickAction: GM_config.get('globalLeftClickAction'),
         globalMiddleClickAction: GM_config.get('globalMiddleClickAction'),
         thirdPartyDelay: GM_config.get('thirdPartyDelay'),
@@ -1740,9 +1924,9 @@ function createPresetItems(trackerDomains) {
                             }
 
                             addTorrent({
-                                quiURL: SETTINGS.quiURL, 
-                                quiApiKey: SETTINGS.quiApiKey, 
                                 torrentURL: torrentURL,
+                                torrentClient: SETTINGS.torrentClient,
+
                                 instance: presetSettings.instance, 
                                 category: presetSettings.category, 
                                 savePath: presetSettings.savePath, 
@@ -2165,9 +2349,9 @@ function bunnyButtonClickedActions(bunnyButton, torrentSettings, settingsValue) 
             bunnyButton.textContent = ' 🕓 '
 
             addTorrent({
-                quiURL: SETTINGS.quiURL,
-                quiApiKey: SETTINGS.quiApiKey,
                 torrentURL: bunnyButton.dataset.torrenturl,
+                torrentClient: SETTINGS.torrentClient,
+
                 instance: torrentSettings.instance,
                 category: torrentSettings.category,
                 savePath: torrentSettings.savePath,
@@ -2206,7 +2390,7 @@ function bunnyButtonClickedActions(bunnyButton, torrentSettings, settingsValue) 
 
     } else if ( buttonAction == 'quiTab') {
         // Open the quiURL in a new tab
-        window.open(SETTINGS.quiURL, '_blank').focus()
+        window.open(SETTINGS.torrentClient.quiURL, '_blank').focus()
 
     } else if ( buttonAction == 'Nothing') {
         // Do nothing, a null button
@@ -2218,9 +2402,9 @@ function bunnyButtonClickedActions(bunnyButton, torrentSettings, settingsValue) 
 
 function addTorrent({
     // Using the provided parameters, create a object containing all the info needed to POST a new torrent to the client, then pass that object to the appropriate POST function depending on if the torrentURL has authentication
-    quiURL,
-    quiApiKey,
     torrentURL,
+    torrentClient,
+
     instance = '',
     category = '',
     savePath = '',
@@ -2235,25 +2419,82 @@ function addTorrent({
     autoTMM = false,
     skipHash = false}) {
 
-    try {
-        // Using the saved quiURL, parse and generate the API endpoint to send the POST request
-        // quiURL Example: http://localhost:7476/qui/instances/1
+    // ----- POST object ----- 
+    let postData = {
+        // The object containing the data needed to POST a torrent
+        'torrentClient': torrentClient.client,
+        'torrentURL': torrentURL,
 
-        let quiURLCaptures = quiURL.match(/^(.*)\/(instances\/\d+)/) // [1] == domain, [2] == instance
-        var quiApiAddTorrentURL = `${quiURLCaptures[1]}/api/${quiURLCaptures[2]}/torrents`
+        'qui': {},
+        'qBitTorrent': {},
+        'transmission': {},
 
-    } catch(error) {
-        // Failed to parse quiURL for the API endpoint
-        console.log(error)
-
-        document.getElementById('__CLICKED__').textContent == ' ❌ '
-        document.getElementById('__CLICKED__').removeAttribute('id')
-
-        window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved quiURL to generate the appropriate apiURL\n\nCheck your quiURL for typos\n\nquiURL: ${quiURL}`)
-
-        return
     }
 
+    if ( torrentClient.client == 'qui' ) {
+        // ----------------------------------- qui -----------------------------------
+
+        if ( torrentClient.quiURL == '' ) {
+            // No quiURL has been provided, alert the user and return
+            window.alert(`❌ quiCKIE ❌\n\nA quiURL is required for adding torrents to qui`)
+            return
+        }
+
+        try {
+            // quiURL Example: http://localhost:7476/qui/instances/1
+            let quiURLCaptures = torrentClient.quiURL.match(/^(.*)\/(instances\/\d+)/) // [1] == domain, [2] == instance
+            postData.qui.addURL = `${quiURLCaptures[1]}/api/${quiURLCaptures[2]}/torrents`
+
+        } catch(error) {
+            // Failed to parse quiURL for the API endpoint
+            console.log(error)
+
+            document.getElementById('__CLICKED__').textContent == ' ❌ '
+            document.getElementById('__CLICKED__').removeAttribute('id')
+
+            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved quiURL to generate the appropriate apiURL\n\nCheck your quiURL for typos\n\nquiURL: ${torrentClient.quiURL}`)
+
+            return
+        }
+
+        // ----- Check for qui Target Instance ----- 
+        if ( instance != '' && instance > 0 ) {
+            // SETTINGS.instance: Update the apiURL to point to the specified instance id
+            postData.qui.addURL = postData.qui.addURL.replace(/\/instances\/\d+/, `\/instances\/${instance}`)
+        }
+
+        postData.qui.apiKey = torrentClient.quiApiKey
+
+    } else if ( torrentClient.client == 'qBitTorrent' ) {
+        // ----------------------------------- qBitTorrent -----------------------------------
+
+        if ( torrentClient.qBitTorrentURL == '' ) {
+            // No qBitTorrentURL has been provided, alert the user and return
+            window.alert(`❌ quiCKIE ❌\n\nA qBitTorrentURL is required for adding torrents to qBitTorrent`)
+            return
+        }
+
+
+        postData.qBitTorrent.url = torrentClient.qBitTorrentURL.match(/^(.+)\/?$/)[1]
+        postData.qBitTorrent.username = torrentClient.qBitTorrentUsername
+        postData.qBitTorrent.password = torrentClient.qBitTorrentPassword
+
+    } else if ( torrentClient.client == 'Transmission' ) {
+        // ----------------------------------- Transmission -----------------------------------
+
+        if ( torrentClient.transmissionURL == '' ) {
+            // No qBitTorrentURL has been provided, alert the user and return
+            window.alert(`❌ quiCKIE ❌\n\nA TransmissionURL is required for adding torrents to Transmission`)
+            return
+        }
+
+
+        // TransmissionURL Example: http://localhost:9091
+        postData.transmission.url = torrentClient.transmissionURL.match(/^(.*)\/?/)[1] // [1] == domain, [2] == instance
+        postData.transmission.username = torrentClient.transmissionUsername
+        postData.transmission.password = torrentClient.transmissionPassword
+
+    }
     // ----- POST form ----- 
     // The form data that will be passed to the client
 
@@ -2329,41 +2570,39 @@ function addTorrent({
         form.append('skip_checking', true)
     }
     
-    // ----- Check for qui Target Instance ----- 
-
-    if ( instance != '' && instance > 0 ) {
-        // SETTINGS.instance: Update the apiURL to point to the specified instance id
-        quiApiAddTorrentURL = quiApiAddTorrentURL.replace(/\/instances\/\d+/, `\/instances\/${instance}`)
-    }
-
-    // ----- Finalized POST object ----- 
-    let torrentPostData = {
-        // The object containing the finalized data needed to POST a torrent
-        'quiApiURL': quiApiAddTorrentURL,
-        'quiApiKey': quiApiKey,
-        'formData': form,
-        'torrentURL': torrentURL
-    }
+    postData.formData = form
 
     // ----- torrentURL Authentication ----- 
-    if ( torrentPostData.torrentURL.match(/(auth=|authkey=|passkey=|magnet:\?xt=urn:btih:)/) && SETTINGS.globalForcedTorrentFile == false && SETTINGS.forceTorrentFile == false ) {
+    if ( postData.torrentURL.match(/(auth=|authkey=|passkey=|magnet:\?xt=urn:btih:)/) && SETTINGS.globalForcedTorrentFile == false && SETTINGS.forceTorrentFile == false ) {
         // Yes, this is an authenticated url or magnet link, so send it directly to the client
-        quiPOST(torrentPostData)
+
+        if ( postData.torrentClient == 'qui' ) {
+            // Add to qui
+            quiPOST(postData)
+
+        } else if ( postData.torrentClient == 'qBitTorrent' ) {
+            // Add to qBitTorrent
+            qBitTorrentPOST(postData)
+
+        } else if ( postData.torrentClient == 'Transmission' ) {
+            // Add to Transmission
+            transmissionPOST(postData)
+        }
 
     } else {
-        // No, this url has no authentication or is being forced to download the .torrentt file through the browser before sending it to the client
+        // No, this url has no authentication or is being forced to download the .torrent file through the browser before sending it to the client
         document.getElementById('__CLICKED__').textContent = ' 🧲 '
-        getFileBlob(torrentPostData)
+        getFileBlob(postData)
 
     }
 
 }
 
 
-function getFileBlob(torrentPostData) {
+function getFileBlob(postData) {
     // Download a file blob with the provided URL
 
-    let fileURL = torrentPostData.torrentURL
+    let fileURL = postData.torrentURL
 
     GM_xmlhttpRequest({
         method: 'get',
@@ -2373,10 +2612,22 @@ function getFileBlob(torrentPostData) {
             // ----- File Downloaded ----- 
             let blobData = response.response
 
-            torrentPostData.formData.append('torrent', blobData)
+            postData.formData.append('torrent', blobData)
             document.getElementById('__CLICKED__').textContent = ' 🕓 '
 
-            quiPOST(torrentPostData)
+            if ( postData.torrentClient == 'qui' ) {
+                // Add to qui
+                quiPOST(postData)
+
+            } else if ( postData.torrentClient == 'qBitTorrent' ) {
+                // Add to qBitTorrent
+                qBitTorrentPOST(postData)
+
+            } else if ( postData.torrentClient == 'Transmission' ) {
+                // Add to Transmission
+                transmissionPOST(postData)
+            }
+
         },
         onerror: function(response) {
             // There was an error getting the .torrent file
@@ -2401,16 +2652,16 @@ function getFileBlob(torrentPostData) {
 }
 
 
-function quiPOST(torrentPostData) {
+function quiPOST(postData) {
     // Using the properties of the paramater object, send a POST to qui
 
     GM_xmlhttpRequest({
         // Use the internal GM function to prevent source-origin errors
         method: 'POST',
-        url: torrentPostData.quiApiURL,
-        data: torrentPostData.formData,
+        url: postData.qui.addURL,
+        data: postData.formData,
         headers: {
-            'X-API-Key': torrentPostData.quiApiKey,
+            'X-API-Key': postData.qui.apiKey,
         },
         onload: function(response) {
             // ----- Actions to take after the request has completed -----
@@ -2431,7 +2682,7 @@ function quiPOST(torrentPostData) {
                 if (response.status == 401) {
                     // Unauthorized
 
-                    window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\nThis usually means a bad ApiKey. Check it for typos...\n\nApiKey: ${torrentPostData.quiApiKey}\n\nThe full response has been printed in the console`)
+                    window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\nThis usually means a bad ApiKey. Check it for typos...\n\nApiKey: ${postData.quiApiKey}\n\nThe full response has been printed in the console`)
                 } else {
                     window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nFailed to Add the Torrent to qui\n\nThe full response has been printed in the console`)
                 }
@@ -2445,7 +2696,7 @@ function quiPOST(torrentPostData) {
             document.getElementById('__CLICKED__').textContent = ' ❌ '
             document.getElementById('__CLICKED__').removeAttribute('id')
 
-            window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nThere was a problem connecting to qui. This is usually caused by qui not running or a bad quiURL. Check the service is running and the quiURL for typos, usually it's the same url you can copy-paste from your browser...\n\nquiURL: ${SETTINGS.quiURL}\n\nThe full response has been printed in the console`)
+            window.alert(`❌ quiCKIE ❌\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nThere was a problem connecting to qui. This is usually caused by qui not running or a bad quiURL. Check the service is running and the quiURL for typos, usually it's the same url you can copy-paste from your browser...\n\nquiURL: ${SETTINGS.torrentClient.quiURL}\n\nThe full response has been printed in the console`)
 
         },
         ontimeout: function(response) {
@@ -2454,10 +2705,271 @@ function quiPOST(torrentPostData) {
             document.getElementById('__CLICKED__').textContent = ' ❌ '
             document.getElementById('__CLICKED__').removeAttribute('id')
 
-            window.alert(`❌ quiCKIE ❌\n\nThe connection to qui timedout\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nquiURL: ${SETTINGS.quiURL}\n\nThe full response has been printed in the console`)
+            window.alert(`❌ quiCKIE ❌\n\nThe connection to qui timedout\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nquiURL: ${SETTINGS.torrentClient.quiURL}\n\nThe full response has been printed in the console`)
 
         }
     })
+
+}
+
+
+function qBitTorrentPOST(postData) {
+    // First send a POST to login and then on success send another POST to add a torrent
+
+    // qBitTorrent expects a different name for these fields
+    postData.formData.get('paused') ? postData.formData.append('stopped', true) : null
+
+    // qBitTorrent expects bytes, so convert these KB values to bytes
+    postData.formData.get('dlLimit') > 0 ? postData.formData.set('dlLimit', Number(postData.formData.get('dlLimit')) * 1024) : null
+    postData.formData.get('upLimit') > 0 ? postData.formData.set('upLimit', Number(postData.formData.get('upLimit')) * 1024) : null
+
+
+    document.getElementById('__CLICKED__').textContent = ' 🧑 '
+    GM_xmlhttpRequest({
+        // First, send a POST to login to qBittorrent
+        method: 'POST',
+        url: `${postData.qBitTorrent.url}/api/v2/auth/login`,
+        headers: {
+            'Referer': postData.qBitTorrent.url,
+        },
+        data: new URLSearchParams({
+            'username': postData.qBitTorrent.username,
+            'password': postData.qBitTorrent.password,
+        }),
+        onload: function(response) {
+            // The login POST has been sent and returned, check the response before proceeding...
+
+            if ( response.responseText == 'Ok.' ) {
+                // Succesfully logged into qBitTorrent, ready to send another POST to add a new torrent
+                
+                document.getElementById('__CLICKED__').textContent = ' 🕓 '
+                GM_xmlhttpRequest({
+                    // Use the internal GM function to prevent source-origin errors
+                    method: 'POST',
+                    url: `${postData.qBitTorrent.url}/api/v2/torrents/add`,
+                    data: postData.formData,
+                    onload: function(response) {
+                        // ----- Actions to take after the torrent POST has completed -----
+                        
+                        if (response.status == 200) {
+                            // Success: The torrent has been added to qBitTorrent
+
+                            document.getElementById('__CLICKED__').textContent = ' ✔️ '
+                            document.getElementById('__CLICKED__').removeAttribute('id')
+
+                        } else {
+                            // Failed: The torrent was NOT added to qBitTorrent, log the response and display an alert...
+                            console.log(response)
+
+                            document.getElementById('__CLICKED__').textContent = ' ❌ '
+                            document.getElementById('__CLICKED__').removeAttribute('id')
+
+                            window.alert(`❌ quiCKIE ❌\n\nFailed during torrent POST\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nFailed to Add the Torrent to qBitTorrent\n\nqBitTorrentURL: ${SETTINGS.torrentClient.qBitTorrentURL}\n\nThe full response has been printed in the console`)
+
+                        }
+
+                    },
+                    onerror: function(response) {
+                        // There was an error making the POST
+                        console.log(response)
+                        document.getElementById('__CLICKED__').textContent = ' ❌ '
+                        document.getElementById('__CLICKED__').removeAttribute('id')
+
+                        window.alert(`❌ quiCKIE ❌\n\nFailed during torrent POST\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nFailed to Add the Torrent to qBitTorrent\n\nqBitTorrentURL: ${SETTINGS.torrentClient.qBitTorrentURL}\n\nThe full response has been printed in the console`)
+
+                    },
+                    ontimeout: function(response) {
+                        // The connection timed out
+                        console.log(response)
+                        document.getElementById('__CLICKED__').textContent = ' ❌ '
+                        document.getElementById('__CLICKED__').removeAttribute('id')
+
+                        window.alert(`❌ quiCKIE ❌\n\nFiled during torrent POST\n\nThe connection to qBitTorrent timedout\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nqBitTorrentURL: ${SETTINGS.torrentClient.qBitTorrentURL}\n\nThe full response has been printed in the console`)
+
+                    }
+                })
+
+            } else if ( response.responseText == 'Fails.' ) {
+                // Failed to login to qBitTorrent
+                
+                console.log(response)
+                document.getElementById('__CLICKED__').textContent = ' ❌ '
+                document.getElementById('__CLICKED__').removeAttribute('id')
+
+                window.alert(`❌ quiCKIE ❌\n\nFailed during login\n\nStatus Code: ${response.status}\n\nqBitTorrent was reached, but there was a problem logging in. Check your Username\\Password for typos. \n\nqBitTorrentURL: ${SETTINGS.torrentClient.qBitTorrentURL}\n\nThe full response has been printed in the console`)
+
+            }
+
+        },
+        onerror: function(response) {
+            // There was an error logging in
+            console.log(response)
+            document.getElementById('__CLICKED__').textContent = ' ❌ '
+            document.getElementById('__CLICKED__').removeAttribute('id')
+
+            window.alert(`❌ quiCKIE ❌\n\nFailed during login\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nThere was a problem logging into qBitTorrent. Check the service is running and the qBitTorrentURL for typos, usually it's the same url you can copy-paste from your browser...\n\nqBitTorrentURL: ${SETTINGS.torrentClient.qBitTorrentURL}\n\nThe full response has been printed in the console`)
+
+        },
+        ontimeout: function(response) {
+            // The connection timed out
+            console.log(response)
+            document.getElementById('__CLICKED__').textContent = ' ❌ '
+            document.getElementById('__CLICKED__').removeAttribute('id')
+
+            window.alert(`❌ quiCKIE ❌\n\nFailed during login\n\nThe connection to qBitTorrent timedout\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nqBitTorrentURL: ${SETTINGS.torrentClient.qBitTorrentURL}\n\nThe full response has been printed in the console`)
+
+        }
+    })
+
+}
+
+
+function transmissionPOST(postData) {
+    // First send a POST to login and then on success send another POST to add a torrent
+
+    let labels 
+    postData.formData.get('tags') ? labels = postData.formData.get('tags').split(',') : null
+
+    let transmissionData = {
+        method: 'torrent-add',
+        arguments: {
+            'download-dir': postData.formData.get('savepath'),
+            labels: labels,
+            paused: postData.formData.get('paused'),
+            'sequential-download': postData.formData.get('sequentialDownload'),
+        },
+    }
+
+    if ( postData.formData.get('torrent') ) {
+        // POST using the .torrent blob, but first convert to base64
+
+        function blobToBase64(blob) {
+            return new Promise(function(resolve) {
+                const reader = new FileReader()
+                reader.onloadend = () => resolve(reader.result.replace(/^data:.+;base64,/, ''))
+                reader.readAsDataURL(blob)
+            })
+
+        }
+
+        blobToBase64(postData.formData.get('torrent')).then(function(result) {
+            transmissionData.arguments.metainfo = result
+            transmissionData = JSON.stringify(transmissionData)
+        })
+
+    } else {
+        // No .torrent blob, so POST using the torrentURL 
+        transmissionData.arguments.filename = postData.torrentURL
+        transmissionData = JSON.stringify(transmissionData)
+    }
+
+
+    document.getElementById('__CLICKED__').textContent = ' 🧑 '
+    GM_xmlhttpRequest({
+        // First, send a POST to login to Transmission
+        method: 'POST',
+        url: `${postData.transmission.url}/transmission/rpc`,
+        headers: {
+            Authorization: `Basic ${btoa(`${postData.transmission.username}:${postData.transmission.password}`)}`,
+        },
+        onload: function(response) {
+            // The login POST has been sent and returned, check the response before proceeding...
+
+            let transmissionSessionId = ''
+            try {
+                transmissionSessionId = response.responseText.match(/X-Transmission-Session-Id: (\w+)/)[1]
+            } catch(error) {
+
+            }
+
+            if ( transmissionSessionId != '') {
+                // Succesfully logged into Transmission, ready to send another POST to add a new torrent
+                
+                document.getElementById('__CLICKED__').textContent = ' 🕓 '
+                GM_xmlhttpRequest({
+                    // Use the internal GM function to prevent source-origin errors
+                    method: 'POST',
+                    url: `${postData.transmission.url}/transmission/rpc`,
+                    headers: {
+                        Authorization: `Basic ${btoa(`${postData.transmission.username}:${postData.transmission.password}`)}`,
+                        'X-Transmission-Session-Id': transmissionSessionId,
+                    },
+                    data: transmissionData,
+                    onload: function(response) {
+                        // ----- Actions to take after the torrent POST has completed -----
+                        
+                        let postResponse = JSON.parse(response.responseText)
+
+                        if ( postResponse.result == 'success' ) {
+                            // Success: The torrent has been added to Transmission
+
+                            document.getElementById('__CLICKED__').textContent = ' ✔️ '
+                            document.getElementById('__CLICKED__').removeAttribute('id')
+
+                        } else {
+                            // Failed: The torrent was NOT added to Transmission, log the response and display an alert...
+                            console.log(response)
+
+                            document.getElementById('__CLICKED__').textContent = ' ❌ '
+                            document.getElementById('__CLICKED__').removeAttribute('id')
+
+                            window.alert(`❌ quiCKIE ❌\n\nFailed during torrent POST\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nFailed to Add the Torrent to Transmission\n\ntransmissionURL: ${SETTINGS.torrentClient.transmissionURL}\n\nThe full response has been printed in the console`)
+
+                        }
+
+                    },
+                    onerror: function(response) {
+                        // There was an error making the POST
+                        console.log(response)
+                        document.getElementById('__CLICKED__').textContent = ' ❌ '
+                        document.getElementById('__CLICKED__').removeAttribute('id')
+
+                        window.alert(`❌ quiCKIE ❌\n\nFailed during torrent POST\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nFailed to Add the Torrent to Transmission\n\ntransmissionURL: ${SETTINGS.torrentClient.transmissionURL}\n\nThe full response has been printed in the console`)
+
+                    },
+                    ontimeout: function(response) {
+                        // The connection timed out
+                        console.log(response)
+                        document.getElementById('__CLICKED__').textContent = ' ❌ '
+                        document.getElementById('__CLICKED__').removeAttribute('id')
+
+                        window.alert(`❌ quiCKIE ❌\n\nFiled during torrent POST\n\nThe connection to Transmission timedout\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\ntransmissionURL: ${SETTINGS.torrentClient.transmissionURL}\n\nThe full response has been printed in the console`)
+
+                    }
+                })
+
+            } else {
+                // Failed to login to Transmission
+                
+                console.log(response)
+                document.getElementById('__CLICKED__').textContent = ' ❌ '
+                document.getElementById('__CLICKED__').removeAttribute('id')
+
+                window.alert(`❌ quiCKIE ❌\n\nFailed during login\n\nStatus Code: ${response.status}\n\nTransmission was reached, but there was a problem logging in. Check your Username\\Password for typos. \n\ntransmissionURL: ${SETTINGS.torrentClient.transmissionURL}\n\nThe full response has been printed in the console`)
+
+            }
+
+        },
+        onerror: function(response) {
+            // There was an error logging in
+            console.log(response)
+            document.getElementById('__CLICKED__').textContent = ' ❌ '
+            document.getElementById('__CLICKED__').removeAttribute('id')
+
+            window.alert(`❌ quiCKIE ❌\n\nFailed during login\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nThere was a problem logging into Transmission. Check the service is running and the transmissionURL for typos, usually it's the same url you can copy-paste from your browser...\n\ntransmissionURL: ${SETTINGS.torrentClient.transmissionURL}\n\nThe full response has been printed in the console`)
+
+        },
+        ontimeout: function(response) {
+            // The connection timed out
+            console.log(response)
+            document.getElementById('__CLICKED__').textContent = ' ❌ '
+            document.getElementById('__CLICKED__').removeAttribute('id')
+
+            window.alert(`❌ quiCKIE ❌\n\nFailed during login\n\nThe connection to Transmission timedout\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\ntransmissionURL: ${SETTINGS.torrentClient.transmissionURL}\n\nThe full response has been printed in the console`)
+
+        }
+    })
+
 
 }
 
@@ -2611,3 +3123,4 @@ function waitForElement(selector) {
         });
     });
 }
+
