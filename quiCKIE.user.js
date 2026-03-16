@@ -3307,13 +3307,20 @@ async function delugePOST(postData) {
                         params: delugeData.params,
                     }),
                     onload: function(response) {
-                        // ---------- The .torrent has been added to the server ----------
+                        // ----- Actions to take after the request has completed -----
 
                         let postResponse = JSON.parse(response.responseText)
 
                         if ( postResponse.result != null || response.responseText.match(/Torrent already in session/) ) {
+                            // ---------- The torrent has been added to Deluge ----------
+
+                            if ( response.responseText.match(/Torrent already in session/) ) {
+                                console.log("According to the Deluge response, this torrent can't be added because it already exists in your session\n\nIf the torrent is not in your UI, it may be lingering in your daemon session")
+                            }
+
                             document.getElementById('__CLICKED__').textContent = ' ✔️ '
                             document.getElementById('__CLICKED__').removeAttribute('id')
+
 
                         } else {
                             // Failed: The torrent POST was sent to the server but NOT added to Deluge, log the response and display an alert...
@@ -3324,6 +3331,15 @@ async function delugePOST(postData) {
 
                             window.alert(`❌ quiCKIE ❌\n\nFailed when adding the torrent\n\nThe torrentURL or magnet link was send to Deluge, but failed to be added\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\ndelugeURL: ${SETTINGS.torrentClient.delugeURL}\n\nThe full response has been printed in the console`)
                         }
+                    },
+                    onerror: function(response) {
+                        // There was an error in the torrent add POST
+                        console.log(response)
+                        document.getElementById('__CLICKED__').textContent = ' ❌ '
+                        document.getElementById('__CLICKED__').removeAttribute('id')
+
+                        window.alert(`❌ quiCKIE ❌\n\nFailed during torrent addition\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\nFailed to add the Torrent to Deluge\n\ntransmissionURL: ${SETTINGS.torrentClient.transmissionURL}\n\nThe full response has been printed in the console`)
+
                     },
                 })
 
