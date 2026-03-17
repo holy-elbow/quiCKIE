@@ -50,7 +50,6 @@ font-family: "Roboto Condensed", Tahoma, Arial;
 #quiCKIE_config_field_qBitTorrentPassword,
 #quiCKIE_config_field_transmissionUsername,
 #quiCKIE_config_field_transmissionPassword,
-#quiCKIE_config_field_delugeUsername,
 #quiCKIE_config_field_delugePassword,
 #quiCKIE_config_field_ruTorrentUsername,
 #quiCKIE_config_field_ruTorrentPassword {
@@ -312,7 +311,6 @@ td.quiCKIE_config_table_tbody_td_field input[type="checkbox"]:checked {
 #quiCKIE_config_field_transmissionUsername,
 #quiCKIE_config_field_transmissionPassword,
 #quiCKIE_config_field_delugeURL,
-#quiCKIE_config_field_delugeUsername,
 #quiCKIE_config_field_delugePassword,
 #quiCKIE_config_field_ruTorrentURL,
 #quiCKIE_config_field_ruTorrentUsername,
