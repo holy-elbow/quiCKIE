@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.17
+// @version     1.18
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰 
 //              Orignally written for qui, later extended to support more torrent clients
@@ -1020,16 +1020,21 @@ function createGMConfigSettingsPanel() {
         'fields': {...{
             // Merge these two field objects so that GM_config reads them properly
 
-            'torrentClient': {
-                'label': '🖥️ Client:',
-                'type': 'select',
-                'options': ['qui', 'qBitTorrent', 'Transmission', 'Deluge', 'ruTorrent 🛠️'],
-                'default': 'qui',
-            },
             'presetCount': {
                 'label': '🚀 Presets:',
                 'type': 'int',
                 'default': 3,
+            },
+            'bunnyButtonPlacement': {
+                'label': '↔️ Placement:',
+                'type': 'select',
+                'options': ['After', 'Before'],
+                'default': 'After',
+            },
+            'globalForcedTorrentFile': {
+                'label': '🧲 Torrent File:',
+                'type': 'checkbox',
+                'default': false
             },
             'globalLeftClickAction': {
                 'label': '🖱️ Left-Click \\ Tap:',
@@ -1043,30 +1048,21 @@ function createGMConfigSettingsPanel() {
                 'options': ['Tracker', 'Settings', 'clientTab', 'Nothing'],
                 'default': 'clientTab',
             },
-            'bunnyButtonPlacement': {
-                'label': '↔️ Placement:',
-                'type': 'select',
-                'options': ['After', 'Before'],
-                'default': 'After',
+            'hiddenTrackers': {
+                'label': '🙈 Hidden Trackers:',
+                'type': 'text',
+                'default': '',
             },
             'thirdPartyDelay': {
                 'label': '🤝 Delay:',
                 'type': 'int',
                 'default': 2000,
             },
-            'hiddenTrackers': {
-                'label': '🙈 Hidden Trackers:',
-                'type': 'text',
-                'default': '',
-            },
-            'globalForcedTorrentFile': {
-                'label': '🧲 Torrent File:',
-                'type': 'checkbox',
-                'default': false
-            },
-            'welcomeMessage': {
-                'type': 'hidden',
-                'default': 'show',
+            'torrentClient': {
+                'label': '🖥️ Client:',
+                'type': 'select',
+                'options': ['qui', 'qBitTorrent', 'Transmission', 'Deluge', 'ruTorrent 🛠️'],
+                'default': 'qui',
             },
 
 
@@ -1132,6 +1128,10 @@ function createGMConfigSettingsPanel() {
                 'type': 'text',
             },
 
+            'welcomeMessage': {
+                'type': 'hidden',
+                'default': 'show',
+            },
         }, ...gmConfigTrackerFields, ...gmConfigPresetsFields},
         'events': {
             'open': function (doc) {
@@ -2100,18 +2100,16 @@ function createPresetItems(trackerDomains) {
                         click: function(event) {
                             // This menuItem was clicked, so use the selected preset
                             let bunnyButton = document.getElementById('__CONTEXTCLICKED__')
-                            bunnyButton.id = '__CLICKED__'
-                            bunnyButton.textContent = ' 🕓 '
 
                             let torrentURL = bunnyButton.dataset.torrenturl
 
                             let startPaused = presetSettings.startPaused
-
                             if ( event.shiftKey && event.ctrlKey && event.button == 0 ) {
                                 // Shift-Ctrl-Click: Add the torrent in a paused state
                                 presetSettings.startPaused = true
                             }
 
+                            bunnyButton.id = '__CLICKED__'
                             addTorrent({
                                 torrentURL: torrentURL,
                                 torrentClient: SETTINGS.torrentClient,
@@ -2458,12 +2456,13 @@ function createBunnyButton({
         if ( event.shiftKey && event.ctrlKey && event.button == 0 ) {
             // Shift-Ctrl-Click: Add the torrent in a paused state
 
+            // Remember the startPaused setting before the override
             let pausedSetting = torrentSettings.startPaused
-            torrentSettings.startPaused = true
 
-            // This tracker is using a specified leftClick action
+            torrentSettings.startPaused = true
             bunnyButtonClickedActions(this, torrentSettings, 'Tracker')
 
+            // Restore the startPaused setting to what it was
             torrentSettings.startPaused = pausedSetting
 
         } else if ( event.shiftKey && event.button == 0 ) {
@@ -2472,9 +2471,9 @@ function createBunnyButton({
             GM_config.open()
 
         } else if ( event.ctrlKey && event.button == 0 || event.altKey && event.button == 0) {
-            // Ctrl-Click \ Cmd-Click: Open the quiURL in a new tab
+            // Ctrl-Click \ Cmd-Click: Open the torrentClient in a new tab
 
-            window.open(SETTINGS.quiURL).focus()
+            bunnyButtonClickedActions(this, torrentSettings, 'clientTab')
             
         } else if ( event.button == 1 ) {
             // Middle-Click: Do what is saved by SETTINGS.globalMiddleClickAction
@@ -2559,8 +2558,6 @@ function bunnyButtonClickedActions(bunnyButton, torrentSettings, settingsValue) 
         } else {
             // Run the function to add the torrent to qui with the current site settings
             bunnyButton.id = '__CLICKED__'
-            bunnyButton.textContent = ' 🕓 '
-
             addTorrent({
                 torrentURL: bunnyButton.dataset.torrenturl,
                 torrentClient: SETTINGS.torrentClient,
@@ -2595,7 +2592,6 @@ function bunnyButtonClickedActions(bunnyButton, torrentSettings, settingsValue) 
         })
 
         bunnyButton.dispatchEvent(rightClickEvent)
-
 
     } else if ( buttonAction == 'Settings') {
         // Open the quiCKIE Settings Panel
@@ -2642,21 +2638,44 @@ function addTorrent({
     autoTMM = false,
     skipHash = false}) {
 
+    // Signify POST processing by updating the icon of the clicked on BunnyButton
+    document.getElementById('__CLICKED__').textContent = ' 🕓 '
+
     // ----- POST object ----- 
     let postData = {
-        // The object containing the data needed to POST a torrent
-        'torrentClient': torrentClient.client,
-        'torrentURL': torrentURL,
+        // The object containing the data to be passed to the appropriate clientPOST function
+        torrentClient: torrentClient.client,
+        torrentURL: torrentURL,
+        formData: null,
 
-        'qui': {},
-        'qBitTorrent': {},
-        'transmission': {},
-        'deluge': {},
-        'ruTorrent': {},
+        // These null placeholders will be filled in depending on the currently selected torrent client
+        qui: {
+            url: null,
+            apiKey: null,
+        },
+        qBitTorrent: {
+            url: null,
+            username: null,
+            password: null
+        },
+        transmission: {
+            url: null,
+            username: null,
+            password: null
+        },
+        deluge: {
+            url: null,
+            password: null
+        },
+        ruTorrent: {
+            url: null,
+            username: null,
+            password: null
+        },
 
     }
 
-    if ( torrentClient.client == 'qui' ) {
+    if ( postData.torrentClient == 'qui' ) {
         // ----------------------------------- qui -----------------------------------
 
         if ( torrentClient.quiURL == '' ) {
@@ -2687,7 +2706,7 @@ function addTorrent({
 
         postData.qui.apiKey = torrentClient.quiApiKey
 
-    } else if ( torrentClient.client == 'qBitTorrent' ) {
+    } else if ( postData.torrentClient == 'qBitTorrent' ) {
         // ----------------------------------- qBitTorrent -----------------------------------
 
         if ( torrentClient.qBitTorrentURL == '' ) {
@@ -2701,7 +2720,7 @@ function addTorrent({
         postData.qBitTorrent.username = torrentClient.qBitTorrentUsername
         postData.qBitTorrent.password = torrentClient.qBitTorrentPassword
 
-    } else if ( torrentClient.client == 'Transmission' ) {
+    } else if ( postData.torrentClient == 'Transmission' ) {
         // ----------------------------------- Transmission -----------------------------------
 
         if ( torrentClient.transmissionURL == '' ) {
@@ -2716,7 +2735,7 @@ function addTorrent({
         postData.transmission.username = torrentClient.transmissionUsername
         postData.transmission.password = torrentClient.transmissionPassword
 
-    } else if ( torrentClient.client == 'Deluge' ) {
+    } else if ( postData.torrentClient == 'Deluge' ) {
         // ----------------------------------- Deluge -----------------------------------
 
         if ( torrentClient.delugeURL == '' ) {
@@ -2729,7 +2748,7 @@ function addTorrent({
         postData.deluge.url = torrentClient.delugeURL.match(/^(.+?)\/?$/)[1] 
         postData.deluge.password = torrentClient.delugePassword
 
-    } else if ( torrentClient.client == 'ruTorrent' ) {
+    } else if ( postData.torrentClient == 'ruTorrent' ) {
         // ----------------------------------- ruTorrent -----------------------------------
 
         if ( torrentClient.ruTorrentURL == '' ) {
