@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.16
+// @version     1.17
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰 
 //              Orignally written for qui, later extended to support more torrent clients
@@ -529,7 +529,6 @@ if ( trackerDomain == 'animebytes' ) {
         let config = { childList: true }
 
         trackerURL.match(/\/top10Tor\.php/) ? target = document.getElementById('top10') : null
-        console.log(target)
 
         observer.observe(target, config)
     }
@@ -1955,6 +1954,7 @@ function getTrackerSettings(trackerDomain) {
     let SETTINGS = {
         trackerDomain: trackerDomain,
         forceTorrentFile: false,
+        firstTrackerHandlerScan: true,
         firstThirdPartyScan: true,
 
         // The global quiCKIE saved settings
@@ -2231,7 +2231,7 @@ function quickieTrackerHandler({
     forceTorrentFile = false,
     callAttachPresetsMenu = true,
     trackProcessedDownloadElements = false}) {
-    // Using the provided arguments, generate bunnyButtons for this page
+    // Using the provided arguments, generate bunnyButtons for matching elements on this page
 
     // If the .torrent file should be forced to download through the browser
     forceTorrentFile == true ? SETTINGS.forceTorrentFile = true : null
@@ -2285,7 +2285,17 @@ function quickieTrackerHandler({
 
                 // After the bunnyButtons have been generated, call the function that will attach to them the right-click presetsMenu
                 callAttachPresetsMenu == true ? attachPresetsMenu('a.quickie_newBunnyButton', SETTINGS.trackerDomain) : null
+
+            } else {
+
+                if ( SETTINGS.firstTrackerHandlerScan && !['myanonamouse'].includes(trackerDomain) ) {
+                    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.`)
+                }
+
+
             }
+
+            SETTINGS.firstTrackerHandlerScan = false
 
             if ( SETTINGS.paginationLoop >= 500 ) {
                 // The tracker handler will continuosly scan the page for new downloadElements
@@ -2367,7 +2377,16 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
                 attachPresetsMenu('a.quickie_newBunnyButton', trackerDomain)
 
+            } else {
+
+                if ( SETTINGS.firstTrackerHandlerScan ) {
+                    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.`)
+                }
+
+
             }
+
+            SETTINGS.firstTrackerHandlerScan = false
 
             if ( SETTINGS.paginationLoop >= 500 ) {
                 // The tracker handler will continuosly scan the page for new downloadElements
