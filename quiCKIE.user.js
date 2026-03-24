@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.18
+// @version     1.19
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰 
 //              Orignally written for qui, later extended to support more torrent clients
@@ -502,7 +502,7 @@ if ( trackerDomain == 'animebytes' ) {
         quickieTrackerHandler(trackerHandlingOptions)
 
     } else {
-        // The Browse or Homepage, both of which require a MutationObserver
+        // The Search or Homepage, both of which require a MutationObserver
        
         let observer = new MutationObserver(function(mutations) {
             // Functionality to run when changes are detected to the target element
@@ -513,6 +513,7 @@ if ( trackerDomain == 'animebytes' ) {
                     downloadElementsSelector: 'a[href^="/tor/download.php/"][title*="Download"]',
                     bunnyButtonFontSize: '150%',
                     bunnyButtonText: '🐰',
+                    trackProcessedDownloadElements: true,
                 }
 
                 quickieTrackerHandler(trackerHandlingOptions)
@@ -525,11 +526,10 @@ if ( trackerDomain == 'animebytes' ) {
 
         })
 
-        let target = document.getElementById('ssr')
+        let target = document.getElementById('ssr') // Search table
+        trackerURL.match(/\/top10Tor\.php/) ? target = document.getElementById('top10') : null // Top 10 
+
         let config = { childList: true }
-
-        trackerURL.match(/\/top10Tor\.php/) ? target = document.getElementById('top10') : null
-
         observer.observe(target, config)
     }
 
@@ -765,7 +765,7 @@ function createGMConfigSettingsPanel() {
             },
             [`${trackerDomain}-${trackerFieldSuffixes[9]}`]: {
                 'type': 'select',
-                'options': ['Global', 'Tracker', 'Settings', 'clientTab', 'Nothing'],
+                'options': ['Global', 'Tracker', 'Settings', 'Client', 'Nothing'],
                 'default': 'Global',
             },
             [`${trackerDomain}-${trackerFieldSuffixes[10]}`]: {
@@ -905,26 +905,26 @@ function createGMConfigSettingsPanel() {
             'bunnyButtonPlacement': '─── ↔️ Placement  ↔️ ───\n\nThe placement of the BunnyButtons relative to the sites download buttons',
             'thirdPartyDelay': "─── 🤝 3rd Party Delay 🤝 ───\n\nThe delay in milliseconds to wait until scanning for third-party integrated quiCKIE links\n\nOnly affects trackers that have the '🤝' column set to 'On'\n\nℹ️ This delay only affects the FIRST scan of third-party quiCKIE links, not every scan thereafter",
             'hiddenTrackers': "─── 🙈 Hidden trackers 🙈 ───\n\nA comma separated list of trackers to be removed from the quiCKIE settings panel\n\nUse the name (case-insensitive) displayed in the '🌎 Tracker' column\n\nHover over the tracker name for a '🙈' button that will quickly add the tracker to the hidden list\n\nℹ️ This does not disable the BunnyButtons from being generated on those trackers, it only hides the tracker from cluttering this settings Panel\n\nExample:  HDBits, secret-cinema, NYAA",
-            'globalForcedTorrentFile': '─── 🧲 Torrent File  🧲 ───\n\nForce all BunnyButtons to download the .torrent file through the browser before sending it to qui\n\nℹ️ By default, quiCKIE will determine for itself if the torrentURL should be sent directly to the client or first downloaded through the browser',
+            'globalForcedTorrentFile': '─── 🧲 Torrent File  🧲 ───\n\nForce all BunnyButtons to download the .torrent file through the browser before sending it to qui\n\nℹ️ By default, quiCKIE will determine for itself if the torrentURL should be sent directly to the client or first downloaded through the browser\n\nℹ️ Magnet links are ALWAYS sent directly to the client',
 
 
             'quiURL': "─── 🔗 quiURL 🔗 ───\n\nThe full URL to a qui instance\n\nThis is usually the same URL you can copy-paste from your browser\n\nℹ️ Unless otherwise specified in the '🎯' column, this is the instance that all torrents will be sent to\n\nExample: http://localhost:7476/qui/instances/1\n\n────────────────\n\nSeedbox\\Swizzin users might try...\n\nhttps://username:password@seedboxDomain.com/qui/instances/1",
-            'quiApiKey': '─── 🔑 qui ApiKey 🔑 ───\n\nA valid and active ApiKey created by qui\n\nFrom the qui interface, you can generate a ApiKey by going to...\n\nSettings > API Keys > Create API Key',
+            'quiApiKey': '─── 🔑 ApiKey 🔑 ───\n\nA valid and active ApiKey created by qui\n\nFrom the qui interface, you can generate a ApiKey by going to...\n\nSettings > API Keys > Create API Key',
 
             'qBitTorrentURL': "─── 🔗 qBitTorrentURL 🔗 ───\n\nThe full URL to a running qBitTorrent service\n\nThis is usually the same URL you can copy-paste from your browser\n\nExample: http://localhost:8080",
-            'qBitTorrentUsername': '─── 🔑 qBitTorrent Username 🔑 ───\n\nThe username for logging into qBitTorrent through the web interface',
-            'qBitTorrentPassword': '─── 🔑 qBitTorrent Password 🔑 ───\n\nThe password for logging into qBitTorrent through the web interface',
+            'qBitTorrentUsername': '─── 🔑 Username 🔑 ───\n\nThe username for logging into qBitTorrent through the web interface',
+            'qBitTorrentPassword': '─── 🔑 Password 🔑 ───\n\nThe password for logging into qBitTorrent through the web interface',
 
             'transmissionURL': "─── 🔗 TransmissionURL 🔗 ───\n\nThe full URL to a running Transmission service\n\nThis is usually the same URL you can copy-paste from your browser\n\nExample: http://localhost:9091\n\nℹ️ If Transmission is not using the default rpc, then specify the complete rpc url\n\nExample: http://localhost:9091/your/custom/rpc",
-            'transmissionUsername': '─── 🔑 Transmission Username 🔑 ───\n\nThe username for logging into Transmission through the web interface',
-            'transmissionPassword': '─── 🔑 Transmission Password 🔑 ───\n\nThe password for logging into Transmission through the web interface',
+            'transmissionUsername': '─── 🔑 Username 🔑 ───\n\nThe username for logging into Transmission through the web interface',
+            'transmissionPassword': '─── 🔑 Password 🔑 ───\n\nThe password for logging into Transmission through the web interface',
 
             'delugeURL': "─── 🔗 DelugeURL 🔗 ───\n\nThe full URL to a running Deluge service\n\nThis is usually the same URL you can copy-paste from your browser\n\nExample: http://localhost:8112",
-            'delugePassword': '─── 🔑 Deluge Password 🔑 ───\n\nThe password for logging into Deluge through the web interface',
+            'delugePassword': '─── 🔑 Password 🔑 ───\n\nThe password for logging into Deluge through the web interface',
 
             'ruTorrentURL': "─── 🔗 ruTorrentURL 🔗 ───\n\nThe full URL to a running ruTorrent service\n\nThis is usually the same URL you can copy-paste from your browser\n\nExample: http://localhost:8080",
-            'ruTorrentUsername': '─── 🔑 ruTorrent Username 🔑 ───\n\nThe username for logging into ruTorrent through the web interface',
-            'ruTorrentPassword': '─── 🔑 ruTorrent Password 🔑 ───\n\nThe password for logging into ruTorrent through the web interface',
+            'ruTorrentUsername': '─── 🔑 Username 🔑 ───\n\nThe username for logging into ruTorrent through the web interface',
+            'ruTorrentPassword': '─── 🔑 Password 🔑 ───\n\nThe password for logging into ruTorrent through the web interface',
         },
 
         'columnText': {
@@ -954,7 +954,7 @@ function createGMConfigSettingsPanel() {
         },
 
         'columnTitles': {
-            'tracker': "─── 🌎 Tracker 🌎 ───\n\nThe tracker (site) for which this row of settings fields will be applied to\n\nClicking a name below will re-direct you to the tracker's website\n\nℹ️ Hovering over a BunnyButton will provide a tooltip of the current tracker settings",
+            'tracker': "─── 🌎 Tracker 🌎 ───\n\nThe tracker (site) for which this row of settings will be applied to\n\nClicking a name below will re-direct you to the tracker's website\n\nℹ️ Hovering over a BunnyButton will provide a tooltip of the current tracker settings",
 
             'preset': "─── 🚀 Preset 🚀 ───\n\nThe name that will be displayed in the presets menu (right-click)\n\nBoth text and emojis are supported\n\nPresets without a name will NOT be displayed\n\nℹ️ Hovering over a preset in the presets menu will provide a tooltip of the preset's settings\n\nℹ️ To display a divider in your list, pick one of these characters and use it as the name...\n- = . [space]",
             'presettrackers': "─── 👀 Preset Trackers 👀 ───\n\nA comma seperated list of trackers on which to display this preset\n\nUse the name (case-insensitive) displayed in the '🌎 Tracker' column\n\nPresets without any trackers listed will NOT be displayed\n\nℹ️ Use the * wildcard to display this preset on ALL trackers\n\nExample:  HDBits, secret-cinema, NYAA",
@@ -1039,14 +1039,14 @@ function createGMConfigSettingsPanel() {
             'globalLeftClickAction': {
                 'label': '🖱️ Left-Click \\ Tap:',
                 'type': 'select',
-                'options': ['Tracker', 'Settings', 'clientTab', 'Nothing'],
+                'options': ['Tracker', 'Settings', 'Client', 'Nothing'],
                 'default': 'Tracker',
             },
             'globalMiddleClickAction': {
                 'label': '🖱️ Middle-Click:',
                 'type': 'select',
-                'options': ['Tracker', 'Settings', 'clientTab', 'Nothing'],
-                'default': 'clientTab',
+                'options': ['Tracker', 'Settings', 'Client', 'Nothing'],
+                'default': 'Client',
             },
             'hiddenTrackers': {
                 'label': '🙈 Hidden Trackers:',
@@ -1502,22 +1502,6 @@ function createGMConfigSettingsPanel() {
                 settingsDivFirst.appendChild(presetCountLabel)
                 settingsDivFirst.appendChild(presetCountField)
 
-                // --- Placement ---
-                let bunnyButtonPlacementLabel = document.getElementById('quiCKIE_config_bunnyButtonPlacement_field_label')
-                let bunnyButtonPlacementField = document.getElementById('quiCKIE_config_field_bunnyButtonPlacement')
-                bunnyButtonPlacementLabel.classList.add('settingsDivLabel')
-                bunnyButtonPlacementLabel.title = panelTextData.globalsTitles.bunnyButtonPlacement
-                settingsDivFirst.appendChild(bunnyButtonPlacementLabel)
-                settingsDivFirst.appendChild(bunnyButtonPlacementField)
-
-                // --- ForcedTorrentFile ---
-                let globalForcedTorrentFileLabel = document.getElementById('quiCKIE_config_globalForcedTorrentFile_field_label')
-                let globalForcedTorrentFileField = document.getElementById('quiCKIE_config_field_globalForcedTorrentFile')
-                globalForcedTorrentFileLabel.classList.add('settingsDivLabel')
-                globalForcedTorrentFileLabel.title = panelTextData.globalsTitles.globalForcedTorrentFile
-                settingsDivFirst.appendChild(globalForcedTorrentFileLabel)
-                settingsDivFirst.appendChild(globalForcedTorrentFileField)
-                
                 // --- Left-Click ---
                 let leftClickLabel = document.getElementById('quiCKIE_config_globalLeftClickAction_field_label')
                 let leftClickField = document.getElementById('quiCKIE_config_field_globalLeftClickAction')
@@ -1534,6 +1518,22 @@ function createGMConfigSettingsPanel() {
                 settingsDivFirst.appendChild(middleClickLabel)
                 settingsDivFirst.appendChild(middleClickField)
 
+                // --- Placement ---
+                let bunnyButtonPlacementLabel = document.getElementById('quiCKIE_config_bunnyButtonPlacement_field_label')
+                let bunnyButtonPlacementField = document.getElementById('quiCKIE_config_field_bunnyButtonPlacement')
+                bunnyButtonPlacementLabel.classList.add('settingsDivLabel')
+                bunnyButtonPlacementLabel.title = panelTextData.globalsTitles.bunnyButtonPlacement
+                settingsDivFirst.appendChild(bunnyButtonPlacementLabel)
+                settingsDivFirst.appendChild(bunnyButtonPlacementField)
+
+                // --- ForcedTorrentFile ---
+                let globalForcedTorrentFileLabel = document.getElementById('quiCKIE_config_globalForcedTorrentFile_field_label')
+                let globalForcedTorrentFileField = document.getElementById('quiCKIE_config_field_globalForcedTorrentFile')
+                globalForcedTorrentFileLabel.classList.add('settingsDivLabel')
+                globalForcedTorrentFileLabel.title = panelTextData.globalsTitles.globalForcedTorrentFile
+                settingsDivFirst.appendChild(globalForcedTorrentFileLabel)
+                settingsDivFirst.appendChild(globalForcedTorrentFileField)
+                
                 // ------ SECOND ROW ------
 
                 let settingsDivSecond = document.createElement('div')
@@ -2476,7 +2476,7 @@ function createBunnyButton({
         } else if ( event.ctrlKey && event.button == 0 || event.altKey && event.button == 0) {
             // Ctrl-Click \ Cmd-Click: Open the torrentClient in a new tab
 
-            bunnyButtonClickedActions(this, torrentSettings, 'clientTab')
+            bunnyButtonClickedActions(this, torrentSettings, 'Client')
             
         } else if ( event.button == 1 ) {
             // Middle-Click: Do what is saved by SETTINGS.globalMiddleClickAction
@@ -2593,7 +2593,7 @@ function bunnyButtonClickedActions(bunnyButton, torrentSettings, settingsValue) 
         // Open the quiCKIE Settings Panel
         GM_config.open()
 
-    } else if ( buttonAction == 'clientTab') {
+    } else if ( buttonAction == 'Client') {
         // Open the clientURL in a new tab
         if ( SETTINGS.torrentClient.client == 'qui') {
             window.open(SETTINGS.torrentClient.quiURL, '_blank').focus()
