@@ -81,6 +81,9 @@
 // @match   https://exoticaz.to/
 // @match   https://exoticaz.to/torrent*
 
+// @match   https://femdomcult.org/torrents.php*
+// @match   https://femdomcult.org/collage/*
+
 // @match   https://gazellegames.net/collections.php?id=*
 // @match   https://gazellegames.net/torrents.php*
 
@@ -205,6 +208,7 @@ const settingsPanelEntries = {
     'deepbassnine': 'DeepBassNine', // @tartuffe
     'empornium': 'Empornium',
     'exoticaz' : 'ExoticaZ', // @fercats99
+    'femdomcult': 'Femdomcult',
     'gazellegames': 'GazelleGames',
     'happyfappy': 'HappyFappy', // @empDM
     'hdbits': 'HDBits',
@@ -410,6 +414,16 @@ if ( trackerDomain == 'animebytes' ) {
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="https://exoticaz.to/download/torrent/"]',
+    }
+
+    quickieTrackerHandler(trackerHandlingOptions)
+
+} else if ( trackerDomain == 'femdomcult' ) {
+
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
+        bunnyButtonFontSize: '125%',
+        bunnyButtonParentPlacement: true,
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
