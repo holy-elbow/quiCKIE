@@ -279,7 +279,8 @@ if ( trackerDomain == 'animebytes' ) {
         // If the bunnyButton should be placed after the downloadElement.parentElement, which may put it on the same row as the downloadElement
         bunnyButtonParentPlacement: false, // Default == false || Options == true|false
 
-        // If quiCKIE should ALWAYS download the .torrent file through the browser before sending it to qui (Useful if the trackers authentication doesn't actually work)
+        // If quiCKIE should ALWAYS download the .torrent file through the browser before sending it to the torrent client (Useful if the torrentURL authentication doesn't actually work)
+        // Magnet links are ALWAYS sent directly to the torrent client, as they are not proper http links that can be downloaded through the browser
         forceTorrentFile: false, // Default == false || Options == true|false
 
         // If quiCKIE should attach the right-click PresetsMenu to the new bunnyButtons
