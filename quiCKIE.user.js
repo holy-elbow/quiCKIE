@@ -6,7 +6,7 @@
 // @author      WirlyWirly + contributors 🫶
 // @version     1.19
 // @homepage    https://github.com/WirlyWirly/quiCKIE
-// @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰 
+// @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
 //              Written on LibreWolf via Violentmonkey
 
@@ -77,7 +77,8 @@
 // @match   https://www.empornium.sx/torrents.php*
 // @match   https://www.empornium.sx/user.php?id=*
 
-// @match   https://exoticaz.to/torrent/*
+
+// @match   https://exoticaz.to/*
 
 // @match   https://gazellegames.net/collections.php?id=*
 // @match   https://gazellegames.net/torrents.php*
@@ -105,6 +106,9 @@
 
 // @match   https://karagarga.in/details.php*
 // @match   https://karagarga.in/browse.php*
+
+// @match   https://luminarr.me/torrents*
+// @match   https://luminarr.me/*/bookmarks
 
 // @match   https://materialize.is/collages.php?id=*
 // @match   https://materialize.is/top10.php*
@@ -185,13 +189,13 @@ const settingsPanelEntries = {
     // Each entry below uses the tracker's unique domain (lowercase) as the property, followed by the row label (TitleCase) as the value.
     // Keep the list alphabetical, as these entries will be used to generate a row for each tracker in the settings panel.
     // Example: https://broadcasthe.net/ --> broadcasthe
-    // Example: https://www.myanonamouse.net/ --> myanonamouse 
+    // Example: https://www.myanonamouse.net/ --> myanonamouse
 
     'alpharatio': 'AlphaRatio',
     'animebytes': 'AnimeBytes',
     'anthelion': 'Anthelion', // @malefis
     'avistaz': 'AvistaZ', // @fercats99
-    'bakabt': 'BakaBT', 
+    'bakabt': 'BakaBT',
     'beyond-hd': 'Beyond-HD', // @empDM
     'bibliotik': 'Bibliotik',
     'bitporn': 'BitPorn',
@@ -206,6 +210,7 @@ const settingsPanelEntries = {
     'iptorrents': 'IP-Torrents',
     'jpopsuki': 'JPopsuki', // @tartuffe
     'karagarga': 'Karagarga', // @fercats99
+    'luminarr': 'Luminarr',
     'materialize': 'Materialize',
     'myanonamouse': 'MyAnonaMouse',
     'nebulance': 'Nebulance', // @malefis
@@ -243,29 +248,29 @@ let trackerURL = document.URL
 // =================================== TRACKER SPECIFIC HANDLING ======================================
 
 // @trackerSpecificHandling
-// Because the trackerDomain is unique for each site, we can use it to determine what tracker this is and how to proceed from there 
+// Because the trackerDomain is unique for each site, we can use it to determine what tracker this is and how to proceed from there
 if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- AnimeBytes -----------------------------------
-    // Browse | Collages | Company | Series 
+    // Browse | Collages | Company | Series
 
     let trackerHandlingOptions = {
-        
+
         // ---------- REQUIRED ----------
 
         // A CSS selector that is unique to ONLY the download elements (download buttons)
         downloadElementsSelector: 'a[href^="/torrent/"][title="Download torrent"]', // Any valid CSS selector unique to only the download elements
 
         // ---------- OPTIONAL ----------
-        
+
         // The font-size of the BunnyButton, for re-sizing the displayed bunnyButton
         bunnyButtonfontSize: 'inherit', // Default == 'inherit' || Options == Any percentile
-        
+
         // The text that will be displayed by this bunnyButton
         bunnyButtonText: ' 🐰 ', // Default == ' 🐰 ' || Options == Any string (text) (Usually this is just used to remove the surrounding spaces when the other buttons on the tracker don't have any; '🐰')
 
         // The text that will be displayed by this bunnyButton
         bunnyButtonAltStyles: '', // Default == '' || Options = Additional style properties to apply to the bunnyButtons (Useful when doing a torrentURL.match() on certain pages because they have large bar\text buttons and you want to make the bunnyButton fit in better on that page)
-        
+
         // The attribute name that contains the torrentURL
         torrentURLAttribute: 'href', // Default == 'href' || Options == Any string corresponding to the attribute name
 
@@ -385,14 +390,14 @@ if ( trackerDomain == 'animebytes' ) {
 
 } else if ( trackerDomain == 'empornium' ) {
     // ----------------------------------- Empornium -----------------------------------
-    // Browse | Collages | Details | Top10 
-    
+    // Browse | Collages | Details | Top10
+
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
         bunnyButtonFontSize: '130%',
     }
 
-    // This is a collage page, so place the bunnyButton on the parentElement 
+    // This is a collage page, so place the bunnyButton on the parentElement
     trackerURL.match(/\/collage\/\d+/) ? trackerHandlingOptions.bunnyButtonParentPlacement = true : null
 
     quickieTrackerHandler(trackerHandlingOptions)
@@ -420,7 +425,7 @@ if ( trackerDomain == 'animebytes' ) {
 
 } else if ( trackerDomain == 'happyfappy' ) {
     // ----------------------------------- HappyHappy -----------------------------------
-    // Browse | Collages | Details | Top10 
+    // Browse | Collages | Details | Top10
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
@@ -432,7 +437,7 @@ if ( trackerDomain == 'animebytes' ) {
 
 } else if ( trackerDomain == 'hdbits' ) {
     // ----------------------------------- HDBits -----------------------------------
-    // Browse | Details | Film  
+    // Browse | Details | Film
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a.js-download[href^="/download.php/"]',
@@ -444,7 +449,7 @@ if ( trackerDomain == 'animebytes' ) {
 
 } else if ( trackerDomain == 'iptorrents' ) {
     // ----------------------------------- IP-Torrents -----------------------------------
-    // Browse | Details 
+    // Browse | Details
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href*="download.php"]',
@@ -471,6 +476,15 @@ if ( trackerDomain == 'animebytes' ) {
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="/down.php/"]',
+    }
+
+    quickieTrackerHandler(trackerHandlingOptions)
+
+} else if ( trackerDomain == 'luminarr' ) {
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="https://luminarr.me/torrents/download/"]',
+        bunnyButtonParentPlacement: true,
+        bunnyButtonfontSize: '8000%',
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
@@ -503,7 +517,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     } else {
         // The Search or Homepage, both of which require a MutationObserver
-       
+
         let observer = new MutationObserver(function(mutations) {
             // Functionality to run when changes are detected to the target element
 
@@ -527,7 +541,7 @@ if ( trackerDomain == 'animebytes' ) {
         })
 
         let target = document.getElementById('ssr') // Search table
-        trackerURL.match(/\/top10Tor\.php/) ? target = document.getElementById('top10') : null // Top 10 
+        trackerURL.match(/\/top10Tor\.php/) ? target = document.getElementById('top10') : null // Top 10
 
         let config = { childList: true }
         observer.observe(target, config)
@@ -573,7 +587,7 @@ if ( trackerDomain == 'animebytes' ) {
 } else if ( trackerDomain == 'passthepopcorn' ) {
     // ----------------------------------- PassThepopcorn -----------------------------------
     // Film
-    
+
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
@@ -583,7 +597,7 @@ if ( trackerDomain == 'animebytes' ) {
 } else if ( trackerDomain == 'portugas' ) {
     // ----------------------------------- Portugas -----------------------------------
     // Browse | Album | Artist
-    
+
     unit3dTrackerHandler('a[href^="https://portugas.org/torrents/download/"]')
 
 } else if ( trackerDomain == 'redacted' ) {
@@ -592,7 +606,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     if ( !trackerURL.match(/collages?\.php\?id=\d+/) ) {
         // This is NOT a collage page, so it doesn't require a MutationObserver
-        
+
         let trackerHandlingOptions = {
             downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
         }
@@ -601,7 +615,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     } else {
         // This is a collage page, which loads DL buttons only after the '+' button of the album is clicked. Setup nested observation.
-        
+
         let pageObserver = new MutationObserver(function(pageMutations) {
             // The actions to take when new PAGES are loaded
 
@@ -612,7 +626,7 @@ if ( trackerDomain == 'animebytes' ) {
 
                     let tbodyObserver = new MutationObserver(function(tbodyMutations) {
                         // The actions to take when the '+' button of a <tr> is clicked, which will load the DL buttons onto the page
-                        
+
                         let trackerHandlingOptions = {
                             downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
                             trackProcessedDownloadElements: true,
@@ -685,7 +699,7 @@ if ( SETTINGS.thirdPartyScan != 'Off' ) {
 
 function createGMConfigSettingsPanel() {
     // Generate and initialize the GM_config settings panel. It has been done in this function for code cleanliness.
-    
+
     // Determine the saved number of preset fields that should be generated in the settings panel and presets-menu
     let presetCount
     if ( GM_getValue('quiCKIE_config') !== undefined ) {
@@ -696,7 +710,7 @@ function createGMConfigSettingsPanel() {
         presetCount = quiCKIESettingsObject['presetCount']
 
     }
-        
+
 
     // New installs will not have a presetCount, so default to 3
     if ( presetCount == undefined ) {
@@ -710,15 +724,15 @@ function createGMConfigSettingsPanel() {
 
     )
 
-    settingsLabelToDomain = Object.fromEntries(settingsLabelToDomain)    
+    settingsLabelToDomain = Object.fromEntries(settingsLabelToDomain)
 
     // @trackerFieldGeneration
-    // This array will later be used to generate the <th> for each column in the settings panel. Create an entry in 
+    // This array will later be used to generate the <th> for each column in the settings panel. Create an entry in
     const trackerFieldSuffixes = ['category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'dlLimit', 'upLimit', 'instance', 'paginationLoop', 'leftClick', 'thirdPartyScan', 'hideDL', 'startPaused', 'subFolder', 'seqPieces', 'autoTMM', 'skipHash']
     let gmConfigTrackerFields = {}
     let trackerDomains = Object.keys(settingsPanelEntries)
     for ( let trackerDomain of trackerDomains ) {
-        // For each trackerDomain (property) of the settingsPanelEntries object, generate the fields that will be used by GM_config() to save\load settings. 
+        // For each trackerDomain (property) of the settingsPanelEntries object, generate the fields that will be used by GM_config() to save\load settings.
         // Each tracker MUST have the fields displayed in the settings panel; Category (+ row label), SavePath, Tags, RatioLimit, Paused, Piece
 
         // --- GM_config() Fields ---
@@ -990,7 +1004,7 @@ function createGMConfigSettingsPanel() {
 
 
         trackerHomepages = {...trackerHomepages, ...{ [`${uniqueDomain}`]: homepageURL } }
-        
+
     }
 
     // Import the fonts used by the Settings Panel
@@ -1103,7 +1117,7 @@ function createGMConfigSettingsPanel() {
                 'label': '🔑 Password:',
                 'type': 'text',
             },
-            
+
             // ----- Deluge -----
             'delugeURL': {
                 'label': '🔗 Deluge:',
@@ -1113,7 +1127,7 @@ function createGMConfigSettingsPanel() {
                 'label': '🔑 Password:',
                 'type': 'text',
             },
-            
+
             // ----- ruTorrent -----
             'ruTorrentURL': {
                 'label': '🔗 ruTorrent:',
@@ -1136,7 +1150,7 @@ function createGMConfigSettingsPanel() {
         'events': {
             'open': function (doc) {
                 // Actions to take When GM_config.open() is called...
-                
+
                 reloadWindow = false
 
                 let panelStyle = this.frame.style
@@ -1155,7 +1169,7 @@ function createGMConfigSettingsPanel() {
                 panelStyle.position = 'fixed'
                 panelStyle.transform = 'translate(-50%,-50%)'
                 panelStyle.width = '1650px'
-                
+
                 // ----------------------------------- TRACKERS TABLE -----------------------------------
                 // Convert the various trackerDomain <div> elements created by GM_config() into a <table> with columns/rows
 
@@ -1221,13 +1235,13 @@ function createGMConfigSettingsPanel() {
                     let labelData = document.createElement('td')
                     labelData.classList.add('quiCKIE_config_table_td_label')
                     tableRow.appendChild(labelData)
-                    
+
                     // Create the trackerHomepage <a> , append it to the <td>
                     let trackerHyperlinkElement = document.createElement('a')
                     trackerHyperlinkElement.href = trackerHomepages[`${uniqueDomainKey}`]
                     trackerHyperlinkElement.target = '_blank'
                     labelData.appendChild(trackerHyperlinkElement)
-                    
+
                     // Move the trackerLabel field into the <a>
                     let trackerLabelElement = document.getElementById(`quiCKIE_config_${uniqueDomainKey}-category_field_label`)
                     trackerLabelElement.removeAttribute('for')
@@ -1244,7 +1258,7 @@ function createGMConfigSettingsPanel() {
                         dataElement.classList.add(`quiCKIE_config_table_td_${fieldSuffix}`)
                         tableRow.appendChild(dataElement)
 
-                        // Move the GM_Config field into the <td> 
+                        // Move the GM_Config field into the <td>
                         let fieldElement = document.getElementById(`quiCKIE_config_field_${uniqueDomainKey}-${fieldSuffix}`)
                         fieldElement.setAttribute('data-fieldtype', fieldSuffix)
                         dataElement.appendChild(fieldElement)
@@ -1255,7 +1269,7 @@ function createGMConfigSettingsPanel() {
                     }
 
                 }
-                
+
 
                 // ----------------------------------- PRESETS TABLE -----------------------------------
                 if ( presetCount > 0 ) {
@@ -1279,7 +1293,7 @@ function createGMConfigSettingsPanel() {
                     table.appendChild(tcolg)
                     table.appendChild(thead)
                     table.appendChild(tbody)
-                    
+
                     // Insert the <table> after the tracker table
                     document.getElementById('quiCKIE_config_tracker_table').insertAdjacentElement('afterend', table)
 
@@ -1320,7 +1334,7 @@ function createGMConfigSettingsPanel() {
 
                         headersRow.appendChild(headerElement)
                     }
-                    
+
                     // Append the headers to the <thead> (tableHeader) element
                     thead.appendChild(headersRow)
 
@@ -1354,7 +1368,7 @@ function createGMConfigSettingsPanel() {
                         }
 
                     }
-                    
+
                     // Create the list of selectable items that appears when typing to the presetTrackers field
                     let trackerTitles = Object.entries(settingsPanelEntries).map (
                         ([key, value]) => [value]
@@ -1366,7 +1380,7 @@ function createGMConfigSettingsPanel() {
 
                     // Append the list somewhere nearby, in this case into the presetTrackers column
                     document.getElementById('quiCKIE_config_preset_table_thead_th_presettrackers').appendChild(datalistElement)
-                    
+
 
                     for ( let tracker of trackerTitles ) {
                         let datalistItem = document.createElement('option')
@@ -1422,7 +1436,7 @@ function createGMConfigSettingsPanel() {
                     trackerLabelData.insertBefore(hideButton, trackerLabelData.firstElementChild)
 
                 }
-                
+
                 // Set the placeholder examples for the various input fields
                 try {
                     document.getElementById('quiCKIE_config_field_quiURL').placeholder = 'http://localhost:7476/qui/instances/1'
@@ -1473,7 +1487,7 @@ function createGMConfigSettingsPanel() {
                     document.getElementById('quiCKIE_config_field_nyaa-upLimit').placeholder = '5000'
                     document.getElementById('quiCKIE_config_field_nyaa-instance').placeholder = '2'
                     document.getElementById('quiCKIE_config_field_nyaa-paginationLoop').placeholder = '2000'
-                    
+
                     document.getElementById('quiCKIE_config_field_secret-cinema-savePath').placeholder = '/downloads/Secret-Cinema'
                     document.getElementById('quiCKIE_config_field_secret-cinema-category').placeholder = 'Secret-Cinema'
                     document.getElementById('quiCKIE_config_field_secret-cinema-tags').placeholder = 'films, media, private'
@@ -1493,7 +1507,7 @@ function createGMConfigSettingsPanel() {
                 settingsDivFirst.id = 'quiCKIE_settingsDivFirst'
                 settingsDivFirst.classList.add('quiCKIE_settingsDiv')
                 document.getElementById('quiCKIE_config_header').insertAdjacentElement('afterend', settingsDivFirst)
-                
+
                 // --- Presets ---
                 let presetCountLabel = document.getElementById('quiCKIE_config_presetCount_field_label')
                 let presetCountField = document.getElementById('quiCKIE_config_field_presetCount')
@@ -1533,7 +1547,7 @@ function createGMConfigSettingsPanel() {
                 globalForcedTorrentFileLabel.title = panelTextData.globalsTitles.globalForcedTorrentFile
                 settingsDivFirst.appendChild(globalForcedTorrentFileLabel)
                 settingsDivFirst.appendChild(globalForcedTorrentFileField)
-                
+
                 // ------ SECOND ROW ------
 
                 let settingsDivSecond = document.createElement('div')
@@ -1548,7 +1562,7 @@ function createGMConfigSettingsPanel() {
                 hiddenTrackersLabel.title = panelTextData.globalsTitles.hiddenTrackers
                 settingsDivSecond.appendChild(hiddenTrackersLabel)
                 settingsDivSecond.appendChild(hiddenTrackersField)
-                
+
                 // --- 3rd Party Delay ---
                 let thirdPartyDelayLabel = document.getElementById('quiCKIE_config_thirdPartyDelay_field_label')
                 let thirdPartyDelayField = document.getElementById('quiCKIE_config_field_thirdPartyDelay')
@@ -1556,7 +1570,7 @@ function createGMConfigSettingsPanel() {
                 thirdPartyDelayLabel.title = panelTextData.globalsTitles.thirdPartyDelay
                 settingsDivSecond.appendChild(thirdPartyDelayLabel)
                 settingsDivSecond.appendChild(thirdPartyDelayField)
-                
+
                 // --- TorrentClient ---
                 let torrentClientLabel = document.getElementById('quiCKIE_config_torrentClient_field_label')
                 let torrentClientField = document.getElementById('quiCKIE_config_field_torrentClient')
@@ -1604,7 +1618,7 @@ function createGMConfigSettingsPanel() {
                 qBitTorrentUsernameField.classList.add('quiCKIE_obfuscate')
                 settingsDivSecond.appendChild(qBitTorrentUsernameLabel)
                 settingsDivSecond.appendChild(qBitTorrentUsernameField)
-                
+
                 // --- qBitTorrentPassword ---
                 let qBitTorrentPasswordLabel = document.getElementById('quiCKIE_config_qBitTorrentPassword_field_label')
                 let qBitTorrentPasswordField = document.getElementById('quiCKIE_config_field_qBitTorrentPassword')
@@ -1633,7 +1647,7 @@ function createGMConfigSettingsPanel() {
                 transmissionUsernameField.classList.add('quiCKIE_obfuscate')
                 settingsDivSecond.appendChild(transmissionUsernameLabel)
                 settingsDivSecond.appendChild(transmissionUsernameField)
-                
+
                 // --- TransmissionPassword ---
                 let transmissionPasswordLabel = document.getElementById('quiCKIE_config_transmissionPassword_field_label')
                 let transmissionPasswordField = document.getElementById('quiCKIE_config_field_transmissionPassword')
@@ -1682,7 +1696,7 @@ function createGMConfigSettingsPanel() {
                 ruTorrentUsernameField.classList.add('quiCKIE_obfuscate')
                 settingsDivSecond.appendChild(ruTorrentUsernameLabel)
                 settingsDivSecond.appendChild(ruTorrentUsernameField)
-                
+
                 // --- ruTorrentPassword ---
                 let ruTorrentPasswordLabel = document.getElementById('quiCKIE_config_ruTorrentPassword_field_label')
                 let ruTorrentPasswordField = document.getElementById('quiCKIE_config_field_ruTorrentPassword')
@@ -1691,7 +1705,7 @@ function createGMConfigSettingsPanel() {
                 ruTorrentPasswordField.classList.add('quiCKIE_obfuscate')
                 settingsDivSecond.appendChild(ruTorrentPasswordLabel)
                 settingsDivSecond.appendChild(ruTorrentPasswordField)
-                
+
                 document.getElementById('quiCKIE_config_field_torrentClient').querySelector('[value="ruTorrent 🛠️"]').disabled = true
                 ruTorrentPasswordField.disabled = true
                 ruTorrentURLField.disabled = true
@@ -1720,7 +1734,7 @@ function createGMConfigSettingsPanel() {
                 document.getElementById('quiCKIE_config_ruTorrentURL_var').remove()
                 document.getElementById('quiCKIE_config_ruTorrentUsername_var').remove()
                 document.getElementById('quiCKIE_config_ruTorrentPassword_var').remove()
-                
+
                 // Obfuscate the client credentials on blur
                 for ( let inputField of document.querySelectorAll('.quiCKIE_obfuscate') ) {
                     inputField.type = 'password'
@@ -1749,7 +1763,7 @@ function createGMConfigSettingsPanel() {
                     // The torernt client was changed, so disable the quiCKIE fields that no longer apply and hide the clientFields not belonging to this client
 
                     // 1: Enable all previously disabled fields, 2: Disable fields not applicable to the selected client, 3: Hide client settings not applicable to the selected client
-                    
+
                     let allClientFields = ['qui', 'qBitTorrent', 'transmission', 'deluge', 'ruTorrent'] // An array of field names to be hidden
                     let hideClientFields
 
@@ -1760,7 +1774,7 @@ function createGMConfigSettingsPanel() {
                         inputField.classList.remove('quiCKIE_disabledField')
                     }
 
-                        
+
                     // The currently selected torrent client from the dropdown list
                     let torrentClient = document.getElementById('quiCKIE_config_field_torrentClient').value
 
@@ -1872,8 +1886,8 @@ function createGMConfigSettingsPanel() {
                     torrentClientChange()
                 })
 
-                torrentClientChange() 
-                
+                torrentClientChange()
+
                 // Create GitHub version element
                 let githubSVG = '<svg width="16" height="16" viewBox="0 0 98 96" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_730_27136)"><path d="M41.4395 69.3848C28.8066 67.8535 19.9062 58.7617 19.9062 46.9902C19.9062 42.2051 21.6289 37.0371 24.5 33.5918C23.2559 30.4336 23.4473 23.7344 24.8828 20.959C28.7109 20.4805 33.8789 22.4902 36.9414 25.2656C40.5781 24.1172 44.4062 23.543 49.0957 23.543C53.7852 23.543 57.6133 24.1172 61.0586 25.1699C64.0254 22.4902 69.2891 20.4805 73.1172 20.959C74.457 23.543 74.6484 30.2422 73.4043 33.4961C76.4668 37.1328 78.0937 42.0137 78.0937 46.9902C78.0937 58.7617 69.1934 67.6621 56.3691 69.2891C59.623 71.3945 61.8242 75.9883 61.8242 81.252L61.8242 91.2051C61.8242 94.0762 64.2168 95.7031 67.0879 94.5547C84.4102 87.9512 98 70.6289 98 49.1914C98 22.1074 75.9883 6.69539e-07 48.9043 4.309e-07C21.8203 1.92261e-07 -1.9479e-07 22.1074 -4.3343e-07 49.1914C-6.20631e-07 70.4375 13.4941 88.0469 31.6777 94.6504C34.2617 95.6074 36.75 93.8848 36.75 91.3008L36.75 83.6445C35.4102 84.2188 33.6875 84.6016 32.1562 84.6016C25.8398 84.6016 22.1074 81.1563 19.4277 74.7441C18.375 72.1602 17.2266 70.6289 15.0254 70.3418C13.877 70.2461 13.4941 69.7676 13.4941 69.1934C13.4941 68.0449 15.4082 67.1836 17.3223 67.1836C20.0977 67.1836 22.4902 68.9063 24.9785 72.4473C26.8926 75.2227 28.9023 76.4668 31.2949 76.4668C33.6875 76.4668 35.2187 75.6055 37.4199 73.4043C39.0469 71.7773 40.291 70.3418 41.4395 69.3848Z" fill="white"/></g><defs><clipPath id="clip0_730_27136"><rect width="98" height="96" fill="white"/></clipPath></defs></svg>'
 
@@ -1906,7 +1920,7 @@ function createGMConfigSettingsPanel() {
             'save': function () {
                 // Actions to take when the 'Save' button is clicked
                 reloadWindow = true
-                
+
                 // Clear cached data when settings are saved
                 GM_listValues().forEach(key => {
                     if (key !== 'quiCKIE_config') {
@@ -1934,10 +1948,10 @@ function createGMConfigSettingsPanel() {
                 }
             }
         },
-        // The CSS to use for the menu, loaded through the @resource line 
+        // The CSS to use for the menu, loaded through the @resource line
         'css': GM_getResourceText('settingsPanelCSS')
     })
-    
+
     // Register the settings panel to be opened from the UserScript manager dialouge
     GM_registerMenuCommand('Settings', () => {
         GM_config.open()
@@ -1950,7 +1964,7 @@ function createGMConfigSettingsPanel() {
 
 function getTrackerSettings(trackerDomain) {
     // Define the main SETTINGS object and populate it with the current trackerDomain specific settings
-    
+
     // @trackerSettings
     let SETTINGS = {
         trackerDomain: trackerDomain,
@@ -2006,7 +2020,7 @@ function getTrackerSettings(trackerDomain) {
         seqPieces: GM_config.get(`${trackerDomain}-seqPieces`),
         autoTMM: GM_config.get(`${trackerDomain}-autoTMM`),
         skipHash: GM_config.get(`${trackerDomain}-skipHash`),
-        
+
     }
 
     // GM_config() saves what should be blank int/float fields as 0, which is qbitTorrent interprets problematically, so set 0 to ''
@@ -2060,7 +2074,7 @@ function createPresetItems(trackerDomains) {
                 } else if ( presetName.includes('.') ) {
                     presetName = presetName.replaceAll(/./g, '·')
                 }
-                
+
                 var presetItem = {
                     content: presetName,
                     events: {
@@ -2117,27 +2131,27 @@ function createPresetItems(trackerDomains) {
                                 torrentClient: SETTINGS.torrentClient,
                                 bunnyButtonId: bunnyButtonId,
 
-                                instance: presetSettings.instance, 
-                                category: presetSettings.category, 
-                                savePath: presetSettings.savePath, 
-                                tags: presetSettings.tags, 
-                                ratioLimit: presetSettings.ratioLimit, 
-                                seedTime: presetSettings.seedTime, 
-                                dlLimit: presetSettings.dlLimit, 
-                                upLimit: presetSettings.upLimit, 
-                                startPaused: presetSettings.startPaused, 
-                                subFolder: presetSettings.subFolder, 
-                                seqPieces: presetSettings.seqPieces, 
-                                autoTMM: presetSettings.autoTMM, 
+                                instance: presetSettings.instance,
+                                category: presetSettings.category,
+                                savePath: presetSettings.savePath,
+                                tags: presetSettings.tags,
+                                ratioLimit: presetSettings.ratioLimit,
+                                seedTime: presetSettings.seedTime,
+                                dlLimit: presetSettings.dlLimit,
+                                upLimit: presetSettings.upLimit,
+                                startPaused: presetSettings.startPaused,
+                                subFolder: presetSettings.subFolder,
+                                seqPieces: presetSettings.seqPieces,
+                                autoTMM: presetSettings.autoTMM,
                                 skipHash: presetSettings.skipHash})
-                            
+
                             presetSettings.startPaused = startPaused
 
                         },
                         mouseover: function(event) {
                             let bunnyButton = document.getElementById('__CONTEXTCLICKED__')
 
-                            this.title = ` ─── 🚀 ${presetName} 🚀 ─── 
+                            this.title = ` ─── 🚀 ${presetName} 🚀 ───
 🗃️ = ${presetSettings.category}
 💾 = ${presetSettings.savePath}
 🏷️ = ${presetSettings.tags}
@@ -2211,7 +2225,7 @@ function attachPresetsMenu(targetSelector, trackerDomain = trackerDomain) {
         // An array of objects to display in the presets-menu
         menuItems: presetMenuItems[trackerDomain]
     })
-    
+
     // init() will stack a 'contextmenu' eventlistener on elements, so don't call it more than once per bunnyButton
     presetsMenu.init()
 
@@ -2221,7 +2235,7 @@ function attachPresetsMenu(targetSelector, trackerDomain = trackerDomain) {
 // @quickieTrackerHandler
 function quickieTrackerHandler({
     // A universal tracker handler, use the provided options to generate bunnyButtons for all the queries downloadElements
-    
+
     downloadElementsSelector,
     bunnyButtonFontSize = 'inherit',
     bunnyButtonText = ' 🐰 ' ,
@@ -2236,7 +2250,7 @@ function quickieTrackerHandler({
 
     // If the .torrent file should be forced to download through the browser
     forceTorrentFile == true ? SETTINGS.forceTorrentFile = true : null
-    
+
     // The global setting for where to place the bunnyButton relative to the downloadElement
     let bunnyButtonPlacement
     SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
@@ -2253,7 +2267,7 @@ function quickieTrackerHandler({
 
             if ( allDownloadElements.length >= 1 ) {
                 // The query returned results that have not yet been processed, so generate a bunnyButton for each downloadElement
-                
+
                 // The separator used between the DL button and the BunnyButton
                 separator == true ? separator = 'automatic' : null
                 separator == 'automatic' ? separator = getPageSeparator(allDownloadElements[0]) : null
@@ -2266,10 +2280,10 @@ function quickieTrackerHandler({
 
                     let placementElement
                     bunnyButtonParentPlacement == true ? placementElement = downloadElement.parentElement : placementElement = downloadElement
-                    
+
                     // Insert the bunnyButton after the placementElement
                     placementElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
-                    
+
                     if ( SETTINGS.hideDL == false ) {
                         // Insert the separator between the placementElement and the bunnyButton
                         separator == false ? null : placementElement.insertAdjacentText(bunnyButtonPlacement, separator)
@@ -2356,7 +2370,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                     // For each downloadElement, generate and insert a bunnyButton
 
                     let bunnyButton = createBunnyButton({torrentURL: downloadElement.href, buttonText: bunnyButtonText, torrentSettings: SETTINGS, altButtonStyles: bunnyButtonAltStyles})
-                    
+
                     if ( torrentDetailsPage == true ) {
                         // Place alongside the parentElement so that the bunnyButton appears on the same row
                         downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
@@ -2422,7 +2436,7 @@ function createBunnyButton({
 
     bunnyButton.setAttribute('data-torrenturl', torrentURL)
 
-    bunnyButton.title = ` ─── 🌎 ${settingsPanelEntries[`${torrentSettings.trackerDomain}`]} 🌎 ─── 
+    bunnyButton.title = ` ─── 🌎 ${settingsPanelEntries[`${torrentSettings.trackerDomain}`]} 🌎 ───
  🗃️ = ${torrentSettings.category}
  💾 = ${torrentSettings.savePath}
  🏷️ = ${torrentSettings.tags}
@@ -2442,13 +2456,13 @@ function createBunnyButton({
 
     bunnyButton.addEventListener('mouseover', function(event) {
         // When this bunnyButton is hovered over...
-        
+
         this.style.textShadow = '0px 0px 1px black, 0 0 5px #2cadff'
     })
 
     bunnyButton.addEventListener('mouseout', function(event) {
         // When this bunnyButton is hovered out...
-        
+
         this.style.textShadow = 'none'
     })
 
@@ -2477,7 +2491,7 @@ function createBunnyButton({
             // Ctrl-Click \ Cmd-Click: Open the torrentClient in a new tab
 
             bunnyButtonClickedActions(this, torrentSettings, 'Client')
-            
+
         } else if ( event.button == 1 ) {
             // Middle-Click: Do what is saved by SETTINGS.globalMiddleClickAction
 
@@ -2511,7 +2525,7 @@ function getPageSeparator(downloadElement, manualSeparator=false) {
 
     if ( manualSeparator ) {
         // A particular separator has been provided
-        separatorText = manualSeparator 
+        separatorText = manualSeparator
 
     } else {
 
@@ -2524,7 +2538,7 @@ function getPageSeparator(downloadElement, manualSeparator=false) {
 
             if ( siblingElement.nodeType == 3 && siblingElement.nodeName == '#text' && siblingElement.textContent.match(/[\]\)]/) ){
                 // Separator is a bracket type, so insert a | between elements
-               separatorText = ' | ' 
+               separatorText = ' | '
 
             } else if ( siblingElement.nodeType == 3 && siblingElement.nodeName == '#text' && !siblingElement.textContent.match(/[\[\]\(\)]/) ){
                separatorText = siblingElement.textContent
@@ -2576,7 +2590,7 @@ function bunnyButtonClickedActions(bunnyButton, torrentSettings, settingsValue) 
 
     } else if ( buttonAction == 'Presets' ) {
         // Simultate a right-click to open the presets-menu
-        
+
         // *** NOT WORKING ***
 
         let rightClickEvent = new MouseEvent('contextmenu', {
@@ -2638,7 +2652,7 @@ function addTorrent({
     // Signify POST processing by updating the icon of the clicked on BunnyButton
     document.getElementById(bunnyButtonId).textContent = ' 🕓 '
 
-    // ----- POST object ----- 
+    // ----- POST object -----
     let postData = {
         // The object containing the data to be passed to the appropriate clientPOST function
         torrentClient: torrentClient.client,
@@ -2696,7 +2710,7 @@ function addTorrent({
             return
         }
 
-        // ----- Check for qui Target Instance ----- 
+        // ----- Check for qui Target Instance -----
         if ( instance != '' && instance > 0 ) {
             // SETTINGS.instance: Update the apiURL to point to the specified instance id
             postData.qui.url = postData.qui.url.replace(/\/instances\/\d+/, `\/instances\/${instance}`)
@@ -2746,7 +2760,7 @@ function addTorrent({
         }
 
         // Deluge Example: http://localhost:8112
-        postData.deluge.url = torrentClient.delugeURL.match(/^(.+?)\/?$/)[1] 
+        postData.deluge.url = torrentClient.delugeURL.match(/^(.+?)\/?$/)[1]
         postData.deluge.password = torrentClient.delugePassword
 
     } else if ( postData.torrentClient == 'ruTorrent' ) {
@@ -2766,14 +2780,14 @@ function addTorrent({
         postData.ruTorrent.password = torrentClient.ruTorrentPassword
 
     }
-    
-    // ----- POST Form Data ----- 
+
+    // ----- POST Form Data -----
     // The form data that will store all the torrent settings
 
     let form = new FormData()
     form.append('urls', torrentURL)
 
-    // ----- Check for Optional Form Data ----- 
+    // ----- Check for Optional Form Data -----
 
     if ( category != '' ) {
         // SETTINGS.category: The category for which to apply to this torrent
@@ -2807,14 +2821,14 @@ function addTorrent({
     }
 
     if ( dlLimit > 0 ) {
-        // SETTINGS.dlLimit 
+        // SETTINGS.dlLimit
         form.append('dlLimit', dlLimit)
-    } 
+    }
 
     if ( upLimit > 0 ) {
-        // SETTINGS.upLimit 
+        // SETTINGS.upLimit
         form.append('upLimit', upLimit)
-    }    
+    }
 
     if ( startPaused == true ) {
         // SETTINGS.startPaused: Add torrents in a paused state, so they do not automatically begin downloading
@@ -2827,7 +2841,7 @@ function addTorrent({
     }
 
     if ( seqPieces == true ) {
-        // SETTINGS.seqPieces: Allow for playback while downloading by enabling "Sequential Piece Downloading" & "First\Last Piece Priority" 
+        // SETTINGS.seqPieces: Allow for playback while downloading by enabling "Sequential Piece Downloading" & "First\Last Piece Priority"
         form.append('sequentialDownload', true)
         form.append('firstLastPiecePrio', true)
     }
@@ -2841,14 +2855,14 @@ function addTorrent({
         // SETTINGS.skipHash: Skip the initial hash check that is invoked when adding a new torrent
         form.append('skip_checking', true)
     }
-    
+
     postData.formData = form
 
-    // ----- torrentURL Authentication ----- 
+    // ----- torrentURL Authentication -----
     let torrentURLAuthentication = false
 
     if ( postData.torrentURL.match(/magnet:\?xt=urn:btih:/) ) {
-        // magnetLink: This torrentURL is a magnetLink, so must be sent directly to the client as it does not support .torrent downloading 
+        // magnetLink: This torrentURL is a magnetLink, so must be sent directly to the client as it does not support .torrent downloading
         torrentURLAuthentication = true
     } else if ( postData.torrentURL.match(/(auth=|authkey=|passkey=)/) && SETTINGS.globalForcedTorrentFile == false && SETTINGS.forceTorrentFile == false ) {
         // Authenticated: This torrentURL is authenticated and no setting is specifying that it must be downloaded through the browser, so POST directly to the client
@@ -2895,7 +2909,7 @@ async function getFileBlob(postData) {
         url: fileURL,
         responseType: 'blob',
         onload: function(response) {
-            // ----- File Downloaded ----- 
+            // ----- File Downloaded -----
             let blobData = response.response
 
             if ( blobData.type != 'application/x-bittorrent' ) {
@@ -2948,7 +2962,7 @@ async function getFileBlob(postData) {
             window.alert(`❌ quiCKIE ❌\n\nThe connection timed out when attempting to download the .torrent file that would then be sent to ${postData.torrentClient}\n\nStatus Code: ${response.status}\n\n${response.responseText}\n\ntorrentURL: ${fileURL}\n\nThe full response has been printed in the console`)
 
         }
-    }) 
+    })
 
 }
 
@@ -2966,7 +2980,7 @@ async function quiPOST(postData) {
         },
         onload: function(response) {
             // ----- Actions to take after the request has completed -----
-            
+
             if (response.status == 201) {
                 // Success: The torrent has been added to qui
 
@@ -3037,7 +3051,7 @@ async function qBitTorrentPOST(postData) {
 
             if ( response.responseText == 'Ok.' ) {
                 // Succesfully logged into qBitTorrent, ready to send another POST to add a new torrent
-                
+
                 document.getElementById(postData.bunnyButtonId).textContent = ' 🕓 '
                 GM_xmlhttpRequest({
                     // Use the internal GM function to prevent source-origin errors
@@ -3046,7 +3060,7 @@ async function qBitTorrentPOST(postData) {
                     data: postData.formData,
                     onload: function(response) {
                         // ----- Actions to take after the torrent POST has completed -----
-                        
+
                         if (response.status == 200) {
                             // Success: The torrent has been added to qBitTorrent
 
@@ -3115,7 +3129,7 @@ async function qBitTorrentPOST(postData) {
 async function transmissionPOST(postData) {
     // First send a POST to login and then on success send another POST to add a torrent
 
-    let labels 
+    let labels
     postData.formData.get('tags') ? labels = postData.formData.get('tags').split(',') : null
 
     let transmissionData = {
@@ -3146,7 +3160,7 @@ async function transmissionPOST(postData) {
         })
 
     } else {
-        // No .torrent blob in postData, so POST using the torrentURL 
+        // No .torrent blob in postData, so POST using the torrentURL
         transmissionData.arguments.filename = postData.torrentURL
         transmissionData = JSON.stringify(transmissionData)
     }
@@ -3175,7 +3189,7 @@ async function transmissionPOST(postData) {
 
             if ( transmissionSessionId != '') {
                 // Succesfully logged into Transmission, send another POST to add the new torrent
-                
+
                 document.getElementById(postData.bunnyButtonId).textContent = ' 🕓 '
                 GM_xmlhttpRequest({
                     // Use the internal GM function to prevent source-origin errors
@@ -3188,7 +3202,7 @@ async function transmissionPOST(postData) {
                     data: transmissionData,
                     onload: function(response) {
                         // ----- Actions to take after the torrent POST has completed -----
-                        
+
                         let postResponse = JSON.parse(response.responseText)
 
                         if ( postResponse.result == 'success' ) {
@@ -3227,7 +3241,7 @@ async function transmissionPOST(postData) {
 
             } else {
                 // Failed to login to Transmission
-                
+
                 console.log(response)
                 document.getElementById(postData.bunnyButtonId).textContent = ' ❌ '
 
@@ -3301,7 +3315,7 @@ async function delugePOST(postData) {
         delugeData.method = 'core.add_torrent_magnet'
         delugeData.params.push(postData.torrentURL)
         delugeData.params.push(torrentOptions)
-        
+
     } else {
         // Neither a file blob nor a magnetLink is available, so call getFileBlob(), which will download the torrentURL as a file blob and then re-call delugePOST()
         getFileBlob(postData)
@@ -3333,7 +3347,7 @@ async function delugePOST(postData) {
 
             if ( delugeSessionId != '') {
                 // Succesfully logged into Deluge, send another POST to add the .torrent blob or magnet link
-                
+
                 document.getElementById(postData.bunnyButtonId).textContent = ' 🕓 '
                 GM_xmlhttpRequest({
                     // Use the internal GM function to prevent source-origin errors
@@ -3428,7 +3442,7 @@ async function ruTorrentPOST(postData) {
 // @thirdPartyIntegrations
 function scanForThirdPartyTorrentURLS(delay) {
     // Check for elements that have the unique 'data-quickie_torrenturl' attribute designating them as integrated thirdParty torrentURLs for which to generate a BunnyButton. This process will loop every 5000ms.
-    
+
     setTimeout(() => {
 
         let allThirdPartyElements = document.querySelectorAll('[data-quickie_torrenturl]')
@@ -3554,7 +3568,7 @@ function scanForThirdPartyTorrentURLS(delay) {
 function waitForElement(selector) {
     // Wait until the target CSS selector exists and then proceed with the `.then()` function
     // Source: https://stackoverflow.com/a/61511955
-    
+
     return new Promise(resolve => {
         if (document.querySelector(selector)) {
             return resolve(document.querySelector(selector));
