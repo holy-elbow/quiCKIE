@@ -494,6 +494,7 @@ td.quiCKIE_config_table_tbody_td_field input[type="checkbox"] {
 /* } */
 
 input.quiCKIE_disabledField {
+    /* Fields not applicable to the current torrent client */
     background-color: #8B8E94 !important;
     border: 1px solid #545454 !important;
     color: #525252 !important;
