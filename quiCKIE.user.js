@@ -319,7 +319,7 @@ if ( trackerDomain == 'animebytes' ) {
         enablePaginationLooping: false, // Default == false || Options == true|false
 
         // The css style properties that will be applied to this bunnyButton
-        bunnyButtonAltStyles: '', // Default == '' || Options = Additional style properties to apply to the bunnyButtons (Useful when doing a torrentURL.match() on certain pages because they have large bar\text buttons and you want to make the bunnyButton fit in better on that page)
+        bunnyButtonAddStyles: '', // Default == '' || Options = Additional style properties to apply to the bunnyButtons (Useful when you want to style the bunnyButtons to better fit the page)
 
         // Additional classes that will be added to each bunnyButton (Useful for advanced styling)
         bunnyButtonAddClasses: [], // Default == [] || Options = An array of class names, each of which will be added to the bunnyButtons
@@ -386,7 +386,7 @@ if ( trackerDomain == 'animebytes' ) {
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a.download_link[href^="/download/"]',
         bunnyButtonFontSize: '175%',
-        bunnyButtonAltStyles: 'vertical-align: text-bottom;',
+        bunnyButtonAddStyles: 'vertical-align: text-bottom;',
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
@@ -604,8 +604,18 @@ if ( trackerDomain == 'animebytes' ) {
 
         let trackerHandlingOptions = {
             downloadElementsSelector: 'a[href^="/tor/download.php/"][title*="Download"]',
-            bunnyButtonFontSize: '150%',
-            bunnyButtonText: '🐰',
+            bunnyButtonFontSize: '125%',
+            bunnyButtonText: '🐰 quiCKIE',
+            bunnyButtonAddStyles: `
+            background: #CBE9FF;
+            border-radius: 5px;
+            border: #000000 solid 1px;
+            color: #000000;
+            font-weight: Bold;
+            margin: 0px 10px 0px 10px;
+            padding: 3px 10px 5px 10px;
+            vertical-align: middle;`,
+
         }
 
         quickieTrackerHandler(trackerHandlingOptions)
@@ -2345,7 +2355,7 @@ function quickieTrackerHandler({
     bunnyButtonParentPlacement = false,
     separator = 'automatic',
     enablePaginationLooping = false,
-    bunnyButtonAltStyles = '',
+    bunnyButtonAddStyles = '',
     bunnyButtonAddClasses = [],
     torrentURLAttribute = 'href',
     forceTorrentFile = false,
@@ -2386,7 +2396,7 @@ function quickieTrackerHandler({
                     for (let downloadElement of allDownloadElements) {
 
                         // Use the supplied attribute (which should be a torrentURL) to create a bunnyButton for this downloadElement
-                        let bunnyButton = createBunnyButton({ torrentURL: downloadElement[torrentURLAttribute], fontSize: bunnyButtonFontSize, buttonText: bunnyButtonText, torrentSettings: SETTINGS, altButtonStyles: bunnyButtonAltStyles, addButtonClasses: bunnyButtonAddClasses })
+                        let bunnyButton = createBunnyButton({ torrentURL: downloadElement[torrentURLAttribute], fontSize: bunnyButtonFontSize, buttonText: bunnyButtonText, torrentSettings: SETTINGS, addButtonStyles: bunnyButtonAddStyles, addButtonClasses: bunnyButtonAddClasses })
 
                         let placementElement
                         bunnyButtonParentPlacement == true ? placementElement = downloadElement.parentElement : placementElement = downloadElement
@@ -2450,7 +2460,8 @@ function unit3dTrackerHandler(downloadElementsSelector) {
     let trackProcessedDownloadElements = false
     let bunnyButtonPlacement
     let torrentDetailsPage = false
-    let bunnyButtonAltStyles = ''
+    let bunnyButtonAddStyles = ''
+    let bunnyButtonAddClasses
     let bunnyButtonText = ' 🐰 '
 
     // If there is a specified paginationLoop, mark the processed elements so that bunnyButtons are not repeatedly generated
@@ -2467,7 +2478,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
         // Give the bunnyButton a bar appearance, to fit in better with the other buttons
         bunnyButtonText = ' 🐰 quiCKIE '
-        bunnyButtonAltStyles = 'background: rgba(0, 0, 0, 0.70); backdrop-filter: blur(9px); color: rgb(203, 233, 255); font-weight: bold; border-radius: 999px; width: inherit; padding: 2%'
+        bunnyButtonAddStyles = 'background: rgba(0, 0, 0, 0.70); backdrop-filter: blur(9px); color: rgb(203, 233, 255); font-weight: bold; border-radius: 999px; width: inherit; padding: 2%'
 
     }
 
@@ -2485,7 +2496,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                 for (let downloadElement of allDownloadElements) {
                     // For each downloadElement, generate and insert a bunnyButton
 
-                    let bunnyButton = createBunnyButton({torrentURL: downloadElement.href, buttonText: bunnyButtonText, torrentSettings: SETTINGS, altButtonStyles: bunnyButtonAltStyles})
+                    let bunnyButton = createBunnyButton({ torrentURL: downloadElement.href, buttonText: bunnyButtonText, torrentSettings: SETTINGS, addButtonStyles: bunnyButtonAddStyles, addButtonClasses: bunnyButtonAddClasses })
 
                     if ( torrentDetailsPage == true ) {
                         // Place alongside the parentElement so that the bunnyButton appears on the same row
@@ -2539,7 +2550,7 @@ function createBunnyButton({
     fontSize = 'inherit',
     buttonText = ' 🐰 ',
     torrentSettings = SETTINGS,
-    altButtonStyles = '',
+    addButtonStyles = '',
     addButtonClasses = [],
 }) {
 
@@ -2549,7 +2560,7 @@ function createBunnyButton({
     bunnyButton.href = 'javascript:undefined'
     bunnyButton.textContent = buttonText
 
-    bunnyButton.setAttribute('style', `font-size: ${fontSize}; text-align: center; text-decoration: none; text-shadow: none;${altButtonStyles}`)
+    bunnyButton.setAttribute('style', `font-size: ${fontSize}; text-align: center; text-decoration: none; text-shadow: none;${addButtonStyles}`)
 
     bunnyButton.setAttribute('data-torrenturl', torrentURL)
 
