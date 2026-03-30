@@ -73,6 +73,7 @@
 
 // @match   https://cinemaz.to/torrent/*
 
+// @match   https://clearjav.com/
 // @match   https://clearjav.com/torrents*
 // @match   https://clearjav.com/*/bookmarks*
 // @match   https://clearjav.com/playlists/*
@@ -350,6 +351,8 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'aither' ) {
+    // ----------------------------------- Aither -----------------------------------
+    // Browse | Bookmarks | Details | Playlists
 
     unit3dTrackerHandler('a[href*="/download"]')
 
@@ -428,6 +431,8 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'clearjav' ) {
+    // ----------------------------------- ClearJAV -----------------------------------
+    // Browse | Bookmarks | Details | Playlists
 
     unit3dTrackerHandler('a[href*="/download/"]')
 
@@ -467,6 +472,8 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'femdomcult' ) {
+    // ----------------------------------- Femdomcult -----------------------------------
+    // Browse | Bookmarks | Collages | Details |
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
@@ -544,14 +551,20 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'kufirc' ) {
+    // ----------------------------------- Kufirc -----------------------------------
+    // Browse | Collages | Details | Top10
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
         bunnyButtonFontSize: "140%",
     }
 
+    trackerURL.match(/top10/) ? trackerHandlingOptions.forcePaginationLooping = true : null
+
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'luminarr' ) {
+    // ----------------------------------- Luminarr -----------------------------------
+    // Browse | Bookmarks | Details | Playlists
 
     unit3dTrackerHandler('a[href^="https://luminarr.me/torrents/download"]')
 
@@ -567,6 +580,8 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'morethantv' ) {
+    // ----------------------------------- MoreThanTV -----------------------------------
+    // Browse | Collages | Details | Top10
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
@@ -736,8 +751,8 @@ if ( trackerDomain == 'animebytes' ) {
         let config = { childList: true }
 
         pageObserver.observe(target, config)
-
     }
+
 
 } else if ( trackerDomain == 'secret-cinema' ) {
     // ----------------------------------- Secret-Cinema -----------------------------------
@@ -760,35 +775,16 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'torrentleech' ) {
-
-    let observer = new MutationObserver(function(mutations) {
-
-        try {
-
-            let trackerHandlingOptions = {
-                // TorrentLeech download links
-                downloadElementsSelector: 'a[href^="/download/"]',
-
-                bunnyButtonFontSize: '200%',
-                bunnyButtonParentPlacement: true,
-                trackProcessedDownloadElements: true,
-            }
-
-            quickieTrackerHandler(trackerHandlingOptions)
-
-        } catch (error) {
-            return
-        }
-
-    })
-
-    let target = document.body
-    let config = {
-        childList: true,
-        subtree: true,
+    // ----------------------------------- TorrentLeech -----------------------------------
+    // Browse | Top
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="/download/"]',
+        bunnyButtonFontSize: '200%',
     }
+    trackerURL.match(/browse|top/) ? trackerHandlingOptions.forcePaginationLooping = true : null
+    trackerURL.match(/browse|top/) ? trackerHandlingOptions.bunnyButtonParentPlacement = true : null
 
-    observer.observe(target, config)
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'tv-vault' ) {
     // ----------------------------------- TV-Vault -----------------------------------
@@ -2373,7 +2369,7 @@ function quickieTrackerHandler({
     let bunnyButtonPlacement
     SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
 
-    // If pagination looping should be enforced on this page 
+    // If pagination looping should be enforced on this page
     forcePaginationLooping == true ? SETTINGS.paginationLoop = 750 : null
 
     // If there is a paginationLoop timer, mark the processed elements so that bunnyButtons are not repeatedly generated
@@ -2427,7 +2423,7 @@ function quickieTrackerHandler({
 
                 if ( SETTINGS.firstTrackerHandlerScan && !['myanonamouse'].includes(trackerDomain) ) {
                     // This being the first scan, alert the user of the possible reasons the query might have failed and how to proceed
-                    
+
                     console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.`)
                 }
 
@@ -3712,4 +3708,3 @@ function waitForElement(selector) {
         });
     });
 }
-
