@@ -479,7 +479,7 @@ if ( trackerDomain == 'animebytes' ) {
         waitForElement('span.torrent_buttons a.quickie_bunnyButton').then((ready) => {
             // The actions to take after the bunnyButtons have been generated...
 
-            for ( let bunnyButton of document.querySelectorAll('#user-sidebar > a.quickie_bunnyButton, span.torrent_buttons a.quickie_bunnyButton') ) {
+            for ( let bunnyButton of document.querySelectorAll('span.torrent_buttons a.quickie_bunnyButton, #user-sidebar > a.quickie_bunnyButton') ) {
                 // Style these bunnyButtons to have a bar-type look, so that they match the larger site buttons
 
                 bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}
