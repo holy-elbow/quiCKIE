@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.22
+// @version     1.23
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -302,40 +302,40 @@ if ( trackerDomain == 'animebytes' ) {
 
         // ---------- OPTIONAL ----------
 
-        // The font-size of the bunnyButton, for re-sizing the displayed bunnyButton
-        bunnyButtonfontSize: 'inherit', // Default == 'inherit' || Options == Any percentile
+        // The font-size of each bunnyButton, useful for re-sizing them to better fit the page
+        bunnyButtonfontSize: 'inherit', // Default == 'inherit' || Options == Any percentile | A valid 'font-size' css value
 
-        // The text that will be displayed by this bunnyButton
-        bunnyButtonText: ' 🐰 ', // Default == ' 🐰 ' || Options == Any string (text) (Usually this is just used to remove the surrounding spaces when the other buttons on the tracker don't have any; '🐰')
+        // The text that will be displayed by each bunnyButton, useful for advanced styling or to remove the surrounding spaces to better fit the page; '🐰'
+        bunnyButtonText: ' 🐰 ', // Default == ' 🐰 ' || Options == Any string 
 
         // If the bunnyButton should be placed after the downloadElement.parentElement, which may result in the bunnyButton being on the same row as the downloadElement
-        bunnyButtonParentPlacement: false, // Default == false || Options == true|false
+        bunnyButtonParentPlacement: false, // Default == false || Options == true | false
 
-        // The separator used between the bunnyButton and the download button
-        separator: 'automatic', // Default == 'automatic' || options == 'automatic' | Any string (text) | false
+        // The separator used between the bunnyButton and the downloadElement
+        elementsSeparator: 'automatic', // Default == 'automatic' || options == 'automatic' | Any string | false
 
-        // If quiCKIE should repeatedly check for new download elements, which works as a simple approach to handling pagination (Only use this on pages that actually contain pagination)
-        // Example: trackerURL.match(/pageURLRegex/) ? trackerHandlingOptions.enablePaginationLooping = true : null
-        enablePaginationLooping: false, // Default == false || Options == true|false
+        // If quiCKIE should repeatedly check for new download elements, which works as a simple approach for handling pagination
+        // Only use this on pages that actually contain pagination, which can be filtered by using an if check against the URL: trackerURL.match(/pageURLRegex/) ? trackerHandlingOptions.enablePaginationLooping = true : null
+        enablePaginationLooping: false, // Default == false || Options == true | false
 
-        // The css style properties that will be applied to this bunnyButton
-        bunnyButtonAddStyles: '', // Default == '' || Options = Additional style properties to apply to the bunnyButtons (Useful when you want to style the bunnyButtons to better fit the page)
+        // Additional CSS style properties that will be applied to each bunnyButton, useful for advanced styling
+        bunnyButtonAddStyles: '', // Default == '' || Options = A string containing css style properties
 
-        // Additional classes that will be added to each bunnyButton (Useful for advanced styling)
-        bunnyButtonAddClasses: [], // Default == [] || Options = An array of class names, each of which will be added to the bunnyButtons
+        // Additional class names that will be applied to each bunnyButton, useful for advanced styling
+        bunnyButtonAddClasses: [], // Default == [] || Options = An array of strings 
 
-        // The attribute name that contains the torrentURL
-        torrentURLAttribute: 'href', // Default == 'href' || Options == Any string corresponding to a attribute name of the download element
+        // The name of the downloadElement attribute that contains the torrentURL
+        downloadElementsTorrentURLAttribute: 'href', // Default == 'href' || Options == A string matching a attribute name of the download element
 
-        // If quiCKIE should ALWAYS download the .torrent file through the browser before sending it to the torrent client (Useful if the torrentURL authentication doesn't actually work)
+        // If quiCKIE should mark already processed downloadElements, useful when dealing with advanced pagination
+        downloadElementsTrackProcessed: false, // Default == false || Options == true | false
+
+        // If quiCKIE should ALWAYS download the .torrent file through the browser before sending it to the torrent client, useful if the torrentURL authentication doesn't actually work
         // Magnet links are ALWAYS sent directly to the torrent client, as they are not proper http links that can be downloaded through the browser
-        forceTorrentFile: false, // Default == false || Options == true|false
+        forceTorrentFile: false, // Default == false || Options == true | false
 
-        // If quiCKIE should mark already processed downloadElements (Only useful when dealing with advanced pagination)
-        trackProcessedDownloadElements: false, // Default == false || Options == true|false
-
-        // If quiCKIE should attach the right-click PresetsMenu to the new bunnyButtons
-        callAttachPresetsMenu: true, // Default == true || Options == true|false
+        // If quiCKIE should attach the right-click presetsMenu to the new bunnyButtons, useful for advanced presetsMenu manipulation
+        bunnyButtonAttachPresetsMenu: true, // Default == true || Options == true | false
 
     }
 
@@ -469,23 +469,21 @@ if ( trackerDomain == 'animebytes' ) {
         bunnyButtonFontSize: '130%',
     }
 
-    // This is a collage page, so place the bunnyButton on the parentElement
+    // This is a collage page, so place the bunnyButton alongside the parentElement
     trackerURL.match(/\/collage\/\d+/) ? trackerHandlingOptions.bunnyButtonParentPlacement = true : null
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
     if ( trackerURL.match(/torrents\.php\?id=\d+/) ) {
         // This is a details page, so apply styling to certain bunnyButtons
 
-        waitForElement('span.torrent_buttons a.quickie_bunnyButton').then((ready) => {
-            // Once the bunnyButtons have been generated, apply button specific bar-type styling 
+        waitForElement('#user-sidebar > a.quickie_bunnyButton').then((ready) => {
+            // The actions to take after the bunnyButtons have been generated...
 
-            for ( let bunnyButton of document.querySelectorAll('span.torrent_buttons a.quickie_bunnyButton') ) {
-
-                bunnyButton.textContent = '🐰 quiCKIE'
+            for ( let bunnyButton of document.querySelectorAll('span.torrent_buttons a.quickie_bunnyButton, #user-sidebar > a.quickie_bunnyButton') ) {
 
                 bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}
                     border-radius: 5px;
-                    border: #CBE9FF solid 1px;
-                    color: #CBE9FF;
                     font-size: 100%;
                     font-weight: Bold;
                     margin: 0px 8px 0px 0px;
@@ -493,22 +491,24 @@ if ( trackerDomain == 'animebytes' ) {
                     vertical-align: middle;`)
 
                 if ( bunnyButton.dataset.torrenturl.match(/&usetoken=1/) ) {
-                    // This is the Freeleech button
-                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}color: #A0DA83; border: #A0DA83 solid 1px;`)
+                    // This is a Freeleech button
                     bunnyButton.textContent = '🐰 Freeleech'
+                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #A0DA83 solid 1px; color: #A0DA83;`)
 
                 } else if ( bunnyButton.dataset.torrenturl.match(/&usetoken=2/) ) {
-                    // This is the Doubleseed button
-                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}color: #F09D63; border: #F09D63 solid 1px;`)
+                    // This is a Doubleseed button
                     bunnyButton.textContent = '🐰 Doubleseed'
+                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #F09D63 solid 1px; color: #F09D63; `)
+                } else {
+                    // This is a regular Download button
+                    bunnyButton.textContent = '🐰 quiCKIE'
+                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #B6D3E7 solid 1px; color: #B6D3E7;`)
                 }
+
             }
 
         })
     }
-
-    quickieTrackerHandler(trackerHandlingOptions)
-
 
 } else if ( trackerDomain == 'exoticaz' ) {
     // ----------------------------------- ExoticaZ -----------------------------------
@@ -644,7 +644,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
-        separator: '||',
+        elementsSeparator: '||',
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
@@ -662,8 +662,8 @@ if ( trackerDomain == 'animebytes' ) {
             bunnyButtonText: '🐰 quiCKIE',
             bunnyButtonAddStyles: `
             border-radius: 5px;
-            border: #CBE9FF solid 1px;
-            color: #CBE9FF;
+            border: #B6D3E7 solid 1px;
+            color: #B6D3E7;
             font-weight: Bold;
             margin: 0px 10px 0px 10px;
             padding: 3px 10px 5px 10px;
@@ -671,14 +671,16 @@ if ( trackerDomain == 'animebytes' ) {
 
         }
 
+        quickieTrackerHandler(trackerHandlingOptions)
+
         waitForElement('#download a.quickie_bunnyButton').then((ready) => {
-            // Once the bunnyButtons have been generated, apply button specific bar-type styling 
+            // The actions to take after the bunnyButtons have been generated...
 
             for ( let bunnyButton of document.querySelectorAll('#download a.quickie_bunnyButton') ) {
 
                 if ( bunnyButton.dataset.torrenturl.match(/tid=\d+&fl/) ) {
                     // This is the Freeleech Wedge button
-                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}color: #DAD983; border: #DAD983 solid 1px;`)
+                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}color: #CBC29E; border: #CBC29E solid 1px;`)
                     bunnyButton.textContent = '🐰 Wedge'
 
                 }
@@ -687,8 +689,6 @@ if ( trackerDomain == 'animebytes' ) {
             }
 
         })
-
-        quickieTrackerHandler(trackerHandlingOptions)
 
     } else {
         // The Search or Homepage, both of which require a MutationObserver
@@ -702,7 +702,7 @@ if ( trackerDomain == 'animebytes' ) {
                     downloadElementsSelector: 'a[href^="/tor/download.php/"][title*="Download"]',
                     bunnyButtonFontSize: '150%',
                     bunnyButtonText: '🐰',
-                    trackProcessedDownloadElements: true,
+                    downloadElementsTrackProcessed: true,
                 }
 
                 quickieTrackerHandler(trackerHandlingOptions)
@@ -711,7 +711,7 @@ if ( trackerDomain == 'animebytes' ) {
                     // Site download buttons are hidden, so change the Wedge button to be distinct from the Download button
 
                     waitForElement('a.quickie_bunnyButton').then((ready) => {
-                        // Once the bunnyButtons have been generated, apply button specific styling 
+                        // The actions to take after the bunnyButtons have been generated...
 
                         for ( let bunnyButton of document.querySelectorAll('a.quickie_bunnyButton') ) {
 
@@ -820,7 +820,7 @@ if ( trackerDomain == 'animebytes' ) {
     } else {
         // This is a collage page, which loads DL buttons after the '+' button of the album is clicked (pagination). Setup nested observation.
 
-        trackerHandlingOptions.trackProcessedDownloadElements = true
+        trackerHandlingOptions.downloadElementsTrackProcessed = true
 
         let pageObserver = new MutationObserver(function(pageMutations) {
             // The actions to take when new PAGES are loaded
@@ -2442,14 +2442,14 @@ function quickieTrackerHandler({
     bunnyButtonFontSize = 'inherit',
     bunnyButtonText = ' 🐰 ' ,
     bunnyButtonParentPlacement = false,
-    separator = 'automatic',
+    elementsSeparator = 'automatic',
     enablePaginationLooping = false,
     bunnyButtonAddStyles = '',
     bunnyButtonAddClasses = [],
-    torrentURLAttribute = 'href',
+    downloadElementsTorrentURLAttribute = 'href',
     forceTorrentFile = false,
-    trackProcessedDownloadElements = false,
-    callAttachPresetsMenu = true,
+    downloadElementsTrackProcessed = false,
+    bunnyButtonAttachPresetsMenu = true,
 }) {
     // Using the provided arguments, generate bunnyButtons for matching elements on this page
 
@@ -2464,7 +2464,7 @@ function quickieTrackerHandler({
     enablePaginationLooping == true ? SETTINGS.paginationLoop = 750 : null
 
     // If there is a paginationLoop timer, mark the processed elements so that bunnyButtons are not repeatedly generated
-    SETTINGS.paginationLoop >= 500 ? trackProcessedDownloadElements = true : null
+    SETTINGS.paginationLoop >= 500 ? downloadElementsTrackProcessed = true : null
 
     function processDownloadElements(delay) {
         // query and create a BunnyButton for all downloadElements
@@ -2478,14 +2478,13 @@ function quickieTrackerHandler({
                     // The query returned results that have not yet been processed, so generate a bunnyButton for each downloadElement
 
                     // The separator used between the DL button and the BunnyButton
-                    separator == true ? separator = 'automatic' : null
-                    separator == 'automatic' ? separator = getPageSeparator(allDownloadElements[0]) : null
+                    elementsSeparator == 'automatic' ? elementsSeparator = getPageSeparator(allDownloadElements[0]) : null
 
                     // Process each downloadElement in the list one at a time, generating a bunnyButton for each and then inserting it after the downloadElement
                     for (let downloadElement of allDownloadElements) {
 
                         // Use the supplied attribute (which should be a torrentURL) to create a bunnyButton for this downloadElement
-                        let bunnyButton = createBunnyButton({ torrentURL: downloadElement[torrentURLAttribute], fontSize: bunnyButtonFontSize, buttonText: bunnyButtonText, torrentSettings: SETTINGS, addButtonStyles: bunnyButtonAddStyles, addButtonClasses: bunnyButtonAddClasses })
+                        let bunnyButton = createBunnyButton({ torrentURL: downloadElement[downloadElementsTorrentURLAttribute], fontSize: bunnyButtonFontSize, buttonText: bunnyButtonText, torrentSettings: SETTINGS, addButtonStyles: bunnyButtonAddStyles, addButtonClasses: bunnyButtonAddClasses })
 
                         let placementElement
                         bunnyButtonParentPlacement == true ? placementElement = downloadElement.parentElement : placementElement = downloadElement
@@ -2493,21 +2492,21 @@ function quickieTrackerHandler({
                         // Insert the bunnyButton after the placementElement
                         placementElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
 
-                        if ( SETTINGS.hideDL == false ) {
-                            // Insert the separator between the placementElement and the bunnyButton
-                            separator == false ? null : placementElement.insertAdjacentText(bunnyButtonPlacement, separator)
-                        } else {
-                            // Hide the DL button and don't insert a separator
+                        if ( SETTINGS.hideDL == true ) {
+                            // Hide the DL button and therefore don't insert a separator
                             downloadElement.style.display = 'none'
+                        } else {
+                            // Insert the separator between the placementElement and the bunnyButton
+                            elementsSeparator == false ? null : placementElement.insertAdjacentText(bunnyButtonPlacement, elementsSeparator)
                         }
 
                         // If enabled, mark this downloadElement as having been processed by assigning it a unique attribute
-                        trackProcessedDownloadElements == true ? downloadElement.setAttribute('data-quickie_processed', 'true') : null
+                        downloadElementsTrackProcessed == true ? downloadElement.setAttribute('data-quickie_processed', 'true') : null
                             
                     }
 
                     // After the bunnyButtons have been generated, call the function that will attach to them the right-click presetsMenu
-                    callAttachPresetsMenu == true ? attachPresetsMenu('a.quickie_newBunnyButton', SETTINGS.trackerDomain) : null
+                    bunnyButtonAttachPresetsMenu == true ? attachPresetsMenu('a.quickie_newBunnyButton', SETTINGS.trackerDomain) : null
 
                 } else {
                     // The query returned no results
@@ -2546,7 +2545,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
     // ! This function used 'Oldtoons' as the model and is not WirlyWirly tested for other sites
 
     // Mutable variables dependent on the current page
-    let trackProcessedDownloadElements = false
+    let downloadElementsTrackProcessed = false
     let bunnyButtonPlacement
     let torrentDetailsPage = false
     let bunnyButtonAddStyles = ''
@@ -2554,12 +2553,12 @@ function unit3dTrackerHandler(downloadElementsSelector) {
     let bunnyButtonText = ' 🐰 '
 
     // If there is a specified paginationLoop, mark the processed elements so that bunnyButtons are not repeatedly generated
-    SETTINGS.paginationLoop >= 500 ? trackProcessedDownloadElements = true : null
+    SETTINGS.paginationLoop >= 500 ? downloadElementsTrackProcessed = true : null
 
     if ( document.location.pathname.match(/(\/|\/torrents[^/]*)$/) && SETTINGS.paginationLoop < 500 ) {
         // This is the homepage or search page, so enable paginationLooping
         SETTINGS.paginationLoop = 750
-        trackProcessedDownloadElements = true
+        downloadElementsTrackProcessed = true
 
     } else if ( trackerURL.match(/\/torrents\/\d+/) ) {
         // The torrents details page, so change the look of the BunnyButton
@@ -2570,8 +2569,8 @@ function unit3dTrackerHandler(downloadElementsSelector) {
         bunnyButtonAddStyles = `
         backdrop-filter: blur(9px);
         border-radius: 999px;
-        border: #CBE9FF solid 1px;
-        color: #CBE9FF;
+        border: #B6D3E7 solid 1px;
+        color: #B6D3E7;
         font-weight: bold;
         padding: 1.5%;
         width: inherit;`
@@ -2611,7 +2610,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                         SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
                     }
 
-                    if ( trackProcessedDownloadElements ) {
+                    if ( downloadElementsTrackProcessed ) {
                         // Keep track of this downloadElement as having been processed my marking it with a unique attribute
                         downloadElement.setAttribute('data-quickie_processed', 'true')
                     }
