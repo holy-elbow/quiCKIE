@@ -2508,7 +2508,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                         // Place alongside the parentElement so that the bunnyButton appears on the same row
                         downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
                         
-                        // Hide the <li> parentElement so that there's not a large gap
+                        // Hide the <li> parentElement so that there's not a large gap in the button row
                         SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
 
                     } else {
