@@ -303,44 +303,43 @@ if ( trackerDomain == 'animebytes' ) {
         // ---------- OPTIONAL ----------
 
         // The font-size of each bunnyButton, useful for re-sizing them to better fit the page
-        bunnyButtonfontSize: 'inherit', // Default == 'inherit' || Options == Any percentile | A valid 'font-size' css value
+        bunnyButtonfontSize: 'inherit', // Default = 'inherit' || Options = Any percentile | A valid 'font-size' css value
 
         // The text that will be displayed by each bunnyButton, useful for advanced styling or to remove the surrounding spaces to better fit the page; '🐰'
-        bunnyButtonText: ' 🐰 ', // Default == ' 🐰 ' || Options == Any string 
+        bunnyButtonText: ' 🐰 ', // Default = ' 🐰 ' || Options = Any string 
 
         // If the bunnyButton should be placed after the downloadElement.parentElement, which may result in the bunnyButton being on the same row as the downloadElement
-        bunnyButtonParentPlacement: false, // Default == false || Options == true | false
+        bunnyButtonParentPlacement: false, // Default = false || Options = true | false
 
         // The separator used between the bunnyButton and the downloadElement
-        elementsSeparator: 'automatic', // Default == 'automatic' || options == 'automatic' | Any string | false
+        elementsSeparator: 'automatic', // Default = 'automatic' || options = 'automatic' | Any string | false
 
         // If quiCKIE should repeatedly check for new download elements, which works as a simple approach for handling pagination
         // Only use this on pages that actually contain pagination, which can be filtered by using an if check against the URL: trackerURL.match(/pageURLRegex/) ? trackerHandlingOptions.enablePaginationLooping = true : null
-        enablePaginationLooping: false, // Default == false || Options == true | false
+        enablePaginationLooping: false, // Default = false || Options = true | false
 
         // Additional CSS style properties that will be applied to each bunnyButton, useful for advanced styling
-        bunnyButtonAddStyles: '', // Default == '' || Options = A string containing css style properties
+        bunnyButtonAddStyles: '', // Default = '' || Options = A string containing css style properties
 
         // Additional class names that will be applied to each bunnyButton, useful for advanced styling
-        bunnyButtonAddClasses: [], // Default == [] || Options = An array of strings 
+        bunnyButtonAddClasses: [], // Default = [] || Options = An array of strings 
 
         // The name of the downloadElement attribute that contains the torrentURL
-        downloadElementsTorrentURLAttribute: 'href', // Default == 'href' || Options == A string matching a attribute name of the download element
+        downloadElementsTorrentURLAttribute: 'href', // Default = 'href' || Options = A string matching a attribute name of the download element
 
         // If quiCKIE should mark already processed downloadElements, useful when dealing with advanced pagination
-        downloadElementsTrackProcessed: false, // Default == false || Options == true | false
+        downloadElementsTrackProcessed: false, // Default = false || Options = true | false
 
         // If quiCKIE should ALWAYS download the .torrent file through the browser before sending it to the torrent client, useful if the torrentURL authentication doesn't actually work
         // Magnet links are ALWAYS sent directly to the torrent client, as they are not proper http links that can be downloaded through the browser
-        forceTorrentFile: false, // Default == false || Options == true | false
+        forceTorrentFile: false, // Default = false || Options = true | false
 
         // If quiCKIE should attach the right-click presetsMenu to the new bunnyButtons, useful for advanced presetsMenu manipulation
-        bunnyButtonAttachPresetsMenu: true, // Default == true || Options == true | false
+        bunnyButtonAttachPresetsMenu: true, // Default = true || Options = true | false
 
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
-
 
 } else if ( trackerDomain == 'alpharatio' ) {
     // ----------------------------------- AlphaRatio -----------------------------------
@@ -480,7 +479,8 @@ if ( trackerDomain == 'animebytes' ) {
         waitForElement('#user-sidebar > a.quickie_bunnyButton').then((ready) => {
             // The actions to take after the bunnyButtons have been generated...
 
-            for ( let bunnyButton of document.querySelectorAll('span.torrent_buttons a.quickie_bunnyButton, #user-sidebar > a.quickie_bunnyButton') ) {
+            for ( let bunnyButton of document.querySelectorAll('#user-sidebar > a.quickie_bunnyButton, span.torrent_buttons a.quickie_bunnyButton') ) {
+                // Style these bunnyButtons to have a bar-type look, so that they match the larger site buttons
 
                 bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}
                     border-radius: 5px;
@@ -500,7 +500,7 @@ if ( trackerDomain == 'animebytes' ) {
                     bunnyButton.textContent = '🐰 Doubleseed'
                     bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #F09D63 solid 1px; color: #F09D63; `)
                 } else {
-                    // This is a regular Download button
+                    // This is a standard Download button
                     bunnyButton.textContent = '🐰 quiCKIE'
                     bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #B6D3E7 solid 1px; color: #B6D3E7;`)
                 }
