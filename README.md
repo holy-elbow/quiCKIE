@@ -2,11 +2,11 @@
 
 ![](https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/preview.webp?raw=true)
 
-This [UserScript](https://openuserjs.org/about/Userscript-Beginners-HOWTO) will generate **BunnyButtons 🐰** alongside a sites regular download buttons. When clicked, the corresponding torrent will be sent to your torrent client using your custom settings. This integration into the page itself allows for compatibility on both desktop and mobile devices
+This [UserScript](https://openuserjs.org/about/Userscript-Beginners-HOWTO) will generate **BunnyButtons 🐰** alongside a sites regular download buttons. When clicked, the corresponding torrent will be sent to your torrent client using your custom settings. Integrating BunnyButtons into the page itself allows for support on both desktop and mobile devices. In addition, this integration has been done in a non-destructive manner, ensuring quiCKIE is friendly\compatible with other UserScripts and default browser functions.
 
 quiCKIE currently supports ***[qui](https://getqui.com/)***, ***[qBitTorrent](https://www.qbittorrent.org/)***, ***[Transmission](https://transmissionbt.com/)***, ***[Deluge](https://deluge-torrent.org/)*** and **35+** different trackers. If a tracker you know of is not listed, check the quiCKIE WiKi for a simple 3-step guide on how anyone may easily contribute a new tracker: [Adding a New Tracker](https://github.com/WirlyWirly/quiCKIE/wiki/Adding-a-New-Tracker)
 
-Only the ***clientURL*** and **login credentials*** for the selected torrent client are required, everything else is optional. Hover over the various emojis for more info about what each field does and how it may be filled in.
+Only the ***clientURL*** and ***login credentials*** for the selected torrent client are required, everything else is optional. Hover over the various emojis for more info about what each field does and how it may be filled in.
 
 The quiCKIE settings panel can be accessed by performing a **Shift-Click** on any BunnyButton, or from the menu of your UserScript Manager, which is the dialogue on your toolbar that lists the currently active UserScripts. 
 

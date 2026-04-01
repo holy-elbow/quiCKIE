@@ -679,7 +679,7 @@ if ( trackerDomain == 'animebytes' ) {
             bunnyButtonText: '🐰 quiCKIE',
             bunnyButtonAddStyles: `
             background: #153245;
-            border-radius: 5px;
+            border-radius: 10px;
             border: #B6D3E7 solid 1px;
             color: #B6D3E7;
             font-weight: Bold;
@@ -698,12 +698,12 @@ if ( trackerDomain == 'animebytes' ) {
 
                 if ( bunnyButton.dataset.torrenturl.match(/tid=\d+&fl/) ) {
                     // This is the Freeleech Wedge button
-    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}color: #CBC29E; border: #CBC29E solid 1px; background: #2E2400;`)
                     bunnyButton.textContent = '🐰 Wedge'
+                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}background: #2E2400; border: #CBC29E solid 1px; color: #CBC29E;`)
 
-                }
+                } 
 
-                // Change display to block so buttons are spaced apart
+                // Change bunnyButton display to block so the buttons are spaced apart
                 SETTINGS.hideDL == true ? bunnyButton.style.display = 'block' : null
             }
 
