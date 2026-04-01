@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.23
+// @version     1.30
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -176,6 +176,7 @@
 // @match   https://privatehd.to/torrent*
 // @match   https://privatehd.to/*/bookmark*
 
+// @match   https://redacted.sh/*
 // @match   https://redacted.sh/artist.php?id=*
 // @match   https://redacted.sh/bookmarks.php*
 // @match   https://redacted.sh/collage*.php?id=*
@@ -218,18 +219,18 @@
 
 // @quickieSettingsPanelEntries
 const settingsPanelEntries = {
-    // Each entry below uses the tracker's unique domain (lowercase) as the property, followed by the row label (TitleCase) as the value.
+    // Each line below uses the trackerDomain (lowercase) as the property, followed by the trackerLabel (TitleCase) as the value.
     // Keep the list alphabetical, as these entries will be used to generate a row for each tracker in the settings panel.
     // Example: https://broadcasthe.net/ --> broadcasthe
     // Example: https://www.myanonamouse.net/ --> myanonamouse
 
-    'aither': 'Aither',
+    'aither': 'Aither', // @holy-elbow
     'alpharatio': 'AlphaRatio',
     'animebytes': 'AnimeBytes',
     'anthelion': 'Anthelion', // @malefis
     'avistaz': 'AvistaZ', // @fercats99
     'bakabt': 'BakaBT',
-    'beyond-hd': 'Beyond-HD', // @empDM
+    'beyond-hd': 'Beyond-HD', // @empUser
     'bibliotik': 'Bibliotik',
     'bitporn': 'BitPorn',
     'broadcasthe': 'BroadcasTheNet',
@@ -240,7 +241,7 @@ const settingsPanelEntries = {
     'exoticaz' : 'ExoticaZ', // @fercats99 > @holy-elbow
     'femdomcult': 'Femdomcult', // @holy-elbow
     'gazellegames': 'GazelleGames',
-    'happyfappy': 'HappyFappy', // @empDM
+    'happyfappy': 'HappyFappy', // @empUser
     'hdbits': 'HDBits',
     'iptorrents': 'IP-Torrents',
     'jpopsuki': 'JPopsuki', // @tartuffe
@@ -266,23 +267,20 @@ const settingsPanelEntries = {
 }
 
 
-// =================================== GM_CONIFG ======================================
+// =================================== quiCKIE SETTINGS ======================================
 
-// For the sake of code-cleanliness, everything related to the settings panel, GM_config.init(), has been done in this function and moved further down this file
-let [presetCount, settingsLabelToDomain] = createGMConfigSettingsPanel()
-
-
-// =================================== TRACKER SETTINGS ======================================
-
-// The domain of the current site, which must match one of the keys in the settingsPanelEntries object
+// The domain of the current site, which must match one of the keys in the settingsPanelEntries object above
 // Example: https://broadcasthe.net/ --> broadcasthe
-let trackerDomain = document.location.hostname.match(/^(\w+\.)?(.+?)(\.\w+)$/)[2].toLowerCase()
+const trackerDomain = document.location.hostname.match(/^(\w+\.)?(.+?)(\.\w+)$/)[2].toLowerCase()
 
-// The global\tracker settings and the relevant presetMenuItems for the current site
+// Everything related to creating and presenting the settings panel using the GM_config library: https://github.com/sizzlemctwizzle/GM_config
+let [presetCount, trackerLabelToDomain] = createGMConfigSettingsPanel()
+
+// Retrieve the settings and presetMenuItems that apply to the current tracker
 let [SETTINGS, presetMenuItems] = getTrackerSettings(trackerDomain)
 
-// The current URL, useful for figuring out what page you are on using trackerURL.match(/regex/)
-let trackerURL = document.URL
+// The URL of the current page, useful for figuring out exactly what page you are on using pageURL.match(/regex/)
+const pageURL = document.URL
 
 
 // =================================== TRACKER SPECIFIC HANDLING ======================================
@@ -314,15 +312,20 @@ if ( trackerDomain == 'animebytes' ) {
         // The separator used between the bunnyButton and the downloadElement
         elementsSeparator: 'automatic', // Default = 'automatic' || options = 'automatic' | Any string | false
 
-        // If quiCKIE should repeatedly check for new download elements, which works as a simple approach for handling pagination
-        // Only use this on pages that actually contain pagination, which can be filtered by using an if check against the URL: trackerURL.match(/pageURLRegex/) ? trackerHandlingOptions.enablePaginationLooping = true : null
-        enablePaginationLooping: false, // Default = false || Options = true | false
-
         // Additional CSS style properties that will be applied to each bunnyButton, useful for advanced styling
         bunnyButtonAddStyles: '', // Default = '' || Options = A string containing css style properties
 
         // Additional class names that will be applied to each bunnyButton, useful for advanced styling
         bunnyButtonAddClasses: [], // Default = [] || Options = An array of strings 
+
+        // A function that will be called after all the bunnyButtons have been created, useful for advanced styling
+        // The first argument of this function will be an array containing all the newly created bunnyButtons, see the BakaBT\Empornium\MyAnonaMouse blocks for examples
+        // ⚠️ quiCKIE is a NON-DESTRUCTIVE UserScript that does NOT break or destroy the default site elements. This ensures quiCKIE is friendly\compatible with other UserScripts. Always adhere to this principle by only manipulating the bunnyButtons created by quiCKIE itself
+        afterBunnyButtonCreation: false, // Default = false || options = false | function(bunnyButtons) {...}
+
+        // If quiCKIE should repeatedly check for new download elements, which works as a simple approach for handling pagination
+        // Only use this on pages that actually contain pagination, which can be filtered by using an if check against the URL: pageURL.match(/pageURLRegex/) ? trackerHandlingOptions.enablePaginationLooping = true : null
+        enablePaginationLooping: false, // Default = false || Options = true | false
 
         // The name of the downloadElement attribute that contains the torrentURL
         downloadElementsTorrentURLAttribute: 'href', // Default = 'href' || Options = A string matching a attribute name of the download element
@@ -394,19 +397,19 @@ if ( trackerDomain == 'animebytes' ) {
         font-weight: normal;
         margin: 0px 5px 0px 5px;
         padding: 3px 10px 3px 10px;
-        vertical-align: super;
-        `,
+        vertical-align: super; `,
+
+        afterBunnyButtonCreation: function(bunnyButtons) {
+            // The actions to take after the bunnyButtons have been created...
+
+            // Decrease the width of the site DL button so that everything fits onto a single row
+            bunnyButtons[0].parentElement.querySelector(trackerHandlingOptions.downloadElementsSelector).style.width = '430px'
+
+        },
+
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
-
-    waitForElement('a.quickie_bunnyButton').then((bunnyButton) => {
-        // The actions to take after the bunnyButtons have been generated...
-
-        // Decrease the width of the site DL button, so that everything fits onto a single row
-        bunnyButton.parentElement.querySelector(trackerHandlingOptions.downloadElementsSelector).style.width = '430px'
-
-    })
 
 } else if ( trackerDomain == 'beyond-hd' ) {
     // ----------------------------------- Beyond-HD -----------------------------------
@@ -477,46 +480,51 @@ if ( trackerDomain == 'animebytes' ) {
     }
 
     // This is a collage page, so place the bunnyButton alongside the parentElement
-    trackerURL.match(/\/collage\/\d+/) ? trackerHandlingOptions.bunnyButtonParentPlacement = true : null
+    pageURL.match(/\/collage\/\d+/) ? trackerHandlingOptions.bunnyButtonParentPlacement = true : null
 
-    quickieTrackerHandler(trackerHandlingOptions)
+    // This is a details page, so apply styling to certain bunnyButtons
+    if ( pageURL.match(/torrents\.php\?id=\d+/) ) {
 
-    if ( trackerURL.match(/torrents\.php\?id=\d+/) ) {
-        // This is a details page, so apply styling to certain bunnyButtons
+        trackerHandlingOptions.afterBunnyButtonCreation = function(bunnyButtons) {
+            // The actions to take after the bunnyButtons have been created...
 
-        waitForElement('span.torrent_buttons a.quickie_bunnyButton').then((ready) => {
-            // The actions to take after the bunnyButtons have been generated...
+            for ( let bunnyButton of bunnyButtons ) {
 
-            for ( let bunnyButton of document.querySelectorAll('span.torrent_buttons a.quickie_bunnyButton, #user-sidebar > a.quickie_bunnyButton') ) {
-                // Style these bunnyButtons to have a bar-type look, so that they match the larger site buttons
+                // Style the bunnyButtons that match this CSS selector, giving them a bar-type look to more closely match the larger site buttons
+                if ( bunnyButton.matches('span.torrent_buttons a.quickie_bunnyButton, #user-sidebar > a.quickie_bunnyButton') ) {
 
-                bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}
-                    border-radius: 5px;
-                    font-size: 100%;
-                    font-weight: Bold;
-                    margin: 0px 8px 0px 0px;
-                    padding: 4px 10px 4px 10px;
-                    vertical-align: middle;`)
+                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}
+                        border-radius: 5px;
+                        font-size: 100%;
+                        font-weight: Bold;
+                        margin: 0px 8px 0px 0px;
+                        padding: 4px 10px 4px 10px;
+                        vertical-align: middle;`)
 
-                if ( bunnyButton.dataset.torrenturl.match(/&usetoken=1/) ) {
-                    // This is a Freeleech button
-                    bunnyButton.textContent = '🐰 Freeleech'
-                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #A0DA83 solid 1px; color: #A0DA83; background: #113400;`)
+                    if ( bunnyButton.dataset.torrenturl.match(/&usetoken=1/) ) {
+                        // This is a Freeleech button
+                        bunnyButton.textContent = '🪙 Freeleech'
+                        bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #A0DA83 solid 1px; color: #A0DA83; background: #113400;`)
 
-                } else if ( bunnyButton.dataset.torrenturl.match(/&usetoken=2/) ) {
-                    // This is a Doubleseed button
-                    bunnyButton.textContent = '🐰 Doubleseed'
-                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #F09D63 solid 1px; color: #F09D63; background: #431C00`)
-                } else {
-                    // This is a standard Download button
-                    bunnyButton.textContent = '🐰 quiCKIE'
-                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #B6D3E7 solid 1px; color: #B6D3E7; background: #153245;`)
+                    } else if ( bunnyButton.dataset.torrenturl.match(/&usetoken=2/) ) {
+                        // This is a Doubleseed button
+                        bunnyButton.textContent = '🐰 Doubleseed'
+                        bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #F09D63 solid 1px; color: #F09D63; background: #431C00`)
+                    } else {
+                        // This is a standard Download button
+                        bunnyButton.textContent = '🐰 quiCKIE'
+                        bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #B6D3E7 solid 1px; color: #B6D3E7; background: #153245;`)
+                    }
+
                 }
 
             }
 
-        })
+        }
+
     }
+
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'exoticaz' ) {
     // ----------------------------------- ExoticaZ -----------------------------------
@@ -551,7 +559,7 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'happyfappy' ) {
-    // ----------------------------------- HappyHappy -----------------------------------
+    // ----------------------------------- HappyFappy -----------------------------------
     // Browse | Collages | Details | Top10
 
     let trackerHandlingOptions = {
@@ -584,10 +592,10 @@ if ( trackerDomain == 'animebytes' ) {
         bunnyButtonText: '🐰',
     }
 
-    if ( trackerURL.match(/(torrent|details)\.php\?id=\d+/) ) {
+    if ( pageURL.match(/(torrent|details)\.php\?id=\d+/) ) {
         // This is a details page, so apply styling to certain bunnyButtons
 
-        waitForElement('div.info a.quickie_bunnyButton').then((bunnyButton) => {
+        waitForElement('div.info a.quickie_bunnyButton').then(bunnyButton => {
             // Once the bunnyButtons have been generated, apply button specific styling 
 
             bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}
@@ -634,7 +642,7 @@ if ( trackerDomain == 'animebytes' ) {
         bunnyButtonFontSize: "140%",
     }
 
-    trackerURL.match(/top10/) ? trackerHandlingOptions.enablePaginationLooping = true : null
+    pageURL.match(/top10/) ? trackerHandlingOptions.enablePaginationLooping = true : null
 
     quickieTrackerHandler(trackerHandlingOptions)
 
@@ -670,7 +678,7 @@ if ( trackerDomain == 'animebytes' ) {
     // ----------------------------------- MyAnonaMouse -----------------------------------
     // Browse | Details | Homepage
 
-    if ( trackerURL.match(/\/t\/\d+/) ) {
+    if ( pageURL.match(/\/t\/\d+/) ) {
         // The book details page, which doesn't require a MutationObserver
 
         let trackerHandlingOptions = {
@@ -687,60 +695,60 @@ if ( trackerDomain == 'animebytes' ) {
             padding: 3px 10px 5px 10px;
             vertical-align: middle;`,
 
+            afterBunnyButtonCreation: function(bunnyButtons) {
+                // The actions to take after the bunnyButtons have been created...
+
+                for ( let bunnyButton of bunnyButtons ) {
+
+                    // If DL buttons are hidden, change bunnyButton display to block so the buttons are properly spaced apart
+                    SETTINGS.hideDL == true ? bunnyButton.style.display = 'block' : null
+
+                    // This is the Freeleech Wedge button, so apply a different style
+                    if ( bunnyButton.dataset.torrenturl.match(/tid=\d+&fl/) ) {
+                        bunnyButton.textContent = '🧀 quiCKIE'
+                        bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}background: #2E2400; border: #CBC29E solid 1px; color: #CBC29E;`)
+                    } 
+
+                }
+            },
+
         }
 
         quickieTrackerHandler(trackerHandlingOptions)
 
-        waitForElement('#download a.quickie_bunnyButton').then((ready) => {
-            // The actions to take after the bunnyButtons have been generated...
-
-            for ( let bunnyButton of document.querySelectorAll('#download a.quickie_bunnyButton') ) {
-
-                if ( bunnyButton.dataset.torrenturl.match(/tid=\d+&fl/) ) {
-                    // This is the Freeleech Wedge button
-                    bunnyButton.textContent = '🐰 Wedge'
-                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}background: #2E2400; border: #CBC29E solid 1px; color: #CBC29E;`)
-
-                } 
-
-                // Change bunnyButton display to block so the buttons are spaced apart
-                SETTINGS.hideDL == true ? bunnyButton.style.display = 'block' : null
-            }
-
-        })
-
     } else {
         // The Search or Homepage, both of which require a MutationObserver
+
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/tor/download.php/"][title*="Download"]',
+            bunnyButtonFontSize: '150%',
+            bunnyButtonText: '🐰',
+            downloadElementsTrackProcessed: true,
+
+            afterBunnyButtonCreation: function(bunnyButtons) {
+                // The actions to take after the bunnyButtons have been created...
+
+                // Site download buttons are hidden, so change the Wedge button to be distinct from the Download button
+                if ( SETTINGS.hideDL ) {
+
+                    for ( let bunnyButton of bunnyButtons ) {
+                        console.log(bunnyButton)
+                        bunnyButton.dataset.torrenturl.match(/tid=\d+&fl/) ? bunnyButton.textContent = '🧀' : null
+
+                    }
+
+                }
+
+            },
+
+        }
 
         let observer = new MutationObserver(function(mutations) {
             // Functionality to run when changes are detected to the target element
 
             try {
 
-                let trackerHandlingOptions = {
-                    downloadElementsSelector: 'a[href^="/tor/download.php/"][title*="Download"]',
-                    bunnyButtonFontSize: '150%',
-                    bunnyButtonText: '🐰',
-                    downloadElementsTrackProcessed: true,
-                }
-
                 quickieTrackerHandler(trackerHandlingOptions)
-
-                if ( SETTINGS.hideDL ) {
-                    // Site download buttons are hidden, so change the Wedge button to be distinct from the Download button
-
-                    waitForElement('a.quickie_bunnyButton').then((ready) => {
-                        // The actions to take after the bunnyButtons have been generated...
-
-                        for ( let bunnyButton of document.querySelectorAll('a.quickie_bunnyButton') ) {
-
-                            bunnyButton.dataset.torrenturl.match(/tid=\d+&fl/) ? bunnyButton.textContent = '🧀' : null
-
-                        }
-
-                    })
-
-                }
 
             } catch(error) {
                 // console.log(error)
@@ -751,7 +759,7 @@ if ( trackerDomain == 'animebytes' ) {
         })
 
         let target = document.getElementById('ssr') // Search table
-        trackerURL.match(/\/top10Tor\.php/) ? target = document.getElementById('top10') : null // Top 10
+        pageURL.match(/\/top10Tor\.php/) ? target = document.getElementById('top10') : null // Top 10
 
         let config = { childList: true }
         observer.observe(target, config)
@@ -777,7 +785,7 @@ if ( trackerDomain == 'animebytes' ) {
     }
 
     // The Details page
-    trackerURL.match(/view\/\d+/) ? trackerHandlingOptions.bunnyButtonText = ' 🐰 quiCKIE ' : null
+    pageURL.match(/view\/\d+/) ? trackerHandlingOptions.bunnyButtonText = ' 🐰 quiCKIE ' : null
 
     quickieTrackerHandler(trackerHandlingOptions)
 
@@ -831,7 +839,7 @@ if ( trackerDomain == 'animebytes' ) {
         downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
     }
 
-    if ( !trackerURL.match(/collages?\.php\?id=\d+/) ) {
+    if ( !pageURL.match(/collages?\.php\?id=\d+/) ) {
         // This is NOT a collage page, so it doesn't require a MutationObserver
 
         quickieTrackerHandler(trackerHandlingOptions)
@@ -839,15 +847,16 @@ if ( trackerDomain == 'animebytes' ) {
     } else {
         // This is a collage page, which loads DL buttons after the '+' button of the album is clicked (pagination). Setup nested observation.
 
+        trackerHandlingOptions.downloadElementsSelector = `#discog_table tbody ${trackerHandlingOptions.downloadElementsSelector}`
         trackerHandlingOptions.downloadElementsTrackProcessed = true
 
         let pageObserver = new MutationObserver(function(pageMutations) {
             // The actions to take when new PAGES are loaded
 
-            // If DL elements are already present, the user has the account setting 'Torrent group display' toggled to 'Open'
+            // DL elements are already present, meaning the user has the account setting 'Torrent group display' toggled to 'Open'
             document.querySelector(trackerHandlingOptions.downloadElementsSelector) ? quickieTrackerHandler(trackerHandlingOptions) : null
 
-            waitForElement('#discog_table tbody').then((tbodyElement) => {
+            waitForElement('#discog_table tbody', document.getElementById('discog_table')).then(tbodyElement => {
                 // The actions to take after the <tbody> of a new page is loaded...
 
                 try {
@@ -870,7 +879,7 @@ if ( trackerDomain == 'animebytes' ) {
 
         })
 
-        let target = document.querySelector('[data-component="TorrentCollageView"]')
+        let target = document.querySelector('div[data-component="TorrentCollageView"]')
         let config = { childList: true }
 
         pageObserver.observe(target, config)
@@ -906,7 +915,7 @@ if ( trackerDomain == 'animebytes' ) {
         bunnyButtonFontSize: '200%',
     }
 
-    if ( trackerURL.match(/(browse|top)/) ) {
+    if ( pageURL.match(/(browse|top)/) ) {
         // The Browse and Top pages, both of which use pagination
         trackerHandlingOptions.bunnyButtonParentPlacement = true 
         trackerHandlingOptions.enablePaginationLooping = true
@@ -959,12 +968,12 @@ function createGMConfigSettingsPanel() {
 
     // Reverse the settingsPanelEntries object so that the values (labels) become the new keys and the keys (trackerDomains) become the new values
     // This will later allow us to get the trackerDomain when we know the settings label
-    let settingsLabelToDomain = Object.entries(settingsPanelEntries).map (
+    let trackerLabelToDomain = Object.entries(settingsPanelEntries).map (
         ([key, value]) => [value.toLowerCase().trim(), key]
 
     )
 
-    settingsLabelToDomain = Object.fromEntries(settingsLabelToDomain)
+    trackerLabelToDomain = Object.fromEntries(trackerLabelToDomain)
 
     // @trackerFieldGeneration
     // This array will later be used to generate the <th> for each column in the settings panel. Create an entry in
@@ -1625,7 +1634,7 @@ function createGMConfigSettingsPanel() {
                 // Remove the tracker rows that should be hidden
                 for ( let trackerLabel of GM_config.get('hiddenTrackers').split(',') ) {
                     trackerLabel = trackerLabel.toLowerCase().trim()
-                    let trackerDomain = settingsLabelToDomain[trackerLabel]
+                    let trackerDomain = trackerLabelToDomain[trackerLabel]
                     let trackerRow = document.getElementById(`quiCKIE_config_tracker_table_tr_${trackerDomain}`)
                     trackerRow ? trackerRow.remove() : null
                 }
@@ -2178,7 +2187,8 @@ function createGMConfigSettingsPanel() {
         GM_config.open()
     })
 
-    return [presetCount, settingsLabelToDomain]
+
+    return [presetCount, trackerLabelToDomain]
 
 }
 
@@ -2469,6 +2479,7 @@ function quickieTrackerHandler({
     forceTorrentFile = false,
     downloadElementsTrackProcessed = false,
     bunnyButtonAttachPresetsMenu = true,
+    afterBunnyButtonCreation = false,
 }) {
     // Using the provided arguments, generate bunnyButtons for matching elements on this page
 
@@ -2492,6 +2503,8 @@ function quickieTrackerHandler({
             setTimeout(() => {
                 // Using the provided CSS selector, get an array of all the downloadElements that have not yet been processed
                 let allDownloadElements = document.querySelectorAll(`${downloadElementsSelector}:not([data-quickie_processed="true"])`)
+
+                let newlyCreatedBunnyButtons = []
 
                 if ( allDownloadElements.length >= 1 ) {
                     // The query returned results that have not yet been processed, so generate a bunnyButton for each downloadElement
@@ -2522,6 +2535,9 @@ function quickieTrackerHandler({
                         // If enabled, mark this downloadElement as having been processed by assigning it a unique attribute
                         downloadElementsTrackProcessed == true ? downloadElement.setAttribute('data-quickie_processed', 'true') : null
                             
+                        // Include this bunnyButton in the array of newly created bunnyButtons
+                        newlyCreatedBunnyButtons.push(bunnyButton)
+
                     }
 
                     // After the bunnyButtons have been generated, call the function that will attach to them the right-click presetsMenu
@@ -2533,13 +2549,18 @@ function quickieTrackerHandler({
                     if ( SETTINGS.firstTrackerHandlerScan && !['myanonamouse'].includes(trackerDomain) ) {
                         // This being the first scan, alert the user of the possible reasons the query might have failed and how to proceed
 
-                        console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.`)
+                        console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${settingsPanelEntries[trackerDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
                     }
 
 
                 }
 
                 SETTINGS.firstTrackerHandlerScan = false
+
+                if ( newlyCreatedBunnyButtons.length > 0  && typeof afterBunnyButtonCreation === 'function' ) {
+                        // There are newly created bunnyButtons and a function to perform
+                        afterBunnyButtonCreation(newlyCreatedBunnyButtons)
+                }
 
                 if ( SETTINGS.paginationLoop >= 500 ) {
                     // The paginationLoop timer has been set, so quiCKIE will continuosly scan the page for new downloadElements
@@ -2574,12 +2595,15 @@ function unit3dTrackerHandler(downloadElementsSelector) {
     // If there is a specified paginationLoop, mark the processed elements so that bunnyButtons are not repeatedly generated
     SETTINGS.paginationLoop >= 500 ? downloadElementsTrackProcessed = true : null
 
+    let unit3dLooping = false
+
     if ( document.location.pathname.match(/(\/|\/torrents[^/]*)$/) && SETTINGS.paginationLoop < 500 ) {
         // This is the homepage or search page, so enable paginationLooping
+        unit3dLooping = true
         SETTINGS.paginationLoop = 750
         downloadElementsTrackProcessed = true
 
-    } else if ( trackerURL.match(/\/torrents\/\d+/) ) {
+    } else if ( pageURL.match(/\/torrents\/\d+/) ) {
         // The torrents details page, so change the look of the BunnyButton
         torrentDetailsPage = true
 
@@ -2601,6 +2625,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
         // query and create a BunnyButton for all downloadElements
 
         setTimeout(() => {
+
             let allDownloadElements = document.querySelectorAll(`${downloadElementsSelector}:not([data-quickie_processed="true"])`)
 
             if ( allDownloadElements.length >= 1 ) {
@@ -2641,7 +2666,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
             } else {
 
                 if ( SETTINGS.firstTrackerHandlerScan ) {
-                    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.`)
+                    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${settingsPanelEntries[trackerDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
                 }
 
 
@@ -2649,7 +2674,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
             SETTINGS.firstTrackerHandlerScan = false
 
-            if ( SETTINGS.paginationLoop >= 500 ) {
+            if ( SETTINGS.paginationLoop >= 500 || unit3dLooping == true ) {
                 // The tracker handler will continuosly scan the page for new downloadElements
                 processDownloadElements(SETTINGS.paginationLoop)
             }
@@ -2678,6 +2703,9 @@ function createBunnyButton({
     bunnyButton.classList.add('quickie_newBunnyButton')
     bunnyButton.href = 'javascript:undefined'
     bunnyButton.textContent = buttonText
+
+    // Indicate that this torrentURL will also Freeleech a torrent
+    torrentURL.match(/(&usetoken=1|&fl)/) ? bunnyButton.textContent = bunnyButton.textContent.replace(/🐰/g, '🪙') : null
 
     bunnyButton.setAttribute('style', `font-size: ${fontSize}; text-align: center; text-decoration: none; text-shadow: none;${addButtonStyles}`)
 
@@ -3733,7 +3761,7 @@ function scanForThirdPartyTorrentURLS(delay) {
 
                     // [quickie_tracker] : Check if the thirdParty element has specified from which tracker the bunnyButtons should get their settings
                     if ( downloadElement.dataset.quickie_tracker != undefined ) {
-                        let thirdPartyDomain = settingsLabelToDomain[`${downloadElement.dataset.quickie_tracker.toLowerCase()}`]
+                        let thirdPartyDomain = trackerLabelToDomain[`${downloadElement.dataset.quickie_tracker.toLowerCase()}`]
 
                         torrentSettings.trackerDomain = thirdPartyDomain
                         torrentSettings.category = GM_config.get(`${thirdPartyDomain}-category`)
@@ -3814,26 +3842,30 @@ function scanForThirdPartyTorrentURLS(delay) {
 
 // =================================== SOURCED FUNCTIONS ======================================
 
-function waitForElement(selector) {
-    // Wait until the target CSS selector exists and then proceed with the `.then()` function
+function waitForElement(cssTarget, observeTarget = document.body, observeSubTree = true) {
+    // Wait until the cssTarget exists within the observeTarget and then resolve the promise
     // Source: https://stackoverflow.com/a/61511955
 
     return new Promise(resolve => {
-        if (document.querySelector(selector)) {
-            return resolve(document.querySelector(selector));
+
+        if ( observeTarget.querySelector(cssTarget) ) {
+            // The cssTarget already exists within the observeTarget, so immediately resolve the promise
+            return resolve(observeTarget.querySelector(cssTarget))
         }
 
         const observer = new MutationObserver(mutations => {
-            if (document.querySelector(selector)) {
-                observer.disconnect();
-                resolve(document.querySelector(selector));
+            // The actions to take when there are new mutations to the observeTarget
+
+            if ( observeTarget.querySelector(cssTarget) ) {
+                // The cssTarget has been found within the observeTarget
+                observer.disconnect()
+                resolve(observeTarget.querySelector(cssTarget))
             }
-        });
+        })
 
         // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    });
+        observer.observe(observeTarget, { childList: true, subtree: observeSubTree })
+
+    })
+
 }
