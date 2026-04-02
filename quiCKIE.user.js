@@ -626,7 +626,7 @@ if ( trackerDomain == 'animebytes' ) {
         trackerHandlingOptions.afterBunnyButtonCreation = function(elements) {
             // The actions to take after the bunnyButtons have been created...
 
-            let bunnyButton = elements.bunnyButton[0]
+            let bunnyButton = elements.bunnyButtons[0]
 
             bunnyButton.textContent = '🐰 quiCKIE'
             bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}
