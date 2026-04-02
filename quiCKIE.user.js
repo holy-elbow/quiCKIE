@@ -347,6 +347,12 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
+} else if ( trackerDomain == 'aither' ) {
+    // ----------------------------------- Aither -----------------------------------
+    // Bookmarks | Browse | Details | Playlists
+
+    unit3dTrackerHandler('a[href*="/download"]')
+
 } else if ( trackerDomain == 'alpharatio' ) {
     // ----------------------------------- AlphaRatio -----------------------------------
     // Browse | Details | Top 10
@@ -356,12 +362,6 @@ if ( trackerDomain == 'animebytes' ) {
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
-
-} else if ( trackerDomain == 'aither' ) {
-    // ----------------------------------- Aither -----------------------------------
-    // Bookmarks | Browse | Details | Playlists
-
-    unit3dTrackerHandler('a[href*="/download"]')
 
 } else if ( trackerDomain == 'anthelion' ) {
     // ----------------------------------- Anthelion -----------------------------------
@@ -470,8 +470,8 @@ if ( trackerDomain == 'animebytes' ) {
         }
 
     }
-    quickieTrackerHandler(trackerHandlingOptions)
 
+    quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( trackerDomain == 'cinemaz' ) {
     // ----------------------------------- CinemaZ -----------------------------------
@@ -806,15 +806,7 @@ if ( trackerDomain == 'animebytes' ) {
         let observer = new MutationObserver(function(mutations) {
             // Functionality to run when changes are detected to the target element
 
-            try {
-
-                quickieTrackerHandler(trackerHandlingOptions)
-
-            } catch(error) {
-                // console.log(error)
-                return
-
-            }
+            quickieTrackerHandler(trackerHandlingOptions)
 
         })
 
@@ -943,6 +935,7 @@ if ( trackerDomain == 'animebytes' ) {
         let config = { childList: true }
 
         pageObserver.observe(target, config)
+
     }
 
 
@@ -976,7 +969,7 @@ if ( trackerDomain == 'animebytes' ) {
     }
 
     if ( pageURL.match(/(browse|top)/) ) {
-        // The Browse and Top pages, both of which use pagination
+        // The Browse and Top pages, both of which have pagination
         trackerHandlingOptions.bunnyButtonParentPlacement = true 
         trackerHandlingOptions.enablePaginationLooping = true
     }
