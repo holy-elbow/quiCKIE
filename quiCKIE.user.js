@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.31
+// @version     1.32
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -218,14 +218,15 @@
 // This string helps prevent various JavaScript oddities when working with variables
 'use strict'
 
-// =================================== SETTINGS PANEL ENTRIES ======================================
+// =================================== SETTINGS PANEL TRACKERS ======================================
 
-// @quickieSettingsPanelEntries
-const settingsPanelEntries = {
+// @quickieSettingsPanelTrackers
+const settingsPanelTrackers = {
     // Each line below uses the trackerDomain (lowercase) as the property, followed by the trackerLabel (TitleCase) as the value.
-    // Keep the list alphabetical, as these entries will be used to generate a row for each tracker in the settings panel.
+    // Keep this list alphabetical,  a row for each tracker in the settings panel.
     // Example: https://broadcasthe.net/ --> broadcasthe
     // Example: https://www.myanonamouse.net/ --> myanonamouse
+    // Example: https://sukebei.nyaa.si/ --> nyaa
 
     'aither': 'Aither', // @holy-elbow
     'alpharatio': 'AlphaRatio',
@@ -272,14 +273,17 @@ const settingsPanelEntries = {
 
 // =================================== quiCKIE SETTINGS ======================================
 
-// The domain of the current site, which must match one of the keys in the settingsPanelEntries object above
+// The domain of the current site, which MUST match one of the keys in the settingsPanelTrackers object above
 // Example: https://broadcasthe.net/ --> broadcasthe
 const trackerDomain = document.location.hostname.match(/^(\w+\.)?(.+?)(\.\w+)$/)[2].toLowerCase()
 
-// Everything related to creating and presenting the settings panel using the GM_config library: https://github.com/sizzlemctwizzle/GM_config
+// Verify that the trackerDomain is registered as an entry in the settingsPanelTrackers object, if not then abort all further exectuion of this script
+if ( !Object.keys(settingsPanelTrackers).includes(trackerDomain) === true ) { console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe domain of the current site if not registered as a tracker supported by quiCKIE: ${trackerDomain}\n\nAll further quiCKIE code will be aborted as to prevent further errors.\n\nℹ️ If you are seeing this message while adding a new tracker, verify that you are using the correct trackerDomain in the settingsPanelTrackers object from Step #2 of the 'Adding a New Tracker' guide`); throw new Error('Aborting further quiCKIE execution') }
+
+// Everything related to the GM_config library, which is used for creating and presenting the settings panel: https://github.com/sizzlemctwizzle/GM_config
 let [presetCount, trackerLabelToDomain] = createGMConfigSettingsPanel()
 
-// Retrieve the settings and presetMenuItems that apply to the current tracker
+// Retrieve the settings and presetMenuItems that are relevant to the current tracker
 let [SETTINGS, presetMenuItems] = getTrackerSettings(trackerDomain)
 
 // The URL of the current page, useful for figuring out exactly what page you are on using pageURL.match(/regex/)
@@ -390,17 +394,16 @@ if ( trackerDomain == 'animebytes' ) {
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a.download_link[href^="/download/"]',
-        bunnyButtonFontSize: '150%',
-        bunnyButtonText: '🐰',
+        bunnyButtonFontSize: '140%',
+        bunnyButtonText: '🐰 quiCKIE',
         bunnyButtonAddStyles: `
-            background: #B6D3E7;
+            background: #153245;
             border-radius: 4px;
-            border: #153245 solid 2px;
+            border: #B6D3E7 solid 2px;
             color: #B6D3E7;
             display: inline;
             font-weight: normal;
             margin: 0px 5px 0px 5px;
-            font-size: 150%;
             padding: 3px 4px 4px 4px;
             vertical-align: super;`,
 
@@ -408,7 +411,7 @@ if ( trackerDomain == 'animebytes' ) {
             // The actions to take after the bunnyButtons have been created...
 
             // Decrease the width of the site DL button so that everything fits onto a single row
-            elements.downloadElements[0].style.width = '430px'
+            elements.downloadElements[0].style.width = '395px'
 
         },
 
@@ -630,14 +633,14 @@ if ( trackerDomain == 'animebytes' ) {
 
         trackerHandlingOptions.bunnyButtonText = '🐰 quiCKIE'
         trackerHandlingOptions.bunnyButtonAddStyles = `
-        background: #153245;
-        border-radius: 3px;
-        border: #B6D3E7 solid 1px;
-        color: #B6D3E7;
-        font-size: 90%;
-        margin: 0px 2px 0px 8px;
-        padding: 2px 7px 2px 7px;
-        vertical-align: unset;`
+            background: #153245;
+            border-radius: 3px;
+            border: #B6D3E7 solid 1px;
+            color: #B6D3E7;
+            font-size: 90%;
+            margin: 0px 2px 0px 8px;
+            padding: 2px 5px 2px 5px;
+            vertical-align: unset;`
 
     }
 
@@ -836,8 +839,19 @@ if ( trackerDomain == 'animebytes' ) {
         downloadElementsSelector: 'a[href^="magnet:?xt\=urn:btih:"]',
     }
 
-    // The Details page
-    pageURL.match(/view\/\d+/) ? trackerHandlingOptions.bunnyButtonText = ' 🐰 quiCKIE ' : null
+    // The Details page, so apply styling to the single bunnyButton
+    if ( pageURL.match(/view\/\d+/) ) {
+        trackerHandlingOptions.bunnyButtonText = '🐰 quiCKIE'
+        trackerHandlingOptions.bunnyButtonAddStyles = `
+            background: #153245;
+            border-radius: 3px;
+            border: #B6D3E7 solid 1px;
+            color: #B6D3E7;
+            font-size: 90%;
+            margin: 0px 2px 0px 8px;
+            padding: 2px 5px 2px 5px;
+            vertical-align: top;`
+    }
 
     quickieTrackerHandler(trackerHandlingOptions)
 
@@ -986,6 +1000,13 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
+} else {
+    // ----------------------------------- NONE -----------------------------------
+
+    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThere was no definied trackerHandler block for processing the current trackerDomain: ${trackerDomain}\n\nAll further quiCKIE code will be aborted as to prevent further errors.\n\nℹ️ If you are seeing this message while adding a new tracker, verify that you are using the correct trackerDomain in the 'else if' chain from step #3 of the 'Adding a New Tracker' guide`)
+
+    throw new Error('Aborting further quiCKIE execution')
+
 }
 
 
@@ -1019,9 +1040,9 @@ function createGMConfigSettingsPanel() {
         presetCount = 3
     }
 
-    // Reverse the settingsPanelEntries object so that the values (labels) become the new keys and the keys (trackerDomains) become the new values
+    // Reverse the settingsPanelTrackers object so that the values (labels) become the new keys and the keys (trackerDomains) become the new values
     // This will later allow us to get the trackerDomain when we know the settings label
-    let trackerLabelToDomain = Object.entries(settingsPanelEntries).map (
+    let trackerLabelToDomain = Object.entries(settingsPanelTrackers).map (
         ([key, value]) => [value.toLowerCase().trim(), key]
 
     )
@@ -1032,15 +1053,15 @@ function createGMConfigSettingsPanel() {
     // This array will later be used to generate the <th> for each column in the settings panel. Create an entry in
     const trackerFieldSuffixes = ['category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'dlLimit', 'upLimit', 'instance', 'paginationLoop', 'leftClick', 'thirdPartyScan', 'hideDL', 'startPaused', 'subFolder', 'seqPieces', 'autoTMM', 'skipHash']
     let gmConfigTrackerFields = {}
-    let trackerDomains = Object.keys(settingsPanelEntries)
+    let trackerDomains = Object.keys(settingsPanelTrackers)
     for ( let trackerDomain of trackerDomains ) {
-        // For each trackerDomain (property) of the settingsPanelEntries object, generate the fields that will be used by GM_config() to save\load settings.
+        // For each trackerDomain (property) of the settingsPanelTrackers object, generate the fields that will be used by GM_config() to save\load settings.
         // Each tracker MUST have the fields displayed in the settings panel; Category (+ row label), SavePath, Tags, RatioLimit, Paused, Piece
 
         // --- GM_config() Fields ---
         let generatedTrackerFields = {
             [`${trackerDomain}-${trackerFieldSuffixes[0]}`]: {
-                'label': settingsPanelEntries[trackerDomain],
+                'label': settingsPanelTrackers[trackerDomain],
                 'type': 'text'
             },
             [`${trackerDomain}-${trackerFieldSuffixes[1]}`]: {
@@ -1283,7 +1304,7 @@ function createGMConfigSettingsPanel() {
     for ( let matchURL of GM_info.script.matches ) {
 
         let homepageURL = matchURL.match(/^(https?:\/\/.+?\/)/)[1]
-        let uniqueDomain = homepageURL.match(/^https?:\/\/(\w+\.)?(.*?)\..+\/$/)[2].toLowerCase()
+        let uniqueDomain = homepageURL.match(/^https?:\/\/(\w+\.)?(.+?)\..+\/$/)[2].toLowerCase()
 
 
         trackerHomepages = {...trackerHomepages, ...{ [`${uniqueDomain}`]: homepageURL } }
@@ -1504,7 +1525,7 @@ function createGMConfigSettingsPanel() {
                 // Append the headers to the <thead> (tableHeader) element
                 thead.appendChild(headersRow)
 
-                let uniqueDomains = Object.keys(settingsPanelEntries)
+                let uniqueDomains = Object.keys(settingsPanelTrackers)
                 for (let uniqueDomainKey of uniqueDomains) {
                     // For each tracker, create 1 <tr> (tablerow). For each <tr>, create 1 <td> (tabledata) to contain the tracker's hyperlink. Create the <a> hyperlink then move the tracker's label into that <a> element.
 
@@ -1653,7 +1674,7 @@ function createGMConfigSettingsPanel() {
                     }
 
                     // Create the list of selectable items that appears when typing to the presetTrackers field
-                    let trackerTitles = Object.entries(settingsPanelEntries).map (
+                    let trackerTitles = Object.entries(settingsPanelTrackers).map (
                         ([key, value]) => [value]
 
                     )
@@ -2341,7 +2362,7 @@ function createPresetItems(trackerDomains) {
             }
 
             // Check if the list of trackers in the presetTrackers field contains a match against the settings panel label of this tracker
-            let settingsPanelLabel = settingsPanelEntries[`${trackerDomain}`].toLowerCase()
+            let settingsPanelLabel = settingsPanelTrackers[`${trackerDomain}`].toLowerCase()
             if ( !presetTrackersList.match(/\*/) && !presetTrackersList.match(settingsPanelLabel) ) {
                 // Neither a wildcard nor a matching tracker label, so don't add this item to the presets-menu
                 continue
@@ -2611,7 +2632,7 @@ function quickieTrackerHandler({
                     if ( SETTINGS.firstTrackerHandlerScan && !['myanonamouse'].includes(trackerDomain) ) {
                         // This being the first scan, alert the user of the possible reasons the query might have failed and how to proceed
 
-                        console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${settingsPanelEntries[trackerDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
+                        console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelTrackers[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${settingsPanelTrackers[trackerDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
                     }
 
                 }
@@ -2699,21 +2720,25 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                     let bunnyButton = createBunnyButton({ torrentURL: downloadElement.href, buttonText: bunnyButtonText, torrentSettings: SETTINGS, addButtonStyles: bunnyButtonAddStyles, addButtonClasses: bunnyButtonAddClasses })
 
                     if ( torrentDetailsPage == true ) {
-                        // Place alongside the parentElement so that the bunnyButton appears on the same row
-                        downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
-                        
-                        // Hide the <li> parentElement so that there's not a large gap in the button row
-                        SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
+
+                        if ( SETTINGS.hideDL == false ) {
+                            // Place alongside the parentElement so that the bunnyButton appears on the same row as the downloadElement
+                            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
+                        } else {
+                            // The downloadElement will be hidden, so the bunnyButton can be placed directly alongside it
+                            downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
+                        }
 
                     } else {
+
                         downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
 
                         // If the bunnyButton is After the downloadElement, increase the padding to better fit the page
                         SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButton.style.paddingLeft = '10px' : null
-                        
-                        // Hide the DL button if enabled
-                        SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
                     }
+
+                    // Hide the downloadElement, as specified by the current tracker settings 
+                    SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
 
                     if ( downloadElementsTrackProcessed ) {
                         // Keep track of this downloadElement as having been processed my marking it with a unique attribute
@@ -2727,7 +2752,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
             } else {
 
                 if ( SETTINGS.firstTrackerHandlerScan ) {
-                    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelEntries[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${settingsPanelEntries[trackerDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
+                    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelTrackers[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${settingsPanelTrackers[trackerDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
                 }
 
 
@@ -2774,7 +2799,7 @@ function createBunnyButton({
 
     addButtonClasses.length > 0 ? addButtonClasses.forEach(classItem => bunnyButton.classList.add(classItem) ) : null
 
-    bunnyButton.title = ` ─── 🌎 ${settingsPanelEntries[`${torrentSettings.trackerDomain}`]} 🌎 ───
+    bunnyButton.title = ` ─── 🌎 ${settingsPanelTrackers[`${torrentSettings.trackerDomain}`]} 🌎 ───
  🗃️ = ${torrentSettings.category}
  💾 = ${torrentSettings.savePath}
  🏷️ = ${torrentSettings.tags}
@@ -3815,7 +3840,7 @@ function scanForThirdPartyTorrentURLS(delay) {
 
                     if ( SETTINGS.firstThirdPartyScan ) {
                         // This being the first scan, update the presetMenuItems object so that it includes properties for ALL trackers
-                        presetMenuItems = createPresetItems(Object.keys(settingsPanelEntries))
+                        presetMenuItems = createPresetItems(Object.keys(settingsPanelTrackers))
                         SETTINGS.firstThirdPartyScan = false
 
                     }
