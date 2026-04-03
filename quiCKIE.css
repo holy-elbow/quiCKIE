@@ -370,7 +370,7 @@ td.quiCKIE_config_table_tbody_td_field input[type="checkbox"] {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     height: 95px;
-    margin: -10px auto 10px auto;
+    margin: -10px auto 15px auto;
     padding: 10px 0px 10px 0px;
     row-gap: 10px;
     text-align: center;
@@ -438,6 +438,27 @@ td.quiCKIE_config_table_tbody_td_field input[type="checkbox"] {
     box-shadow: 0 0 6px 3px rgba(0, 124, 255, 0.60);
 }
 
+#quiCKIE_config_field_settingsExport,
+#quiCKIE_config_field_settingsImport {
+    background: none;
+    background-color: #2C3E50;
+    border-radius: 5px;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    /* grid-column: 2; */
+    /* grid-row: 1; */
+    padding-bottom: 6px !important;
+    padding-top: 6px !important;
+    padding: 15px 20px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    will-change: background-color, transform;
+
+}
+
 #quiCKIE_config_closeBtn {
     background: none;
     background-color: #2C3E50;
@@ -457,11 +478,15 @@ td.quiCKIE_config_table_tbody_td_field input[type="checkbox"] {
     will-change: background-color, transform;
 }
 
+#quiCKIE_config_field_settingsImport:hover,
+#quiCKIE_config_field_settingsExport:hover,
 #quiCKIE_config_closeBtn:hover {
     background-color: #34495E;
     transform: translateY(-2px);
 }
 
+#quiCKIE_config_field_settingsImport:active,
+#quiCKIE_config_field_settingsExport:active,
 #quiCKIE_config_closeBtn:active {
     background-color: #2C3E50;
     transform: translateY(1px);

@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.32
+// @version     1.33
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -1386,6 +1386,66 @@ function createGMConfigSettingsPanel() {
                 'options': ['qui', 'qBitTorrent', 'Transmission', 'Deluge', 'ruTorrent 🛠️'],
                 'default': 'qui',
             },
+            'settingsImport' : {
+                'label': 'Import Settings',
+                'type': 'button',
+                'size': 25,
+                'click': function() {
+                    // Prompt the user to select a file for which to import GM_config settings
+                    
+                    let inputElement = document.createElement('input');
+                    inputElement.type = 'file';
+
+                    inputElement.onchange = (event) => { 
+
+                        // Getting a hold of the file reference
+                        let file = event.target.files[0]
+
+                        // Setting up the reader
+                        let reader = new FileReader()
+                        reader.readAsText(file,'UTF-8')
+
+                        // Here we tell the reader what to do when it's done reading...
+                        reader.onload = (readerEvent) => {
+
+                            let textContent = readerEvent.target.result // this is the content!
+
+                            try {
+
+                                // Parse the content of the selected file, making sure it is valid JSON
+                                let quickieSettings = JSON.stringify(JSON.parse(textContent))
+
+                                GM_setValue('quiCKIE_config', quickieSettings)
+
+                                window.location.reload()
+
+                            } catch {
+                                // The JSON parse has failed, so abort the import
+                                window.alert(`quiCKIE\n\nThe imported settings file was not valid JSON\n\nThe settings were not imported`)
+                            }
+                       }
+
+                    }
+
+                    inputElement.click()
+
+                },
+            },
+            'settingsExport' : {
+                'label': 'Export Settings',
+                'type': 'button',
+                'size': 25,
+                'click': function() {
+                    // Export GM_Config settings to a file
+
+                    // Pretty-print the settings string to make it easier to read
+                    let jsonString = JSON.stringify(JSON.parse(GM_getValue('quiCKIE_config')), null, 4)
+
+                    // Save the quiCKIE settings to a local file
+                    saveToFile(jsonString, `quiCKIE-${new Date().toISOString().split('T')[0]}.json`)
+
+                },
+            },
 
 
             // ----- qui -----
@@ -2208,6 +2268,20 @@ function createGMConfigSettingsPanel() {
 
                 doc.getElementById('quiCKIE_config_buttons_holder').appendChild(versionElement)
 
+                // Adjust the Import\Export buttons
+                let exportButton = document.getElementById('quiCKIE_config_field_settingsExport')
+                exportButton.classList.add('saveclose_buttons')
+
+                let importButton = document.getElementById('quiCKIE_config_field_settingsImport')
+                importButton.classList.add('saveclose_buttons')
+
+                let buttonsHolderElement = document.getElementById('quiCKIE_config_buttons_holder')
+                buttonsHolderElement.appendChild(importButton)
+                buttonsHolderElement.appendChild(exportButton)
+                
+                document.getElementById('quiCKIE_config_settingsImport_var').remove()
+                document.getElementById('quiCKIE_config_settingsExport_var').remove()
+                
                 // Add success animation to save button
                 let saveButton = doc.getElementById('quiCKIE_config_saveBtn')
                 saveButton.addEventListener('click', () => {
@@ -3956,7 +4030,7 @@ function scanForThirdPartyTorrentURLS(delay) {
 }
 
 
-// =================================== SOURCED FUNCTIONS ======================================
+// =================================== HELPER FUNCTIONS ======================================
 
 function waitForElement(cssTarget, observeTarget = document.body, observeSubTree = true) {
     // Wait until the cssTarget exists within the observeTarget and then resolve the promise
@@ -3983,5 +4057,61 @@ function waitForElement(cssTarget, observeTarget = document.body, observeSubTree
         observer.observe(observeTarget, { childList: true, subtree: observeSubTree })
 
     })
+
+}
+
+function saveToFile(fileData, filename) {
+    // Save the provided fileData to a local file
+    
+    mimeTypes = {
+        // The different MIME types this function is setup to handl. 
+        // MIME Types: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
+            
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'json': 'application/json;charset=utf-8;',
+        'png': 'image/png',
+        'text': 'text/plain;charset=utf-8;',
+        'torrent': 'application/x-bittorrent',
+
+    }
+
+    let filetype
+
+    try {
+        // Parse the provided filename to determine the filetype
+        filetype = filename.match(/.*\.(\w+)$/)[1]
+
+    } catch {
+        // No file extension was provided, so assume it to be a text type
+        filetype = 'txt'
+
+    }
+
+    let blobType 
+
+    if ( Object.keys(mimeTypes).includes(filetype) ) {
+        // The filetype has a registered mime type
+        blobType = mimeTypes[filetype]
+
+    } else {
+        // The filetype is not registerd, so assume it to be a text type
+        blobType = 'text/plain;charset=utf-8;' 
+    }
+
+    // Create the blob object that will contain the data to be written
+    let blobData = new Blob([fileData], { type: blobType });
+    let fileURL = URL.createObjectURL(blobData);
+
+    // Create the HTML element that will be automatically clicked on to download the file
+    let fileElement = document.createElement("a");
+    fileElement.href = fileURL;
+    fileElement.download = filename;
+
+    document.body.appendChild(fileElement);
+    fileElement.click();
+    document.body.removeChild(fileElement);
+
+    URL.revokeObjectURL(fileURL);
 
 }
