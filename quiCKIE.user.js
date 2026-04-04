@@ -232,7 +232,7 @@ const settingsPanelTrackers = [
     //  https://www.myanonamouse.net/ --> myanonamouse
     //  https://sukebei.nyaa.si/ --> nyaa
 
-    // If the tracker has more than 1 domain that it can be accessed from, you may include an array of domain names. This will make it so that these domains all share the same settings.
+    // If the tracker has more than one domain that it can be accessed from, you may also include the `trackerDomains` property, in which you can provide an array (list) of different domain names. This will make it so that these domains all share the same settings.
     // trackerDomains: ['domain1', 'domain2', 'domain3'],
     
     {
