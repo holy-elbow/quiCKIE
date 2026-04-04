@@ -1286,9 +1286,9 @@ function createGMConfigSettingsPanel(trackerDomain) {
             }
 
         } else {
-            // This tracker has an array of trackerDomains, so check each one for a match
+            // This tracker has an array of trackerDomains, so check if either the primaryDomain or an array item is a match
             
-            if ( allDomains.includes(trackerDomain) ) {
+            if ( settingsId == trackerDomain || allDomains.includes(trackerDomain) ) {
                 primaryDomain = settingsId
                 registeredTracker = true
             }
