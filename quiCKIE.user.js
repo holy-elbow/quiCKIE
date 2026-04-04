@@ -207,7 +207,8 @@
 // @grant   GM_getValue
 // @grant   GM_listValues
 // @grant   GM_registerMenuCommand
-// @grant   GM_setValue
+// @grant   GM:q
+// @setValue
 // @grant   GM_xmlhttpRequest
 
 // ----------------------------------- Script Links --------------------------------------
@@ -318,6 +319,12 @@ const settingsPanelTrackers = [
         homepageURL: 'https://www.empornium.sx',
         primaryDomain: 'empornium', 
     },
+
+    {
+        trackerName: 'E-Hentai',
+        homepageURL: 'https://e-hentai.org',
+        primaryDomain: 'e-hentai',
+        trackerDomains: ['exhentai'],
 
     {
         trackerName: 'ExoticaZ', // @fercats99 > @holy-elbow
@@ -777,6 +784,17 @@ if ( primaryDomain == 'animebytes' ) {
 
         }
 
+    }
+
+    quickieTrackerHandler(trackerHandlingOptions)
+
+} else if ( primaryDomain == 'e-hentai' ) {
+
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="https://ehtracker.org/get/"]',
+    }
+    if ( pageURL.match(/exhentai/) ) {
+        trackerHandlingOptions.downloadElementsSelector = 'a[href^="https://exhentai.org/torrent/"]'
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
