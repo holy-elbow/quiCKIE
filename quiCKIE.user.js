@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.34
+// @version     1.35
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -222,72 +222,273 @@
 // =================================== SETTINGS PANEL TRACKERS ======================================
 
 // @quickieSettingsPanelTrackers
-const settingsPanelTrackers = {
-    // Each line uses the trackerDomain (lowercase) as the property, followed by the trackerLabel (TitleCase) as the value 
+const settingsPanelTrackers = [
     // Keep this list alphabetical, as each tracker here will appear as a row in the quiCKIE settings panel
-
+    
+    // Each tracker requires 3 things; A TitleCase name, the URL of the homepage, and the primaryDomain of the tracker
+    
+    // Identifying the domain of a tracker
     // Example: https://broadcasthe.net/ --> broadcasthe
     // Example: https://www.myanonamouse.net/ --> myanonamouse
     // Example: https://sukebei.nyaa.si/ --> nyaa
 
-    'aither': 'Aither', // @holy-elbow
-    'alpharatio': 'AlphaRatio',
-    'animebytes': 'AnimeBytes',
-    'anthelion': 'Anthelion', // @malefis
-    'avistaz': 'AvistaZ', // @fercats99
-    'bakabt': 'BakaBT',
-    'beyond-hd': 'Beyond-HD', // @empUser
-    'bibliotik': 'Bibliotik',
-    'bitporn': 'BitPorn',
-    'broadcasthe': 'BroadcasTheNet',
-    'cinemaz' : 'CinemaZ', // @fercats99
-    'clearjav': 'ClearJAV', // @holy-elbow
-    'deepbassnine': 'DeepBassNine', // @tartuffe
-    'empornium': 'Empornium',
-    'exoticaz' : 'ExoticaZ', // @fercats99 > @holy-elbow
-    'femdomcult': 'Femdomcult', // @holy-elbow
-    'gazellegames': 'GazelleGames',
-    'happyfappy': 'HappyFappy', // @empUser
-    'hdbits': 'HDBits',
-    'iptorrents': 'IP-Torrents',
-    'jpopsuki': 'JPopsuki', // @tartuffe
-    'karagarga': 'Karagarga', // @fercats99
-    'kufirc': 'Kufirc', // @holy-elbow
-    'lat-team': 'Lat-Team',
-    'luminarr': 'Luminarr', // @holy-elbow
-    'materialize': 'Materialize',
-    'morethantv': 'MoreThanTV', // @holy-elbow
-    'myanonamouse': 'MyAnonaMouse',
-    'nebulance': 'Nebulance', // @malefis
-    'nyaa': 'Nyaa',
-    'oldtoons': 'Oldtoons',
-    'orpheus': 'Orpheus',
-    'passthepopcorn': 'PassThePopcorn',
-    'portugas': 'Portugas', // @Phreaker
-    'privatehd': 'PrivateHD', // @holy-elbow
-    'redacted': 'Redacted',
-    'secret-cinema': 'Secret-Cinema', // @tartuffe
-    'thegeeks': 'TheGeeks',
-    'torrentleech': 'TorrentLeech', // @holy-elbow
-    'tv-vault': 'TV-Vault',
+    // If the tracker has more than 1 domain that it can be accessed from, you may include an array of domain names, that way these domains will all share the same settings
+    // trackerDomains: ['domain1', 'domain2', 'domain3']
+    
+    {
+        trackerName: 'Aither', // @holy-elbow
+        homepageURL: 'https://aither.cc',
+        primaryDomain: 'aither',
+    },
 
-}
+    {
+        trackerName: 'AlphaRatio',
+        homepageURL: 'https://alpharatio.cc',
+        primaryDomain: 'alpharatio', 
+    },
+
+    {
+        trackerName: 'AnimeBytes',
+        homepageURL: '',
+        primaryDomain: 'animebytes', 
+    },
+
+    {
+        trackerName: 'Anthelion', // @malefis
+        homepageURL: 'https://anthelion.me',
+        primaryDomain: 'anthelion',
+    },
+
+    {
+        trackerName: 'AvistaZ', // @fercats99
+        homepageURL: 'https://avistaz.to',
+        primaryDomain: 'avistaz',
+    },
+
+    {
+        trackerName: 'BakaBT',
+        homepageURL: 'https://bakabt.me',
+        primaryDomain: 'bakabt', 
+    },
+
+    {
+        trackerName: 'Beyond-HD', // @empUser
+        homepageURL: 'https://beyond-hd.me',
+        primaryDomain: 'beyond-hd',
+    },
+
+    {
+        trackerName: 'Bibliotik',
+        homepageURL: 'https://bibliotik.me',
+        primaryDomain: 'bibliotik', 
+    },
+
+    {
+        trackerName: 'BitPorn',
+        homepageURL: 'https://bitporn.eu',
+        primaryDomain: 'bitporn', 
+    },
+
+    {
+        trackerName: 'BroadcasTheNet',
+        homepageURL: 'https://broadcasthe.net',
+        primaryDomain: 'broadcasthe', 
+    },
+
+    {
+        trackerName: 'CinemaZ', // @fercats99
+        homepageURL: 'https://cinemaz.to',
+        primaryDomain: 'cinemaz',
+    },
+
+    {
+        trackerName: 'ClearJAV', // @holy-elbow
+        homepageURL: 'https://clearjav.com',
+        primaryDomain: 'clearjav',
+    },
+
+    {
+        trackerName: 'DeepBassNine', // @tartuffe
+        homepageURL: 'https://www.deepbassnine.com',
+        primaryDomain: 'deepbassnine',
+    },
+
+    {
+        trackerName: 'Empornium',
+        homepageURL: 'https://www.empornium.sx',
+        primaryDomain: 'empornium', 
+    },
+
+    {
+        trackerName: 'ExoticaZ', // @fercats99 > @holy-elbow
+        homepageURL: 'https://exoticaz.to',
+        primaryDomain: 'exoticaz',
+    },
+
+    {
+        trackerName: 'Femdomcult', // @holy-elbow
+        homepageURL: 'https://femdomcult.org',
+        primaryDomain: 'femdomcult',
+    },
+
+    {
+        trackerName: 'GazelleGames',
+        homepageURL: 'https://gazellegames.net',
+        primaryDomain: 'gazellegames', 
+    },
+
+    {
+        trackerName: 'HappyFappy', // @empUser
+        homepageURL: 'https://www.happyfappy.org',
+        primaryDomain: 'happyfappy',
+    },
+
+    {
+        trackerName: 'HDBits',
+        homepageURL: 'https://hdbits.org',
+        primaryDomain: 'hdbits', 
+    },
+
+    {
+        trackerName: 'IP-Torrents',
+        homepageURL: 'https://iptorrents.me',
+        primaryDomain: 'iptorrents', 
+    },
+
+    {
+        trackerName: 'JPopsuki', // @tartuffe
+        homepageURL: 'https://jpopsuki.eu',
+        primaryDomain: 'jpopsuki',
+    },
+
+    {
+        trackerName: 'Karagarga', // @fercats99
+        homepageURL: 'https://karagarga.in',
+        primaryDomain: 'karagarga',
+    },
+
+    {
+        trackerName: 'Kufirc', // @holy-elbow
+        homepageURL: 'https://kufirc.com',
+        primaryDomain: 'kufirc',
+    },
+
+    {
+        trackerName: 'Lat-Team',
+        homepageURL: 'https://lat-team.com',
+        primaryDomain: 'lat-team', 
+    },
+
+    {
+        trackerName: 'Luminarr', // @holy-elbow
+        homepageURL: 'https://lumniarr.me',
+        primaryDomain: 'luminarr',
+    },
+
+    {
+        trackerName: 'Materialize',
+        homepageURL: 'https://materialize.is',
+        primaryDomain: 'materialize', 
+    },
+
+    {
+        trackerName: 'MoreThanTV', // @holy-elbow
+        homepageURL: 'https://www.morethantv.me',
+        primaryDomain: 'morethantv',
+    },
+
+    {
+        trackerName: 'MyAnonaMouse',
+        homepageURL: 'https://www.myanonamouse.net',
+        primaryDomain: 'myanonamouse', 
+    },
+
+    {
+        trackerName: 'Nebulance', // @malefis
+        homepageURL: 'https://nebulance.io',
+        primaryDomain: 'nebulance',
+    },
+
+    {
+        trackerName: 'Nyaa',
+        homepageURL: 'https://nyaa.si',
+        primaryDomain: 'nyaa', 
+    },
+
+    {
+        trackerName: 'Oldtoons',
+        homepageURL: 'https://oldtoons.world',
+        primaryDomain: 'oldtoons', 
+    },
+
+    {
+        trackerName: 'Orpheus',
+        homepageURL: 'https://orpheus.network',
+        primaryDomain: 'orpheus', 
+    },
+
+    {
+        trackerName: 'PassThePopcorn',
+        homepageURL: 'https://passthepopcorn.me',
+        primaryDomain: 'passthepopcorn', 
+    },
+
+    {
+        trackerName: 'Portugas', // @Phreaker
+        homepageURL: 'https://portugas.org',
+        primaryDomain: 'portugas',
+    },
+
+    {
+        trackerName: 'PrivateHD', // @holy-elbow
+        homepageURL: 'https://privatehd.to',
+        primaryDomain: 'privatehd',
+    },
+
+    {
+        trackerName: 'Redacted',
+        homepageURL: 'https://redacted.sh',
+        primaryDomain: 'redacted', 
+    },
+
+    {
+        trackerName: 'Secret-Cinema', // @tartuffe
+        homepageURL: 'https://secret-cinema.pw',
+        primaryDomain: 'secret-cinema',
+    },
+
+    {
+        trackerName: 'TheGeeks',
+        homepageURL: 'https://thegeeks.click',
+        primaryDomain: 'thegeeks', 
+    },
+
+    {
+        trackerName: 'TorrentLeech', // @holy-elbow
+        homepageURL: 'https://www.torrentleech.org',
+        primaryDomain: 'torrentleech',
+    },
+
+    {
+        trackerName: 'TV-Vault',
+        homepageURL: 'https://tv-vault.me',
+        primaryDomain: 'tv-vault', 
+    },
+
+]
 
 
 // =================================== quiCKIE SETTINGS ======================================
 
-// The domain of the current site, which MUST match one of the keys in the settingsPanelTrackers object above
+// The domain of the current site, which MUST be registerd to one of the trackers in the settingsPanelTrackers array
 // Example: https://broadcasthe.net/ --> broadcasthe
 const trackerDomain = document.location.hostname.match(/^(\w+\.)?(.+?)(\.\w+)$/)[2].toLowerCase()
 
-// Verify that the trackerDomain is registered as an entry in the settingsPanelTrackers object, if not then abort all further exectuion of this script
-if ( !Object.keys(settingsPanelTrackers).includes(trackerDomain) === true ) { console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe domain of the current site if not registered as a tracker supported by quiCKIE: ${trackerDomain}\n\nAll further quiCKIE code will be aborted as to prevent further errors.\n\nℹ️ If you are seeing this message while adding a new tracker, verify that you are using the correct trackerDomain in the settingsPanelTrackers object from Step #2 of the 'Adding a New Tracker' guide`); throw new Error('Aborting further quiCKIE execution') }
-
 // Everything related to the GM_config library, which is used for creating and presenting the settings panel: https://github.com/sizzlemctwizzle/GM_config
-let [presetCount, trackerLabelToDomain] = createGMConfigSettingsPanel()
+let [ primaryDomain, allPrimaryDomains, primaryDomainToName, primaryDomainToHomepage, trackerNameToPrimaryDomain, presetCount ] = createGMConfigSettingsPanel(trackerDomain)
 
 // Retrieve the settings and presetMenuItems that are relevant to the current tracker
-let [SETTINGS, presetMenuItems] = getTrackerSettings(trackerDomain)
+let [ SETTINGS, presetMenuItems ] = getTrackerSettings(primaryDomain)
 
 // All the emojis that may be displayed on bunnyButtons, defined as a RegExp so that they can be replaced during different stages of the script
 const emojiRegex = new RegExp('🐰|🪙|🕓|🧲|🧑|❌|✔️|🧀', 'g')
@@ -299,8 +500,8 @@ const pageURL = document.URL
 // =================================== TRACKER SPECIFIC HANDLING ======================================
 
 // @trackerSpecificHandling
-// Because the trackerDomain is unique for each site, we can use it to determine what tracker this is and how to proceed from there
-if ( trackerDomain == 'animebytes' ) {
+// Because the primaryDomain is unique for each registerd tracker, we can use it to determine what tracker this is and how to proceed from there
+if ( primaryDomain == 'animebytes' ) {
     // ----------------------------------- AnimeBytes -----------------------------------
     // Bookmarks | Browse | Collages | Company | Series
 
@@ -357,13 +558,13 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'aither' ) {
+} else if ( primaryDomain == 'aither' ) {
     // ----------------------------------- Aither -----------------------------------
     // Bookmarks | Browse | Details | Playlists
 
     unit3dTrackerHandler('a[href*="/download"]')
 
-} else if ( trackerDomain == 'alpharatio' ) {
+} else if ( primaryDomain == 'alpharatio' ) {
     // ----------------------------------- AlphaRatio -----------------------------------
     // Browse | Details | Top 10
 
@@ -373,7 +574,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'anthelion' ) {
+} else if ( primaryDomain == 'anthelion' ) {
     // ----------------------------------- Anthelion -----------------------------------
     // Browse | Collages | Film
 
@@ -384,7 +585,7 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 
-} else if ( trackerDomain == 'avistaz' ) {
+} else if ( primaryDomain == 'avistaz' ) {
     // ----------------------------------- AvistaZ -----------------------------------
     // Details
 
@@ -394,7 +595,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'bakabt' ) {
+} else if ( primaryDomain == 'bakabt' ) {
     // ----------------------------------- BakaBT -----------------------------------
     // Details
 
@@ -425,13 +626,13 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'beyond-hd' ) {
+} else if ( primaryDomain == 'beyond-hd' ) {
     // ----------------------------------- Beyond-HD -----------------------------------
     // Browse | Details | Homepage | Library
 
     unit3dTrackerHandler('a[href^="https://beyond-hd.me/download/"]')
 
-} else if ( trackerDomain == 'bibliotik' ) {
+} else if ( primaryDomain == 'bibliotik' ) {
     // ----------------------------------- Bibliotik -----------------------------------
     // Browse | Details
 
@@ -443,13 +644,13 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'bitporn' ) {
+} else if ( primaryDomain == 'bitporn' ) {
     // ----------------------------------- BitPorn -----------------------------------
     // Browse | Details
 
     unit3dTrackerHandler('a[href^="https://bitporn.eu/torrents/download/"]')
 
-} else if ( trackerDomain == 'broadcasthe' ) {
+} else if ( primaryDomain == 'broadcasthe' ) {
     // ----------------------------------- BroadcasTheNet -----------------------------------
     // Browse | Series | Season\Episodes
 
@@ -482,7 +683,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'cinemaz' ) {
+} else if ( primaryDomain == 'cinemaz' ) {
     // ----------------------------------- CinemaZ -----------------------------------
     // Details
 
@@ -492,13 +693,13 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'clearjav' ) {
+} else if ( primaryDomain == 'clearjav' ) {
     // ----------------------------------- ClearJAV -----------------------------------
     // Bookmarks | Browse | Details | Playlists
 
     unit3dTrackerHandler('a[href*="/download/"]')
 
-} else if ( trackerDomain == 'deepbassnine' ) {
+} else if ( primaryDomain == 'deepbassnine' ) {
     // ----------------------------------- DeepBassNine -----------------------------------
     // Album | Artist | Browse
 
@@ -508,7 +709,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'empornium' ) {
+} else if ( primaryDomain == 'empornium' ) {
     // ----------------------------------- Empornium -----------------------------------
     // Browse | Collages | Details | Top10
 
@@ -580,7 +781,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'exoticaz' ) {
+} else if ( primaryDomain == 'exoticaz' ) {
     // ----------------------------------- ExoticaZ -----------------------------------
     // Details
 
@@ -590,7 +791,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'femdomcult' ) {
+} else if ( primaryDomain == 'femdomcult' ) {
     // ----------------------------------- Femdomcult -----------------------------------
     // Bookmarks | Browse | Collages | Details |
 
@@ -602,7 +803,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'gazellegames' ) {
+} else if ( primaryDomain == 'gazellegames' ) {
     // ----------------------------------- GazelleGames -----------------------------------
     // Browse | Bundles | Game
 
@@ -612,7 +813,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'happyfappy' ) {
+} else if ( primaryDomain == 'happyfappy' ) {
     // ----------------------------------- HappyFappy -----------------------------------
     // Browse | Collages | Details | Top10
 
@@ -624,7 +825,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'hdbits' ) {
+} else if ( primaryDomain == 'hdbits' ) {
     // ----------------------------------- HDBits -----------------------------------
     // Browse | Details | Film
 
@@ -652,7 +853,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'iptorrents' ) {
+} else if ( primaryDomain == 'iptorrents' ) {
     // ----------------------------------- IP-Torrents -----------------------------------
     // Browse | Details
 
@@ -682,7 +883,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'jpopsuki' ) {
+} else if ( primaryDomain == 'jpopsuki' ) {
     // ----------------------------------- JpopSuki -----------------------------------
     // Album | Artist | Browse
 
@@ -693,7 +894,7 @@ if ( trackerDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 
-} else if ( trackerDomain == 'karagarga' ) {
+} else if ( primaryDomain == 'karagarga' ) {
     // ----------------------------------- Karagarga -----------------------------------
     // Browse | Details
 
@@ -703,7 +904,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'kufirc' ) {
+} else if ( primaryDomain == 'kufirc' ) {
     // ----------------------------------- Kufirc -----------------------------------
     // Browse | Collages | Details | Top10
 
@@ -716,19 +917,19 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'lat-team' ) {
+} else if ( primaryDomain == 'lat-team' ) {
     // ----------------------------------- Lat-Team -----------------------------------
     // Bookmarks | Browse | Details | Homepage | Playlists
 
     unit3dTrackerHandler('a[href^="https://lat-team.com/torrents/download"]')
 
-} else if ( trackerDomain == 'luminarr' ) {
+} else if ( primaryDomain == 'luminarr' ) {
     // ----------------------------------- Luminarr -----------------------------------
     // Bookmarks | Browse | Details | Playlists
 
     unit3dTrackerHandler('a[href^="https://luminarr.me/torrents/download"]')
 
-} else if ( trackerDomain == 'materialize' ) {
+} else if ( primaryDomain == 'materialize' ) {
     // ----------------------------------- Materialize -----------------------------------
     // Browse | Collages | Details | Top10
 
@@ -739,7 +940,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'morethantv' ) {
+} else if ( primaryDomain == 'morethantv' ) {
     // ----------------------------------- MoreThanTV -----------------------------------
     // Browse | Collages | Details | Top10
 
@@ -750,7 +951,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'myanonamouse' ) {
+} else if ( primaryDomain == 'myanonamouse' ) {
     // ----------------------------------- MyAnonaMouse -----------------------------------
     // Browse | Details | Homepage
 
@@ -832,7 +1033,7 @@ if ( trackerDomain == 'animebytes' ) {
         observer.observe(target, config)
     }
 
-} else if ( trackerDomain == 'nebulance' ) {
+} else if ( primaryDomain == 'nebulance' ) {
     // ----------------------------------- Nebulance -----------------------------------
     // Bookmarks | Browse | Top 10
 
@@ -843,7 +1044,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'nyaa' ) {
+} else if ( primaryDomain == 'nyaa' ) {
     // ----------------------------------- Nyaa -----------------------------------
     // Browse | Details
 
@@ -867,13 +1068,13 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'oldtoons' ) {
+} else if ( primaryDomain == 'oldtoons' ) {
     // ----------------------------------- OldToons -----------------------------------
     // Browse | Details | Homepage | Playlists | Similar
 
     unit3dTrackerHandler('a[href^="https://oldtoons.world/torrents/download/"]')
 
-} else if ( trackerDomain == 'orpheus' ) {
+} else if ( primaryDomain == 'orpheus' ) {
     // ----------------------------------- Orpheus -----------------------------------
     // Album | Artist | Browse | Collages
 
@@ -883,7 +1084,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'passthepopcorn' ) {
+} else if ( primaryDomain == 'passthepopcorn' ) {
     // ----------------------------------- PassThepopcorn -----------------------------------
     // Film
 
@@ -893,13 +1094,13 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'portugas' ) {
+} else if ( primaryDomain == 'portugas' ) {
     // ----------------------------------- Portugas -----------------------------------
     // Browse | Album | Artist
 
     unit3dTrackerHandler('a[href^="https://portugas.org/torrents/download/"]')
 
-} else if ( trackerDomain == 'privatehd' ) {
+} else if ( primaryDomain == 'privatehd' ) {
     // ----------------------------------- PrivateHD -----------------------------------
     // Details
 
@@ -909,7 +1110,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'redacted' ) {
+} else if ( primaryDomain == 'redacted' ) {
     // ----------------------------------- Redacted -----------------------------------
     // Album | Artist | Bookmarks | Browse | Collages | Top10
 
@@ -965,7 +1166,7 @@ if ( trackerDomain == 'animebytes' ) {
     }
 
 
-} else if ( trackerDomain == 'secret-cinema' ) {
+} else if ( primaryDomain == 'secret-cinema' ) {
     // ----------------------------------- Secret-Cinema -----------------------------------
     // Artist (no DL links as of script creation) | Browse | Movie
 
@@ -975,7 +1176,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'thegeeks' ) {
+} else if ( primaryDomain == 'thegeeks' ) {
     // ----------------------------------- TheGeeks -----------------------------------
     // Browse | Details
 
@@ -985,7 +1186,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'torrentleech' ) {
+} else if ( primaryDomain == 'torrentleech' ) {
     // ----------------------------------- TorrentLeech -----------------------------------
     // Browse | Top
 
@@ -1002,7 +1203,7 @@ if ( trackerDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
-} else if ( trackerDomain == 'tv-vault' ) {
+} else if ( primaryDomain == 'tv-vault' ) {
     // ----------------------------------- TV-Vault -----------------------------------
     // Series
 
@@ -1015,7 +1216,7 @@ if ( trackerDomain == 'animebytes' ) {
 } else {
     // ----------------------------------- NONE -----------------------------------
 
-    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThere was no definied trackerHandler block for processing the current trackerDomain: ${trackerDomain}\n\nAll further quiCKIE code will be aborted as to prevent further errors.\n\nℹ️ If you are seeing this message while adding a new tracker, verify that you are using the correct trackerDomain in the 'else if' chain from step #3 of the 'Adding a New Tracker' guide`)
+    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThere was no definied trackerHandler block for processing the current primaryDomain: ${primaryDomain}\n\nAll further quiCKIE code will be aborted as to prevent further errors.\n\nℹ️ If you are seeing this message while adding a new tracker, verify that you are using the correct primaryDomain in the 'else if' chain from step #3 of the 'Adding a New Tracker' guide`)
 
     throw new Error('Aborting further quiCKIE execution')
 
@@ -1032,8 +1233,51 @@ if ( SETTINGS.thirdPartyScan != 'Off' ) {
 
 // =================================== SCRIPT FUNCTIONS ======================================
 
-function createGMConfigSettingsPanel() {
+function createGMConfigSettingsPanel(trackerDomain) {
     // Generate and initialize the GM_config settings panel. It has been done in this function for code cleanliness.
+
+    // These array\objects will later allow us to quickly reference the different tracker info
+    let allPrimaryDomains = []
+    let primaryDomainToName = {}
+    let primaryDomainToHomepage = {}
+    let trackerNameToPrimaryDomain = {}
+
+    let primaryDomain, registeredTracker = false
+    for ( let tracker of settingsPanelTrackers ) {
+        // Check the current trackerDomain against all the registered trackers to retrieve the trackers primaryDomain
+    
+
+        let trackerName = tracker.trackerName
+        let settingsId = tracker.primaryDomain.toLowerCase().trim()
+        let allDomains = tracker.trackerDomains
+
+        // Populate the array\objects that will be returned and made global
+        allPrimaryDomains.push(settingsId)
+        primaryDomainToName[settingsId] = trackerName
+        primaryDomainToHomepage[settingsId] = tracker.homepageURL
+        trackerNameToPrimaryDomain[trackerName.toLowerCase()] = settingsId
+
+        if ( allDomains == undefined ) {
+            // This tracker only has a primary domain, so check it for a match
+            
+            if ( settingsId == trackerDomain ) {
+                primaryDomain = settingsId
+                registeredTracker = true
+            }
+
+        } else {
+            // This tracker has an array of trackerDomains, so check each one for a match
+            
+            if ( allDomains.includes(trackerDomain) ) {
+                primaryDomain = settingsId
+                registeredTracker = true
+            }
+        }
+
+    }
+
+    // Verify that the trackerDomain is registered as an entry in the settingsPanelTrackers object, if not then abort all further exectuion of this script
+    if ( registeredTracker == false ) { console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe domain of the current site if not registered to a tracker supported by quiCKIE: ${trackerDomain}\n\nAll further quiCKIE code will be aborted as to prevent further errors.\n\nℹ️ If you are seeing this message while adding a new tracker, verify that you have included this trackerDomain to a tracker in Step #2 of the 'Adding a New Tracker' guide`); throw new Error('Aborting further quiCKIE execution') }
 
     // Determine the saved number of preset fields that should be generated in the settings panel and presets-menu
     let presetCount
@@ -1046,103 +1290,92 @@ function createGMConfigSettingsPanel() {
 
     }
 
-
     // New installs will not have a presetCount, so default to 3
     if ( presetCount == undefined ) {
         presetCount = 3
     }
 
-    // Reverse the settingsPanelTrackers object so that the values (labels) become the new keys and the keys (trackerDomains) become the new values
-    // This will later allow us to get the trackerDomain when we know the settings label
-    let trackerLabelToDomain = Object.entries(settingsPanelTrackers).map (
-        ([key, value]) => [value.toLowerCase().trim(), key]
-
-    )
-
-    trackerLabelToDomain = Object.fromEntries(trackerLabelToDomain)
-
     // @trackerFieldGeneration
     // This array will later be used to generate the <th> for each column in the settings panel. Create an entry in
     const trackerFieldSuffixes = ['category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'dlLimit', 'upLimit', 'instance', 'paginationLoop', 'leftClick', 'thirdPartyScan', 'hideDL', 'startPaused', 'subFolder', 'seqPieces', 'autoTMM', 'skipHash']
     let gmConfigTrackerFields = {}
-    let trackerDomains = Object.keys(settingsPanelTrackers).sort()
-    for ( let trackerDomain of trackerDomains ) {
-        // For each trackerDomain (property) of the settingsPanelTrackers object, generate the fields that will be used by GM_config() to save\load settings.
+    for ( let primaryDomain of allPrimaryDomains ) {
+        // For each primaryDomain (property) of the settingsPanelTrackers object, generate the fields that will be used by GM_config() to save\load settings.
         // Each tracker MUST have the fields displayed in the settings panel; Category (+ row label), SavePath, Tags, RatioLimit, Paused, Piece
 
         // --- GM_config() Fields ---
         let generatedTrackerFields = {
-            [`${trackerDomain}-${trackerFieldSuffixes[0]}`]: {
-                'label': settingsPanelTrackers[trackerDomain],
+            [`${primaryDomain}-${trackerFieldSuffixes[0]}`]: {
+                'label': primaryDomainToName[primaryDomain],
                 'type': 'text'
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[1]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[1]}`]: {
                 'type': 'text'
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[2]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[2]}`]: {
                 'type': 'text'
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[3]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[3]}`]: {
                 'label': 'Ratio Limit',
                 'type': 'float',
                 'default': ''
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[4]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[4]}`]: {
                 'label': 'Seed Time',
                 'type': 'int',
                 'default': ''
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[5]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[5]}`]: {
                 'label': 'Download Limit',
                 'type': 'int',
                 'default': ''
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[6]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[6]}`]: {
                 'label': 'Upload Limit',
                 'type': 'int',
                 'default': ''
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[7]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[7]}`]: {
                 'label': 'Instance',
                 'type': 'int',
                 'default': ''
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[8]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[8]}`]: {
                 'label': 'Pagination Loop',
                 'type': 'int',
                 'default': ''
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[9]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[9]}`]: {
                 'type': 'select',
                 'options': ['Global', 'Tracker', 'Settings', 'Client', 'Nothing'],
                 'default': 'Global',
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[10]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[10]}`]: {
                 'type': 'select',
                 'options': ['On', 'Off', 'On + 🌎'],
                 'default': 'Off',
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[11]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[11]}`]: {
                 'type': 'checkbox',
                 'default': false
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[12]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[12]}`]: {
                 'type': 'checkbox',
                 'default': false
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[13]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[13]}`]: {
                 'type': 'checkbox',
                 'default': false
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[14]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[14]}`]: {
                 'type': 'checkbox',
                 'default': false
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[15]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[15]}`]: {
                 'type': 'checkbox',
                 'default': false
             },
-            [`${trackerDomain}-${trackerFieldSuffixes[16]}`]: {
+            [`${primaryDomain}-${trackerFieldSuffixes[16]}`]: {
                 'type': 'checkbox',
                 'default': false
             }
@@ -1545,7 +1778,7 @@ function createGMConfigSettingsPanel() {
                 panelStyle.touchAction = 'pan-x pan-y'
 
                 // ----------------------------------- TRACKERS TABLE -----------------------------------
-                // Convert the various trackerDomain <div> elements created by GM_config() into a <table> with columns/rows
+                // Convert the various primaryName <div> elements created by GM_config() into a <table> with columns/rows
 
                 let table = document.createElement('table')
                 table.id = 'quiCKIE_config_tracker_table'
@@ -1595,7 +1828,7 @@ function createGMConfigSettingsPanel() {
                 // Append the headers to the <thead> (tableHeader) element
                 thead.appendChild(headersRow)
 
-                let uniqueDomains = Object.keys(settingsPanelTrackers).sort()
+                let uniqueDomains = allPrimaryDomains
                 for (let uniqueDomainKey of uniqueDomains) {
                     // For each tracker, create 1 <tr> (tablerow). For each <tr>, create 1 <td> (tabledata) to contain the tracker's hyperlink. Create the <a> hyperlink then move the tracker's label into that <a> element.
 
@@ -1738,7 +1971,7 @@ function createGMConfigSettingsPanel() {
                     }
 
                     // Create the list of selectable items that appears when typing to the presetTrackers field
-                    let trackerTitles = Object.entries(settingsPanelTrackers).sort().map (
+                    let trackerTitles = Object.entries(primaryDomainToName).sort().map (
                         ([key, value]) => [value]
 
                     )
@@ -1772,8 +2005,8 @@ function createGMConfigSettingsPanel() {
                 // Remove the tracker rows that should be hidden
                 for ( let trackerLabel of GM_config.get('hiddenTrackers').split(',') ) {
                     trackerLabel = trackerLabel.toLowerCase().trim()
-                    let trackerDomain = trackerLabelToDomain[trackerLabel]
-                    let trackerRow = document.getElementById(`quiCKIE_config_tracker_table_tr_${trackerDomain}`)
+                    let primaryDomain = trackerNameToPrimaryDomain[trackerLabel]
+                    let trackerRow = document.getElementById(`quiCKIE_config_tracker_table_tr_${primaryDomain}`)
                     trackerRow ? trackerRow.remove() : null
                 }
 
@@ -2318,17 +2551,17 @@ function createGMConfigSettingsPanel() {
     })
 
 
-    return [presetCount, trackerLabelToDomain]
+    return [ primaryDomain, allPrimaryDomains, primaryDomainToName, primaryDomainToHomepage, trackerNameToPrimaryDomain, presetCount ]
 
 }
 
 
-function getTrackerSettings(trackerDomain) {
-    // Define the main SETTINGS object and populate it with the current trackerDomain specific settings
+function getTrackerSettings(primaryDomain) {
+    // Define the main SETTINGS object and populate it with the current primaryDomain specific settings
 
     // @trackerSettings
     let SETTINGS = {
-        trackerDomain: trackerDomain,
+        primaryDomain: primaryDomain,
         forceTorrentFile: false,
         firstTrackerHandlerScan: true,
         firstThirdPartyScan: true,
@@ -2364,23 +2597,23 @@ function getTrackerSettings(trackerDomain) {
         globalForcedTorrentFile: GM_config.get('globalForcedTorrentFile'),
 
         // The saved settings of the current tracker
-        category: GM_config.get(`${trackerDomain}-category`),
-        savePath: GM_config.get(`${trackerDomain}-savePath`),
-        tags: GM_config.get(`${trackerDomain}-tags`),
-        ratioLimit: GM_config.get(`${trackerDomain}-ratioLimit`),
-        seedTime: GM_config.get(`${trackerDomain}-seedTime`),
-        dlLimit: GM_config.get(`${trackerDomain}-dlLimit`),
-        upLimit: GM_config.get(`${trackerDomain}-upLimit`),
-        instance: GM_config.get(`${trackerDomain}-instance`),
-        paginationLoop: GM_config.get(`${trackerDomain}-paginationLoop`),
-        leftClick: GM_config.get(`${trackerDomain}-leftClick`),
-        thirdPartyScan: GM_config.get(`${trackerDomain}-thirdPartyScan`),
-        hideDL: GM_config.get(`${trackerDomain}-hideDL`),
-        startPaused: GM_config.get(`${trackerDomain}-startPaused`),
-        subFolder: GM_config.get(`${trackerDomain}-subFolder`),
-        seqPieces: GM_config.get(`${trackerDomain}-seqPieces`),
-        autoTMM: GM_config.get(`${trackerDomain}-autoTMM`),
-        skipHash: GM_config.get(`${trackerDomain}-skipHash`),
+        category: GM_config.get(`${primaryDomain}-category`),
+        savePath: GM_config.get(`${primaryDomain}-savePath`),
+        tags: GM_config.get(`${primaryDomain}-tags`),
+        ratioLimit: GM_config.get(`${primaryDomain}-ratioLimit`),
+        seedTime: GM_config.get(`${primaryDomain}-seedTime`),
+        dlLimit: GM_config.get(`${primaryDomain}-dlLimit`),
+        upLimit: GM_config.get(`${primaryDomain}-upLimit`),
+        instance: GM_config.get(`${primaryDomain}-instance`),
+        paginationLoop: GM_config.get(`${primaryDomain}-paginationLoop`),
+        leftClick: GM_config.get(`${primaryDomain}-leftClick`),
+        thirdPartyScan: GM_config.get(`${primaryDomain}-thirdPartyScan`),
+        hideDL: GM_config.get(`${primaryDomain}-hideDL`),
+        startPaused: GM_config.get(`${primaryDomain}-startPaused`),
+        subFolder: GM_config.get(`${primaryDomain}-subFolder`),
+        seqPieces: GM_config.get(`${primaryDomain}-seqPieces`),
+        autoTMM: GM_config.get(`${primaryDomain}-autoTMM`),
+        skipHash: GM_config.get(`${primaryDomain}-skipHash`),
 
     }
 
@@ -2392,20 +2625,20 @@ function getTrackerSettings(trackerDomain) {
     SETTINGS.instance <= 0 ? SETTINGS.instance = '' : null
     SETTINGS.paginationLoop < 500 ? SETTINGS.paginationLoop = '' : null
 
-    let presetMenuItems = createPresetItems([SETTINGS.trackerDomain])
+    let presetMenuItems = createPresetItems([SETTINGS.primaryDomain])
 
     return [SETTINGS, presetMenuItems]
 
 }
 
 
-function createPresetItems(trackerDomains) {
-    // For all the trackerDomains (array), generate and return a object who's properties equal the presetMenu items of a trackerDomain
+function createPresetItems(primaryDomains) {
+    // For all the primaryDomains (array), generate and return a object who's properties equal the presetMenu items of a primaryDomain
 
     let allPresetItems = {}
 
-    for ( let trackerDomain of trackerDomains ) {
-        // For each trackerDomain, determine the presets that apply to that tracker and add them to the object
+    for ( let primaryDomain of primaryDomains ) {
+        // For each primaryDomain, determine the presets that apply to that tracker and add them to the object
         let menuItems = []
         for ( let i=1; i <= presetCount; i++ ) {
             // for each preset, create a menuItem object to put in the right-click presets-menu
@@ -2419,7 +2652,7 @@ function createPresetItems(trackerDomains) {
             }
 
             // Check if the list of trackers in the presetTrackers field contains a match against the settings panel label of this tracker
-            let settingsPanelLabel = settingsPanelTrackers[`${trackerDomain}`].toLowerCase()
+            let settingsPanelLabel = primaryDomainToName[primaryDomain].toLowerCase()
             if ( !presetTrackersList.match(/\*/) && !presetTrackersList.match(settingsPanelLabel) ) {
                 // Neither a wildcard nor a matching tracker label, so don't add this item to the presets-menu
                 continue
@@ -2568,7 +2801,7 @@ function createPresetItems(trackerDomains) {
 
         }
 
-        allPresetItems[trackerDomain] = menuItems
+        allPresetItems[primaryDomain] = menuItems
 
     }
 
@@ -2578,14 +2811,14 @@ function createPresetItems(trackerDomains) {
 
 
 GM_addStyle(GM_getResourceText('presetsMenuCSS'))
-function attachPresetsMenu(targetSelector, trackerDomain = trackerDomain) {
+function attachPresetsMenu(targetSelector, primaryDomain = primaryDomain) {
     // append the menuItems to the target elements
 
     const presetsMenu = new ContextMenu({
         // targetSelector == CSS Selector
         target: targetSelector,
         // An array of objects to display in the presets-menu
-        menuItems: presetMenuItems[trackerDomain]
+        menuItems: presetMenuItems[primaryDomain]
     })
 
     // init() will stack a 'contextmenu' eventlistener on elements, so don't call it more than once per bunnyButton
@@ -2681,15 +2914,15 @@ function quickieTrackerHandler({
                     }
 
                     // After the bunnyButtons have been generated, call the function that will attach to them the right-click presetsMenu
-                    bunnyButtonAttachPresetsMenu == true ? attachPresetsMenu('a.quickie_newBunnyButton', SETTINGS.trackerDomain) : null
+                    bunnyButtonAttachPresetsMenu == true ? attachPresetsMenu('a.quickie_newBunnyButton', SETTINGS.primaryDomain) : null
 
                 } else {
                     // The query returned no results
 
-                    if ( SETTINGS.firstTrackerHandlerScan && !['myanonamouse'].includes(trackerDomain) ) {
+                    if ( SETTINGS.firstTrackerHandlerScan && !['myanonamouse'].includes(primaryDomain) ) {
                         // This being the first scan, alert the user of the possible reasons the query might have failed and how to proceed
 
-                        console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelTrackers[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${settingsPanelTrackers[trackerDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
+                        console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${primaryDomainToName[primaryDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${primaryDomainToName[primaryDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
                     }
 
                 }
@@ -2804,12 +3037,12 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
                 }
 
-                attachPresetsMenu('a.quickie_newBunnyButton', trackerDomain)
+                attachPresetsMenu('a.quickie_newBunnyButton', SETTINGS.primaryDomain)
 
             } else {
 
                 if ( SETTINGS.firstTrackerHandlerScan ) {
-                    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${settingsPanelTrackers[trackerDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${settingsPanelTrackers[trackerDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
+                    console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe script has executed sucessfully, but the initial search found no download elements for which to make BunnyButtons 🐰\n\nIf you are not seeing any BunnyButtons, this usually means that either the CSS selector used for matching the ${primaryDomainToName[primaryDomain]} download buttons needs to be updated or that you are on a site\\page that has pagination.\n\nPaste this command into your browser console, if the returned list is empty, then the CSS Selector is returning no results and needs updating: document.querySelectorAll('${downloadElementsSelector}')\n\nRefer to the quiCKIE GitHub WiKi for a guide on adding a new tracker, which has a section on how to determine\\update the CSS selector.\n\nIf the CSS selector is returning results but there are still no BunnyButtons, it is likely due to pagination. Use quiCKIE's 🔁 setting for pagination compatability.\n\nℹ️ If you are reading this and your BunnyButtons are working fine, you can safely ignore this message. It is likely that the pagination of your current site did not finish loading before quiCKIE performed this first scan.\n\nℹ️ If this page has no download elements to begin with, it means that one of the @match URL's for ${primaryDomainToName[primaryDomain]} is running quiCKIE on pages it should not. Please report this so that quiCKIE won't waste your resources and can be improved.`)
                 }
 
 
@@ -2856,7 +3089,7 @@ function createBunnyButton({
 
     addButtonClasses.length > 0 ? addButtonClasses.forEach(classItem => bunnyButton.classList.add(classItem) ) : null
 
-    bunnyButton.title = ` ─── 🌎 ${settingsPanelTrackers[`${torrentSettings.trackerDomain}`]} 🌎 ───
+    bunnyButton.title = ` ─── 🌎 ${primaryDomainToName[`${torrentSettings.primaryDomain}`]} 🌎 ───
  🗃️ = ${torrentSettings.category}
  💾 = ${torrentSettings.savePath}
  🏷️ = ${torrentSettings.tags}
@@ -3901,7 +4134,7 @@ function scanForThirdPartyTorrentURLS(delay) {
                 // For each thirdPartyElement, create a BunnyButton using the elements 'data-quickie_torrenturl' attribute
 
                 let torrentSettings = {
-                    trackerDomain: trackerDomain,
+                    primaryDomain: primaryDomain,
                     category: SETTINGS.category,
                     savePath: SETTINGS.savePath,
                     tags: SETTINGS.tags,
@@ -3922,16 +4155,16 @@ function scanForThirdPartyTorrentURLS(delay) {
 
                     if ( SETTINGS.firstThirdPartyScan ) {
                         // This being the first scan, update the presetMenuItems object so that it includes properties for ALL trackers
-                        presetMenuItems = createPresetItems(Object.keys(settingsPanelTrackers))
+                        presetMenuItems = createPresetItems(allPrimaryDomains)
                         SETTINGS.firstThirdPartyScan = false
 
                     }
 
                     // [quickie_tracker] : Check if the thirdParty element has specified from which tracker the bunnyButtons should get their settings
                     if ( downloadElement.dataset.quickie_tracker != undefined ) {
-                        let thirdPartyDomain = trackerLabelToDomain[`${downloadElement.dataset.quickie_tracker.toLowerCase()}`]
+                        let thirdPartyDomain = trackerNameToPrimaryDomain[`${downloadElement.dataset.quickie_tracker.toLowerCase()}`]
 
-                        torrentSettings.trackerDomain = thirdPartyDomain
+                        torrentSettings.primaryDomain = thirdPartyDomain
                         torrentSettings.category = GM_config.get(`${thirdPartyDomain}-category`)
                         torrentSettings.savePath = GM_config.get(`${thirdPartyDomain}-savePath`)
                         torrentSettings.tags = GM_config.get(`${thirdPartyDomain}-tags`)
@@ -3993,7 +4226,7 @@ function scanForThirdPartyTorrentURLS(delay) {
                 newThirdParties = true
 
                 // Append the presets-menu to the newly created bunnyButtons
-                attachPresetsMenu('a.quickie_newBunnyButton', torrentSettings.trackerDomain)
+                attachPresetsMenu('a.quickie_newBunnyButton', torrentSettings.primaryDomain)
 
             }
 
