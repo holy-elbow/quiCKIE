@@ -91,6 +91,8 @@
 // @match   https://www.empornium.sx/torrents.php*
 // @match   https://www.empornium.sx/user.php?id=*
 
+// @match   https://e*hentai.org/gallerytorrents.php*
+
 // @match   https://exoticaz.to/
 // @match   https://exoticaz.to/*/bookmark*
 // @match   https://exoticaz.to/torrent*
@@ -234,6 +236,7 @@ const settingsPanelTrackers = [
 
     // If the tracker has more than one domain that it can be accessed from, you may also include the `trackerDomains` property, in which you can provide an array (list) of different domain names. This will make it so that these domains all share the same settings.
     // trackerDomains: ['domain1', 'domain2', 'domain3'],
+    // trackerDomains MUST include the primaryDomain. See E-Hentai as an example.
     
     {
         trackerName: 'Aither', // @holy-elbow
@@ -317,6 +320,13 @@ const settingsPanelTrackers = [
         trackerName: 'Empornium',
         homepageURL: 'https://www.empornium.sx',
         primaryDomain: 'empornium', 
+    },
+
+    {
+        trackerName: 'E-Hentai',
+        homepageURL: 'https://e-hentai.org',
+        primaryDomain: 'e-hentai',
+        trackerDomains: ['exhentai'],
     },
 
     {
@@ -777,6 +787,17 @@ if ( primaryDomain == 'animebytes' ) {
 
         }
 
+    }
+
+    quickieTrackerHandler(trackerHandlingOptions)
+
+} else if ( primaryDomain == 'e-hentai' ) {
+
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="https://ehtracker.org/get/"]',
+    }
+    if ( pageURL.match(/exhentai/) ) {
+        trackerHandlingOptions.downloadElementsSelector = 'a[href^="https://exhentai.org/torrent/"]'
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
