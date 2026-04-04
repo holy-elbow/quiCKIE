@@ -236,6 +236,7 @@ const settingsPanelTrackers = [
 
     // If the tracker has more than one domain that it can be accessed from, you may also include the `trackerDomains` property, in which you can provide an array (list) of different domain names. This will make it so that these domains all share the same settings.
     // trackerDomains: ['domain1', 'domain2', 'domain3'],
+    // trackerDomains MUST include the primaryDomain. See E-Hentai as an example.
     
     {
         trackerName: 'Aither', // @holy-elbow
