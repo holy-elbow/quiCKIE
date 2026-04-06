@@ -3392,7 +3392,7 @@ function addTorrent({
         } catch(error) {
             // Failed to parse quiURL for the API endpoint
             replaceEmojis(bunnyButton, '❌')
-            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved quiURL\n\nCheck your quiURL for typos, making sure it is the expected format and that it starts with the appropriate http(s) protocol\n\nHover the quiURL emoji for examples\n\nquiURL: ${torrentClient.quiURL}`)
+            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved quiURL\n\nCheck your quiURL for typos, making sure it is in the expected format and that it starts with the appropriate http(s) protocol\n\nHover the quiURL emoji for examples\n\nquiURL: ${torrentClient.quiURL}`)
             return
         }
 
