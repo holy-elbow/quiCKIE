@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.35.6
+// @version     1.36
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -1317,8 +1317,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
     const trackerFieldSuffixes = ['category', 'savePath', 'tags', 'ratioLimit', 'seedTime', 'dlLimit', 'upLimit', 'instance', 'paginationLoop', 'leftClick', 'thirdPartyScan', 'hideDL', 'startPaused', 'subFolder', 'seqPieces', 'autoTMM', 'skipHash']
     let gmConfigTrackerFields = {}
     for ( let primaryDomain of allPrimaryDomains ) {
-        // For each primaryDomain (property) of the settingsPanelTrackers object, generate the fields that will be used by GM_config() to save\load settings.
-        // Each tracker MUST have the fields displayed in the settings panel; Category (+ row label), SavePath, Tags, RatioLimit, Paused, Piece
+        // For each tracker (primaryDomain) in the settingsPanelTrackers object, generate the fields that will be used by GM_config() to save\load settings for that primaryDomain
 
         // --- GM_config() Fields ---
         let generatedTrackerFields = {
@@ -1472,6 +1471,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
         }
 
             gmConfigPresetsFields = {...gmConfigPresetsFields, ...genereatedPresetFields}
+
     }
 
     const panelTextData = {
@@ -3386,14 +3386,13 @@ function addTorrent({
 
         try {
             // quiURL Example: http://localhost:7476/qui/instances/1
-            let quiURLCaptures = torrentClient.quiURL.match(/^(.*)\/(instances\/\d+)/) // [1] == domain, [2] == instance
+            let quiURLCaptures = torrentClient.quiURL.match(/^(https?:\/\/.+)\/(instances\/\d+)/) // [1] == domain, [2] == instance
             postData.qui.url = `${quiURLCaptures[1]}/api/${quiURLCaptures[2]}/torrents`
 
         } catch(error) {
             // Failed to parse quiURL for the API endpoint
-            console.log(error)
             replaceEmojis(bunnyButton, '❌')
-            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved quiURL into a valid qui apiURL\n\nCheck your quiURL for typos and make sure it is in the expected format. Hover the quiURL emoji for examples\n\nquiURL: ${torrentClient.quiURL}`)
+            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved quiURL\n\nCheck your quiURL for typos, making sure it is the expected format and that it starts with the appropriate http(s) protocol\n\nHover the quiURL emoji for examples\n\nquiURL: ${torrentClient.quiURL}`)
             return
         }
 
@@ -3415,8 +3414,15 @@ function addTorrent({
             return
         }
 
-        // qBitTorrent Example: http://localhost:8080
-        postData.qBitTorrent.url = torrentClient.qBitTorrentURL.match(/^(.+?)\/?$/)[1]
+        try {
+            // qBitTorrent Example: http://localhost:8080
+            postData.qBitTorrent.url = torrentClient.qBitTorrentURL.match(/^(https?:\/\/.+?)\/?$/)[1]
+        } catch(error) {
+            replaceEmojis(bunnyButton, '❌')
+            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved qBitTorrentURL\n\nThe URL must start with the appropriate http(s) protocol\n\nHover the qBitTorrentURL emoji for examples\n\nqBitTorrentURL: ${torrentClient.qBitTorrentURL}`)
+            return
+        }
+
         postData.qBitTorrent.username = torrentClient.qBitTorrentUsername
         postData.qBitTorrent.password = torrentClient.qBitTorrentPassword
 
@@ -3431,8 +3437,15 @@ function addTorrent({
         }
 
 
-        // TransmissionURL Example: http://localhost:9091 | http://localhost:9091/custom/rpc
-        postData.transmission.url = torrentClient.transmissionURL.match(/^(.+?)\/?$/)[1]
+        try {
+            // TransmissionURL Example: http://localhost:9091 | http://localhost:9091/custom/rpc
+            postData.transmission.url = torrentClient.transmissionURL.match(/^(https?:\/\/.+?)\/?$/)[1]
+        } catch(error) {
+            replaceEmojis(bunnyButton, '❌')
+            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved transmissionURL\n\nThe URL must start with the appropriate http(s) protocol\n\nHover the transmissionURL emoji for examples\n\ntransmissionURL: ${torrentClient.transmissionURL}`)
+            return
+        }
+
         postData.transmission.username = torrentClient.transmissionUsername
         postData.transmission.password = torrentClient.transmissionPassword
 
@@ -3446,8 +3459,15 @@ function addTorrent({
             return
         }
 
-        // Deluge Example: http://localhost:8112
-        postData.deluge.url = torrentClient.delugeURL.match(/^(.+?)\/?$/)[1]
+        try {
+            // Deluge Example: http://localhost:8112
+            postData.deluge.url = torrentClient.delugeURL.match(/^(https?:\/\/.+?)\/?$/)[1]
+        } catch(error) {
+            replaceEmojis(bunnyButton, '❌')
+            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved delgueURL\n\nThe URL must start with the appropriate http(s) protocol\n\nHover the delgueURL emoji for examples\n\ndelugeURL: ${torrentClient.delgueURL}`)
+            return
+        }
+
         postData.deluge.password = torrentClient.delugePassword
 
     } else if ( postData.torrentClient == 'ruTorrent' ) {
@@ -3461,8 +3481,14 @@ function addTorrent({
         }
 
 
-        // ruTorrent Example: http://localhost:8080
-        postData.ruTorrent.url = torrentClient.ruTorrentURL.match(/^(.+?)\/?$/)[1]
+        try {
+            // ruTorrent Example: http://localhost:8080
+            postData.ruTorrent.url = torrentClient.ruTorrentURL.match(/^(https?:\/\/.+?)\/?$/)[1]
+        } catch(error) {
+            replaceEmojis(bunnyButton, '❌')
+            window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved ruTorrentURL\n\nThe URL must start with the appropriate http(s) protocol\n\nHover the ruTorrentURL emoji for examples\n\nruTorrentURL: ${torrentClient.ruTorrentURL}`)
+            return
+        }
         postData.ruTorrent.username = torrentClient.ruTorrentUsername
         postData.ruTorrent.password = torrentClient.ruTorrentPassword
 
