@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.35
+// @version     1.35.5
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -234,8 +234,8 @@ const settingsPanelTrackers = [
     //  https://www.myanonamouse.net/ --> myanonamouse
     //  https://sukebei.nyaa.si/ --> nyaa
 
-    // If the tracker has more than one domain that it can be accessed from, you may also include the `trackerDomains` property, in which you can provide an array (list) of different domain names. This will make it so that these domains all share the same settings.
-    // trackerDomains: ['domain1', 'domain2', 'domain3'],
+    // If the tracker has more than one domain that it can be accessed from, you may also include the `otherDomains` property, in which you can provide an array (list) of different domain names. This will make it so that these domains all share the same settings.
+    // otherDomains: ['domain1', 'domain2', 'domain3'],
     
     {
         trackerName: 'Aither', // @holy-elbow
@@ -325,7 +325,7 @@ const settingsPanelTrackers = [
         trackerName: 'E-Hentai', // @holy-elbow
         homepageURL: 'https://e-hentai.org',
         primaryDomain: 'e-hentai',
-        trackerDomains: ['exhentai'],
+        otherDomains: ['exhentai'],
     },
 
     {
@@ -976,7 +976,7 @@ if ( primaryDomain == 'animebytes' ) {
 
 } else if ( primaryDomain == 'myanonamouse' ) {
     // ----------------------------------- MyAnonaMouse -----------------------------------
-    // Browse | Details | Homepage
+    // Browse | Details | Homepage | Top10
 
     if ( pageURL.match(/\/t\/\d+/) ) {
         // The book details page, which doesn't require a MutationObserver
@@ -1028,7 +1028,7 @@ if ( primaryDomain == 'animebytes' ) {
             afterBunnyButtonCreation: function(elements) {
                 // The actions to take after the bunnyButtons have been created...
 
-                // Site download buttons are hidden, so change the Freelech Wedge button to be cheese
+                // Site download buttons are hidden, so change the Freelech Wedge button to cheese
                 if ( SETTINGS.hideDL ) {
 
                     for ( let bunnyButton of elements.bunnyButtons ) {
@@ -1045,7 +1045,7 @@ if ( primaryDomain == 'animebytes' ) {
         let observer = new MutationObserver(function(mutations) {
             // Functionality to run when changes are detected to the target element
 
-            quickieTrackerHandler(trackerHandlingOptions)
+           quickieTrackerHandler(trackerHandlingOptions)
 
         })
 
@@ -1271,7 +1271,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
 
         let trackerName = tracker.trackerName
         let settingsId = tracker.primaryDomain.toLowerCase().trim()
-        let allDomains = tracker.trackerDomains
+        let allDomains = tracker.otherDomains
 
         // Populate the array\objects that will be returned and made global
         allPrimaryDomains.push(settingsId)
@@ -1288,7 +1288,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
             }
 
         } else {
-            // This tracker has an array of trackerDomains, so check if either the primaryDomain or an array item is a match
+            // This tracker has an array of otherDomains, so check if either the primaryDomain or an array item is a match
             
             if ( settingsId == trackerDomain || allDomains.includes(trackerDomain) ) {
                 primaryDomain = settingsId
