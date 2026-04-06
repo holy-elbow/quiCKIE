@@ -1259,7 +1259,7 @@ if ( SETTINGS.thirdPartyScan != 'Off' ) {
 function createGMConfigSettingsPanel(trackerDomain) {
     // Generate and initialize the GM_config settings panel. It has been done in this function for code cleanliness.
 
-    // These array\objects will later allow us to quickly reference the different tracker info
+    // These array\objects will later allow us to easily cross-reference the settingsPanelTrackers data
     let allPrimaryDomains = []
     let primaryDomainToName = {}
     let primaryDomainToHomepage = {}
