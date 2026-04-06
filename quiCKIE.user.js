@@ -1280,12 +1280,12 @@ function createGMConfigSettingsPanel(trackerDomain) {
         trackerNameToPrimaryDomain[trackerName.toLowerCase()] = settingsId
 
         if ( settingsId == trackerDomain ) {
-            // This tracker only has a primary domain, so check it for a match
+            // This trackerDomain matches the primaryDomain
             primaryDomain = settingsId
             registeredTracker = true
 
         } else if ( otherDomains != undefined && otherDomains.includes(trackerDomain) ) {
-            // This tracker has otherDomains, so check if the primaryDomain or an otherDomains item is a match
+            // This trackerDomain did not match the primaryDomain, but there are otherDomains and a match was found
             primaryDomain = settingsId
             registeredTracker = true
 
