@@ -234,7 +234,7 @@ const settingsPanelTrackers = [
     //  https://www.myanonamouse.net/ --> myanonamouse
     //  https://sukebei.nyaa.si/ --> nyaa
 
-    // If the tracker has more than one domain that it can be accessed from, you may also include the `otherDomains` property, in which you can provide an array (list) of different domain names. This will make it so that these domains all share the same settings.
+    // If the tracker has more than one domain that it can be accessed from, you may also include the 'otherDomains' property, which should consist of an array (list) of different domain names. This will make it so that these domains all share the same tracker settings.
     // otherDomains: ['domain1', 'domain2', 'domain3'],
     
     {
@@ -1281,14 +1281,13 @@ function createGMConfigSettingsPanel(trackerDomain) {
 
         if ( settingsId == trackerDomain && otherDomains == undefined ) {
             // This tracker only has a primary domain, so check it for a match
-
             primaryDomain = settingsId
             registeredTracker = true
 
         } else {
-            // This tracker has an array of otherDomains, so check if either the primaryDomain or an array item is a match
-            
+            // This tracker has otherDomains, so check if the primaryDomain or an otherDomains item is a match
             if ( settingsId == trackerDomain || otherDomains.includes(trackerDomain) ) {
+
                 primaryDomain = settingsId
                 registeredTracker = true
             }
