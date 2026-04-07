@@ -61,9 +61,9 @@ body:
     attributes:
       label: Confirm New Issue
       options:
+        - label: If this bug is related to a particular private tracker, I am willing to help with some testing or HTML inspections to get it fixed
         - label: Yes, I can reproduce this bug even after disabling other UserScripts\programs that may cause interference
           required: true
         - label: Yes, I have searched for and confirmed this bug has not yet been reported
           required: true
-        - label: If this bug is related to a particular private tracker, I am willing to help with testing or HTML inspections to get it fixed
 
