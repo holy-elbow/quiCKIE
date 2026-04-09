@@ -544,12 +544,12 @@ if ( primaryDomain == 'animebytes' ) {
 
         // A string of valid JavaScript pointing to a nearby element, relative to the downloadElement, that indicates a torrent has the status of 'seeding' (see the BroadcasTheNet\Empornium\PassThePopcorn blocks for examples)
         // The string should start with 'downloadElement' then be followed by a chain of '.closest()' and\or '.querySelector()' methods in order to locate the target element. If the element is found the bunnyButton emoji will be changed to '🌱'
-        // In addition, it may be helpful to perform a .textContent.match(/regex/) if the element does not have a unique class\attribute and only text (see the Redacted block for examples)
+        // In addition, if the target element has identifiable text but not attributes, it may be helpful to perform a .textContent.match(/regex/) (see the Redacted block for examples)
         seedingStatusSelector: null, // Default = null || Options = 'downloadElement...'
 
         // A string of valid JavaScript pointing to a nearby element, relative to the downloadElement, that indicates a torrent has the status of 'snatched' (see the BroadcasTheNet\Empornium\PassThePopcorn blocks for examples)
         // The string should start with 'downloadElement' then be followed by a chain of '.closest()' and\or '.querySelector()' methods in order to locate the target element. If the element is found the bunnyButton emoji will be changed to '🍂 '
-        // In addition, it may be helpful to perform a .textContent.match(/regex/) if the element does not have a unique class\attribute and only text (see the Redacted block for examples)
+        // In addition, if the target element has identifiable text but not attributes, it may be helpful to perform a .textContent.match(/regex/) (see the Redacted block for examples)
         snatchedStatusSelector: "downloadElement.closest('td').querySelector('a.snatched-torrent')", // Default = null || Options = 'downloadElement...'
 
         // A function that will be called after all the bunnyButtons have been created, useful for advanced styling or further clean-up (see the BakaBT\Empornium\MyAnonaMouse blocks for examples)
@@ -1033,14 +1033,17 @@ if ( primaryDomain == 'animebytes' ) {
                     if ( bunnyButton.dataset.torrenturl.match(/tid=\d+&fl/) ) {
                         bunnyButton.textContent = '🧀 Freeleech'
                         bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}background: #2E2400; border: #CBC29E solid 1px; color: #CBC29E;`)
+
                     } else {
                         // This is not the Freeleech Wedge button, so check if the torrent is seeding\snatched
+                        
                         try {
                             document.getElementById('DLhistory').textContent.match(/seeding/i) ? replaceEmojis(bunnyButton, '🌱') : null
                             document.getElementById('DLhistory').textContent.match(/seeder/i) ? replaceEmojis(bunnyButton, '🍂') : null
                         } catch(error) {
-                            console.log(error)
+                            // console.log(error)
                         }
+
                     }
 
                 }
