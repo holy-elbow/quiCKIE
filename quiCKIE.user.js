@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.36
+// @version     1.37
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -38,6 +38,7 @@
 // @match   https://alpharatio.cc/top10.php*
 // @match   https://alpharatio.cc/torrents.php*
 
+// @match   https://animebytes.tv/alltorrents.php?*&userid=*
 // @match   https://animebytes.tv/artist.php?id=*
 // @match   https://animebytes.tv/bookmarks.php*
 // @match   https://animebytes.tv/collage.php?*id=*
@@ -500,7 +501,7 @@ let [ primaryDomain, allPrimaryDomains, primaryDomainToName, primaryDomainToHome
 let [ SETTINGS, presetMenuItems ] = getTrackerSettings(primaryDomain)
 
 // All the emojis that may be displayed on bunnyButtons, defined as a RegExp so that they can be replaced during different stages of the script
-const emojiRegex = new RegExp('🐰|🪙|🌱|🤝|🕓|🧲|🧑|❌|✔️|🧀', 'g')
+const emojiRegex = new RegExp('🐰|🪙|🌱|🍂|🤝|🕓|🧲|🧑|❌|✔️|🧀', 'g')
 
 // The URL of the current page, useful for figuring out exactly what page you are on using pageURL.match(/regex/)
 const pageURL = document.URL
@@ -512,7 +513,7 @@ const pageURL = document.URL
 // Because the primaryDomain is unique for each registerd tracker, we can use it to determine what tracker this is and how to proceed from there
 if ( primaryDomain == 'animebytes' ) {
     // ----------------------------------- AnimeBytes -----------------------------------
-    // Bookmarks | Browse | Collages | Company | Series
+    // Bookmarks | Browse | Collages | Company | Seeding\Snatched\Leeching | Series
 
     let trackerHandlingOptions = {
 
@@ -541,8 +542,16 @@ if ( primaryDomain == 'animebytes' ) {
         // Additional class names that will be applied to each bunnyButton, useful for advanced styling
         bunnyButtonAddClasses: [], // Default = [] || Options = An array of strings 
 
+        // As a string, provide a line of valid JavaScript that will be used to find a nearby element that indicates the torrent has the status of 'seeding' (see the BroadcasTheNet\Empornium blocks for examples)
+        // The string should start with 'downloadElement' then be followed by a chain of '.closest()' and\or '.querySelector()' to locate the target element that indicates this torrent is 'seeding'
+        seedingStatusSelector: null, // Default = null || Options = 'downloadElement...'
+
+        // As a string, provide a line of valid JavaScript that will be used to find a nearby element that indicates the torrent has the status of 'snatched' (see the BroadcasTheNet\Empornium blocks for examples)
+        // The string should start with 'downloadElement' then be followed by a chain of '.closest()' and\or '.querySelector()' to locate the target element that indicates this torrent is 'snatched'
+        snatchedStatusSelector: "downloadElement.closest('td').querySelector('a.snatched-torrent')", // Default = null || Options = 'downloadElement...'
+
         // A function that will be called after all the bunnyButtons have been created, useful for advanced styling or further clean-up (see the BakaBT\Empornium\MyAnonaMouse blocks for examples)
-        // The 'elements' parameter will be an object consisting of three arrays: { bunnyButtons: [], downloadElements: [], pairedElements:[] } 
+        // The 'elements' parameter will be an object consisting of three arrays: elements = { bunnyButtons: [], downloadElements: [], pairedElements:[] } 
         // ⚠️ quiCKIE is a NON-DESTRUCTIVE UserScript that does NOT break or destroy the default site elements. This ensures quiCKIE is friendly\compatible with other UserScripts. Always adhere to this principle by only manipulating the bunnyButtons created by quiCKIE itself
         afterBunnyButtonCreation: false, // Default = false || options = false | function(elements) {...}
 
@@ -665,6 +674,8 @@ if ( primaryDomain == 'animebytes' ) {
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
+        seedingStatusSelector: "downloadElement.closest('td').querySelector('a.tor_highlight_seed')",
+        snatchedStatusSelector: "downloadElement.closest('td').querySelector('a.tor_highlight_snatch')",
     }
 
     // This is a browse page (not Season\Episode), so apply styling to all bunnyButtons
@@ -739,6 +750,8 @@ if ( primaryDomain == 'animebytes' ) {
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="/torrents.php?action=download&id="]',
         bunnyButtonFontSize: '130%',
+        seedingStatusSelector: "downloadElement.parentElement.querySelector('i.torrent_icons.seeding')",
+        snatchedStatusSelector: "downloadElement.parentElement.querySelector('i.torrent_icons.snatched')"
     }
 
     // This is a collage page, so place the bunnyButton alongside the parentElement
@@ -795,7 +808,7 @@ if ( primaryDomain == 'animebytes' ) {
                     }
 
                 }
-
+                
             }
 
         }
@@ -832,6 +845,8 @@ if ( primaryDomain == 'animebytes' ) {
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
+        seedingStatusSelector: "downloadElement.closest('td').querySelector('#color_seeding')",
+        snatchedStatusSelector: "downloadElement.closest('td').querySelector('#color_snatched')",
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
@@ -861,6 +876,7 @@ if ( primaryDomain == 'animebytes' ) {
     // This is a details page, so apply styling to the single bunnyButton
     if ( pageURL.match(/details\.php\?id=\d+/) ) {
 
+        trackerHandlingOptions.seedingStatusSelector = "downloadElement.closest('td').querySelector('span.tag_seeding')"
         trackerHandlingOptions.bunnyButtonText = '🐰 quiCKIE'
         trackerHandlingOptions.bunnyButtonAddStyles = `
             background: #153245;
@@ -1113,6 +1129,8 @@ if ( primaryDomain == 'animebytes' ) {
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
+        seedingStatusSelector: "downloadElement.closest('td').querySelector('span.torrent-info__user-seeding')",
+        snatchedStatusSelector: "downloadElement.closest('td').querySelector('span.torrent-info__user-snatched')"
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
@@ -2861,11 +2879,13 @@ function quickieTrackerHandler({
     enablePaginationLooping = false,
     bunnyButtonAddStyles = '',
     bunnyButtonAddClasses = [],
+    seedingStatusSelector = null,
+    snatchedStatusSelector = null,
+    afterBunnyButtonCreation = false,
     downloadElementsTorrentURLAttribute = 'href',
     forceTorrentFile = false,
     downloadElementsTrackProcessed = false,
     bunnyButtonAttachPresetsMenu = true,
-    afterBunnyButtonCreation = false,
 }) {
     // Using the provided arguments, generate bunnyButtons for matching elements on this page
 
@@ -2882,9 +2902,11 @@ function quickieTrackerHandler({
     // If there is a paginationLoop timer, mark the processed elements so that bunnyButtons are not repeatedly generated
     SETTINGS.paginationLoop >= 500 ? downloadElementsTrackProcessed = true : null
 
-    // Determine if there is a valid function to be performed after the bunnyButtons are created
-    let afterFunction = false
-    typeof afterBunnyButtonCreation === 'function' ? afterFunction = true : null
+    // Determine if there is a reason to log the bunnyButtons so that they can be referenced after the query loop
+    let logElements = false
+    if ( typeof afterBunnyButtonCreation === 'function' || seedingStatusSelector != null || snatchedStatusSelector != null ) {
+        logElements = true
+    }
 
     function processDownloadElements(delay) {
         // query and create a BunnyButton for all downloadElements
@@ -2895,7 +2917,7 @@ function quickieTrackerHandler({
                 let allDownloadElements = document.querySelectorAll(`${downloadElementsSelector}:not([data-quickie_processed="true"])`)
 
                 // There is a function to be performed after the bunnyButtons are created, so populate a object to store the elements
-                afterFunction == true ? processedElements = { bunnyButtons: [], downloadElements: [] , pairedElements: [] } : null
+                logElements == true ? loggedElements = { bunnyButtons: [], downloadElements: [] , pairedElements: [] } : null
 
                 if ( allDownloadElements.length >= 1 ) {
                     // The query returned results that have not yet been processed, so generate a bunnyButton for each downloadElement
@@ -2927,10 +2949,10 @@ function quickieTrackerHandler({
                         downloadElementsTrackProcessed == true ? downloadElement.setAttribute('data-quickie_processed', 'true') : null
                             
                         // Store the processed elements in the object to be passed to the afterBunnyButtonCreation() function
-                        if ( afterFunction == true ) {
-                            processedElements['bunnyButtons'].push(bunnyButton)
-                            processedElements['downloadElements'].push(downloadElement)
-                            processedElements['pairedElements'].push({ bunnyButton: bunnyButton, downloadElement: downloadElement })
+                        if ( logElements == true ) {
+                            loggedElements['bunnyButtons'].push(bunnyButton)
+                            loggedElements['downloadElements'].push(downloadElement)
+                            loggedElements['pairedElements'].push({ bunnyButton: bunnyButton, downloadElement: downloadElement })
                         }
 
                     }
@@ -2951,9 +2973,28 @@ function quickieTrackerHandler({
 
                 SETTINGS.firstTrackerHandlerScan = false
 
-                if ( afterFunction == true && processedElements['bunnyButtons'].length > 0 ) {
-                        // There is a function to be performed and newly created bunnyButtons
-                        afterBunnyButtonCreation(processedElements)
+                if ( typeof afterBunnyButtonCreation === 'function' && loggedElements['bunnyButtons'].length > 0 ) {
+                    // There is a function to be performed and there are newly created bunnyButtons
+                    afterBunnyButtonCreation(loggedElements)
+                }
+
+                if ( seedingStatusSelector != null || snatchedStatusSelector != null && loggedElements['bunnyButtons'].length > 0 ) {
+                    // A torrent status selector was provided and there are newly created bunnyButtons
+
+                    for ( let pairedElements of loggedElements.pairedElements ) {
+
+                        if ( eval(`pairedElements.${seedingStatusSelector}`) != null ) {
+                            // A seedingStatusSelector was matched
+                            replaceEmojis(pairedElements.bunnyButton, '🌱')
+                            pairedElements.bunnyButton.title = pairedElements.bunnyButton.title.replace(/🔗/, '🌱 Seeding\n🔗')
+
+                        } else if ( eval(`pairedElements.${snatchedStatusSelector}`) != null ) { 
+                            // A snatchedStatusSelector was matched
+                            replaceEmojis(pairedElements.bunnyButton, '🍂')
+                            pairedElements.bunnyButton.title = pairedElements.bunnyButton.title.replace(/🔗/, '🍂 Snatched\n🔗')
+                        }
+
+                    }
                 }
 
                 if ( SETTINGS.paginationLoop >= 500 ) {
@@ -3032,6 +3073,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                     let bunnyButton = createBunnyButton({ torrentURL: downloadElement.href, buttonText: bunnyButtonText, torrentSettings: SETTINGS, addButtonStyles: bunnyButtonAddStyles, addButtonClasses: bunnyButtonAddClasses })
 
                     if ( torrentDetailsPage == true ) {
+                        // This is the torrentDetails page, which only lists 1 torrent at a time
 
                         if ( SETTINGS.hideDL == false ) {
                             // Place alongside the parentElement so that the bunnyButton appears on the same row as the downloadElement
@@ -3041,9 +3083,31 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                             downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
                         }
 
+                        if ( document.querySelector('li.torrent-activity-indicator--seeding') != null ) {
+                            // The seedingStatusSelector was matched
+                            replaceEmojis(bunnyButton, '🌱')
+                            bunnyButton.title = bunnyButton.title.replace(/🔗/, '🌱 Seeding\n🔗')
+
+                        } else if ( document.querySelector('li.torrent-activity-indicator--completed') != null ) {
+                            // The snatchedStatusSelector was matched
+                            replaceEmojis(bunnyButton, '🍂')
+                            bunnyButton.title = bunnyButton.title.replace(/🔗/, '🍂 Completed\n🔗')
+                        }
+
                     } else {
+                        // This is NOT the torrent details page, so it likely uses a table to list torrents
 
                         downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
+
+                        if ( downloadElement.closest('tr').querySelector('td.torrent-activity-indicator--seeding') != null ) {
+                            // The seedingStatusSelector was matched
+                            replaceEmojis(bunnyButton, '🌱')
+                            bunnyButton.title = bunnyButton.title.replace(/🔗/, '🌱 Seeding\n🔗')
+                        } else if ( downloadElement.closest('tr').querySelector('td.torrent-activity-indicator--completed') != null ) {
+                            // The snatchedStatusSelector was matched
+                            replaceEmojis(bunnyButton, '🍂')
+                            bunnyButton.title = bunnyButton.title.replace(/🔗/, '🍂 Completed\n🔗')
+                        }
 
                         // If the bunnyButton is After the downloadElement, increase the padding to better fit the page
                         SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButton.style.paddingLeft = '10px' : null
@@ -3725,7 +3789,7 @@ async function quiPOST(postData) {
             console.log(response)
             replaceEmojis(bunnyButton, '❌')
 
-            window.alert(`❌ quiCKIE ❌\n\nThere was an error when connecting to qui. This is usually caused by qui not running or a bad quiURL. Check the service is running and the quiURL for typos, usually it's the same url you can copy-paste from your browser\n\nStatus Code: ${response.status}\n\nquiURL: ${SETTINGS.torrentClient.quiURL}\n\nThe full response has been printed in the console`)
+            window.alert(`❌ quiCKIE ❌\n\nThere was an error when connecting to qui. This is usually caused by qui not running or a bad quiURL. Check the service is running and the quiURL for typos, usually it's the same instance url you can copy-paste from your browser\n\nStatus Code: ${response.status}\n\nquiURL: ${SETTINGS.torrentClient.quiURL}\n\nThe full response has been printed in the console`)
 
         },
         ontimeout: function(response) {
