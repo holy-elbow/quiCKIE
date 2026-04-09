@@ -2979,19 +2979,26 @@ function quickieTrackerHandler({
                 }
 
                 if ( seedingStatusSelector != null || snatchedStatusSelector != null && loggedElements['bunnyButtons'].length > 0 ) {
-                    // A torrent status selector was provided and there are newly created bunnyButtons
+                    // A torrent status selector was provided and there are newly created bunnyButtons, so check for status
 
                     for ( let pairedElements of loggedElements.pairedElements ) {
 
-                        if ( eval(`pairedElements.${seedingStatusSelector}`) != null ) {
-                            // A seedingStatusSelector was matched
-                            replaceEmojis(pairedElements.bunnyButton, '🌱')
-                            pairedElements.bunnyButton.title = pairedElements.bunnyButton.title.replace(/🔗/, '🌱 Seeding\n🔗')
+                        try {
 
-                        } else if ( eval(`pairedElements.${snatchedStatusSelector}`) != null ) { 
-                            // A snatchedStatusSelector was matched
-                            replaceEmojis(pairedElements.bunnyButton, '🍂')
-                            pairedElements.bunnyButton.title = pairedElements.bunnyButton.title.replace(/🔗/, '🍂 Snatched\n🔗')
+                            if ( eval(`pairedElements.${seedingStatusSelector}`) != null ) {
+                                // A seedingStatusSelector was matched
+                                replaceEmojis(pairedElements.bunnyButton, '🌱')
+                                pairedElements.bunnyButton.title = pairedElements.bunnyButton.title.replace(/🔗/, '🌱 Seeding\n🔗')
+
+                            } else if ( eval(`pairedElements.${snatchedStatusSelector}`) != null ) { 
+                                // A snatchedStatusSelector was matched
+                                replaceEmojis(pairedElements.bunnyButton, '🍂')
+                                pairedElements.bunnyButton.title = pairedElements.bunnyButton.title.replace(/🔗/, '🍂 Snatched\n🔗')
+                            }
+
+                        } catch(error) {
+                            // There was en error, likely due to either bad method chaining or invalid JavaScript
+                            console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThere was an error when attempting to query for the element that would indicate the torrents Seeding\\Snatched status. This is likely due to either a bad chaining of selectors or invalid Javascript. BunnyButton functionality is not affected, but this should be reported.\n\ndownloadElement: ${pairedElements.downloadElement}\n\nseedingStatusSelector: ${seedingStatusSelector}\n\nsnatchedStatusSelector: ${snatchedStatusSelector}\n\nError:${error}\n\n`)
                         }
 
                     }
