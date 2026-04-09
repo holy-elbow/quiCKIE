@@ -29,6 +29,8 @@ The quiCKIE settings panel can be accessed by performing a **Shift-Click** on an
 > **Ctrl-Click**: Open torrent client in a new tab<br>
 > **Shift-Ctrl-Click**: Send torrent to client, but paused (works for both the current tracker settings and presets)<br>
 >
+> **BunnyButton Indicators**<br>🐰 = Normal | 🌱 = Seeding | 🍂 = Snatched | 🪙 = Freeleech | 🤝 = ThirdParty<br>🧲 = Downloading .torrent file | 🧑 = Client Login | 🕓 = Sending Torrent | ✔️ = Success | ❌ = Failure
+>
 > **Source: [GitHub](https://github.com/WirlyWirly/quiCKIE)**<br>
 > **Install: [qui - quiCKIE](https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/quiCKIE.user.js?raw=true)**<br>
 > Written on [LibreWolf](https://librewolf.net/) via [Violentmonkey](https://violentmonkey.github.io/)<br>
