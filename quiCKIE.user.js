@@ -501,7 +501,7 @@ let [ primaryDomain, allPrimaryDomains, primaryDomainToName, primaryDomainToHome
 let [ SETTINGS, presetMenuItems ] = getTrackerSettings(primaryDomain)
 
 // All the emojis that may be displayed on bunnyButtons, defined as a RegExp so that they can be replaced during different stages of the script
-const emojiRegex = new RegExp('🐰|💎|🌱|🍁|🤝|🕓|🧲|🧑|❌|✔️|🧀', 'g')
+const emojiRegex = new RegExp('🐰|💸|💎|🌱|🍁|🤝|🕓|🧲|🧑|❌|✔️|🧀', 'g')
 
 // The URL of the current page, useful for figuring out exactly what page you are on using pageURL.match(/regex/)
 const pageURL = document.URL
@@ -542,19 +542,19 @@ if ( primaryDomain == 'animebytes' ) {
         // Additional class names that will be applied to each bunnyButton, useful for advanced styling
         bunnyButtonAddClasses: [], // Default = [] || Options = An array of strings 
 
-        // A string of valid JavaScript that if 'true' indicates a torrent has the status of 'seeding', so the bunnyButton emoji will be changed to '🌱' (see the BroadcasTheNet\Empornium\Orpheus\PassThePopcorn\Redacted blocks for examples)
+        // A string representing a valid JavaScript comparison, that if 'true' indicates a torrent has the status of 'seeding', so the bunnyButton emoji will be changed to '🌱' (see the BroadcasTheNet\Empornium\Orpheus\PassThePopcorn\Redacted blocks for examples)
         // The string may start with 'downloadElement' then be followed by a chain of '.closest()' and\or '.querySelector()' methods in order to locate a target element relative to the downloadElement. If the target element is found, the check is considered 'true'
-        // If the target element has identifiable text but not attributes, it may be helpful to perform a targetElement.textContent.match(/regex/). If a match is found, the check is considered to be 'true' (see the Redacted block for examples)
+        // If the target element has identifiable text but not attributes, one option is to perform a targetElement.textContent.match(/regex/). If a match is found, the check is considered to be 'true' (see the MyAnonaMouse\Redacted block for examples)
         seedingStatusSelector: null, // Default = null || Options = 'downloadElement...'
 
-        // A string of valid JavaScript that if 'true' indicates a torrent has the status of 'snatched', so the bunnyButton emoji will be changed to '🍁' (see the AnimeBytes\BroadcasTheNet\Empornium\Orpheus\PassThePopcorn\Redacted blocks for examples)
+        // A string representing a valid JavaScript comparison, that if 'true' indicates a torrent has the status of 'snatched', so the bunnyButton emoji will be changed to '🍁' (see the AnimeBytes\BroadcasTheNet\Empornium\Orpheus\PassThePopcorn\Redacted blocks for examples)
         // The string may start with 'downloadElement' then be followed by a chain of '.closest()' and\or '.querySelector()' methods in order to locate a target element relative to the downloadElement. If the target element is found, the check is considered 'true'
-        // If the target element has identifiable text but not attributes, you may perform a targetElement.textContent.match(/regex/). If a match is found, the check is considered to be 'true' (see the Redacted block for examples)
+        // If the target element has identifiable text but not attributes, one option is to perform a targetElement.textContent.match(/regex/). If a match is found, the check is considered to be 'true' (see the MyAnonaMouse\Redacted block for examples)
         snatchedStatusSelector: "downloadElement.closest('td').querySelector('a.snatched-torrent')", // Default = null || Options = 'downloadElement...'
 
-        // A string of valid JavaScript that if 'true' indicates a torrent has the status of 'freeleech', so the bunnyButton emoji will be changed to '💎' (see the AnimeBytes\BroadcasTheNet\Empornium\Orpheus\PassThePopcorn\Redacted blocks for examples)
+        // A string representing a valid JavaScript comparison, that if 'true' indicates a torrent has the status of 'freeleech', so the bunnyButton emoji will be changed to '💎' (see the AnimeBytes\BroadcasTheNet\Empornium\Orpheus\PassThePopcorn\Redacted blocks for examples)
         // The string may start with 'downloadElement' then be followed by a chain of '.closest()' and\or '.querySelector()' methods in order to locate a target element relative to the downloadElement. If the target element is found, the check is considered 'true'
-        // If the target element has identifiable text but not attributes, you may perform a targetElement.textContent.match(/regex/). If a match is found, the check is considered to be 'true' (see the Redacted block for examples)
+        // If the target element has identifiable text but not attributes, one option is to perform a targetElement.textContent.match(/regex/). If a match is found, the check is considered to be 'true' (see the MyAnonaMouse\Redacted block for examples)
         freeleechStatusSelector: `downloadElement.closest('td').querySelector('img[alt^="Freeleech"]')`, // Default = null || Options = 'downloadElement...'
 
         // A function that will be called after all the bunnyButtons have been created, useful for advanced styling or further clean-up (see the BakaBT\Empornium\MyAnonaMouse blocks for examples)
@@ -807,7 +807,7 @@ if ( primaryDomain == 'animebytes' ) {
 
                     if ( bunnyButton.dataset.torrenturl.match(/&usetoken=1/) ) {
                         // This is a Freeleech button
-                        bunnyButton.textContent = '💎 Freeleech'
+                        bunnyButton.textContent = '💸 Freeleech'
                         bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}border: #A0DA83 solid 1px; color: #A0DA83; background: #113400;`)
                         bunnyButton.setAttribute('data-emojispecified', 'true')
 
@@ -1024,6 +1024,9 @@ if ( primaryDomain == 'animebytes' ) {
 
         let trackerHandlingOptions = {
             downloadElementsSelector: 'a[href^="/tor/download.php/"][title*="Download"]',
+            seedingStatusSelector: "document.getElementById('DLhistory').textContent.match(/seeding/i)",
+            snatchedStatusSelector: "document.getElementById('DLhistory').textContent.match(/seeder/i)",
+            freeleechStatusSelector: "document.getElementById('ratio').textContent.match(/freeleech/i)",
             bunnyButtonFontSize: '125%',
             bunnyButtonText: '🐰 quiCKIE',
             bunnyButtonAddStyles: `
@@ -1044,22 +1047,10 @@ if ( primaryDomain == 'animebytes' ) {
                     // If DL buttons are hidden, change bunnyButton display to block so the buttons are properly spaced apart
                     SETTINGS.hideDL == true ? bunnyButton.style.display = 'block' : null
 
-                    // This is the Freeleech Wedge button, so apply a different style
+                    // This is the Freeleech Wedge button, so apply different text\styles
                     if ( bunnyButton.dataset.torrenturl.match(/tid=\d+&fl/) ) {
                         bunnyButton.textContent = '🧀 Freeleech'
                         bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}background: #2E2400; border: #CBC29E solid 1px; color: #CBC29E;`)
-
-                    } else {
-                        // This is not the Freeleech Wedge button, so check if the torrent is seeding\snatched\freeleech
-                        
-                        try {
-                            document.getElementById('ratio').textContent.match(/freeleech/i) ? replaceEmojis(bunnyButton, '💎') : null // Freeleech
-                            document.getElementById('DLhistory').textContent.match(/seeder/i) ? replaceEmojis(bunnyButton, '🍁') : null // Snatched
-                            document.getElementById('DLhistory').textContent.match(/seeding/i) ? replaceEmojis(bunnyButton, '🌱') : null // Seeding
-                        } catch(error) {
-                            // console.log(error)
-                        }
-
                     }
 
                 }
@@ -3260,7 +3251,7 @@ function createBunnyButton({
 
     // Indicate that this torrentURL will also Freeleech a torrent
     if ( torrentURL.match(/(&usetoken=1|&fl)/) ) { 
-        bunnyButton.textContent = bunnyButton.textContent.replace(/🐰/g, '💎')
+        bunnyButton.textContent = bunnyButton.textContent.replace(/🐰/g, '💸')
         bunnyButton.setAttribute('data-emojispecified', 'true')
     }
 
