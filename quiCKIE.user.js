@@ -87,6 +87,16 @@
 // @match   https://www.deepbassnine.com/collages.php?id=*
 // @match   https://www.deepbassnine.com/torrents.php*
 
+// @match   https://digitalcore.club/alltorrents*
+// @match   https://digitalcore.club/movies*
+// @match   https://digitalcore.club/tvseries*
+// @match   https://digitalcore.club/games*
+// @match   https://digitalcore.club/music*
+// @match   https://digitalcore.club/apps*
+// @match   https://digitalcore.club/xxx*
+// @match   https://digitalcore.club/other*
+// @match   https://digitalcore.club/torrent/*
+
 // @match   https://www.empornium.sx/collage/*
 // @match   https://www.empornium.sx/top10.php*
 // @match   https://www.empornium.sx/torrents.php*
@@ -315,6 +325,12 @@ const settingsPanelTrackers = [
         homepageURL: 'https://www.deepbassnine.com',
         primaryDomain: 'deepbassnine',
     },
+
+    {
+        trackerName: 'DigitalCore',
+        homepageURL: 'https://digitalcore.club/',
+        primaryDomain: 'digitalcore',
+    },    
 
     {
         trackerName: 'Empornium',
@@ -733,6 +749,19 @@ if ( primaryDomain == 'animebytes' ) {
 
     let trackerHandlingOptions = {
         downloadElementsSelector: 'a[href^="torrents.php?action=download&id="]',
+    }
+
+    quickieTrackerHandler(trackerHandlingOptions)
+
+} else if ( primaryDomain == 'digitalcore' ) {
+
+    let trackerHandlingOptions = {
+        downloadElementsSelector: 'a[href^="/api/v1/torrents/download/"]',
+        enablePaginationLooping: true,
+    }
+
+    if ( pageURL.match(/\/torrent\/\d+/) ) {
+        trackerHandlingOptions.downloadElementsSelector = 'a[href^="/api/v1/torrents/download"] > i[class*="fa-download"]'
     }
 
     quickieTrackerHandler(trackerHandlingOptions)
