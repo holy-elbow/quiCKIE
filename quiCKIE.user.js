@@ -809,9 +809,8 @@ if ( primaryDomain == 'animebytes' ) {
 
         let pageObserver = new MutationObserver(async function(pageMutations) {
 
-            let tbodyElement = await waitForElement('torrents-table[torrents^="vm.torrents"]', document.getElementById('contentContainer'))
 
-            // let tbodyElement = await waitForElement('div[ng-hide="vm.loadingTorrents"]:not(.ng-hide) tbody', document.getElementById('contentContainer'))
+            let tbodyElement = await waitForElement('div[ng-hide="vm.loadingTorrents"]:not(.ng-hide) tbody', document.getElementById('contentContainer'))
 
             try {
 
