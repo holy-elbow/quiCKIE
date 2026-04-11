@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.42.5
+// @version     1.42.8
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -1297,8 +1297,8 @@ if ( primaryDomain == 'animebytes' ) {
             // DL elements are already present, meaning the user has the account setting 'Torrent group display' toggled to 'Open'
             document.querySelector(trackerHandlingOptions.downloadElementsSelector) ? quickieTrackerHandler(trackerHandlingOptions) : null
 
-            // Wait until the <tbody> of a new page is loaded...
             try {
+                // Wait until the <tbody> of a new page is loaded...
                 var tbodyElement = await waitForElement('#discog_table tbody', document.getElementById('discog_table'))
             } catch (error) {
                 // There was an error, likely this mutation did not contain the waitForElement query target
@@ -3362,13 +3362,13 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                     if ( torrentDetailsPage == true ) {
                         // This is the torrentDetails page, which only lists 1 torrent at a time
 
-                        if ( SETTINGS.hideDL == false ) {
-                            // Place alongside the parentElement so that the bunnyButton appears on the same row as the downloadElement
-                            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
-                        } else {
-                            // The downloadElement will be hidden, so the bunnyButton can be placed directly alongside it
-                            downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
-                        }
+                        // Place BunnyButton into it's own <li>
+                        let clonedParent = downloadElement.parentElement.cloneNode()
+                        clonedParent.appendChild(bunnyButton)
+                        downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
+
+                        // Hide the <li> parentElement to avoid a empty gap
+                        SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
 
                         if ( document.querySelector('li.torrent__seeders.torrent-activity-indicator--seeding') != null ) {
                             // The seedingStatusSelector was matched
@@ -3386,12 +3386,46 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                         }
 
                     } else {
-                        // This is NOT the torrent details page, so it likely uses a table to list torrents
+                        // This is NOT the torrent details page, so it likely uses one of the three views: List, Cards, or Grouped
 
                         downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
                         
-                        // If the bunnyButton is After the downloadElement, increase the padding to better fit the page
-                        SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButton.style.paddingLeft = '10px' : null
+                        if ( downloadElement.closest('td.torrent-search--list__buttons') ) {
+                            // This is a List view
+                            bunnyButton.style.display = 'inline-grid'
+                            bunnyButton.style.fontSize = '110%'
+                            bunnyButton.style.padding = '10px'
+
+
+                        } else if ( downloadElement.closest('article.torrent-card') ) {
+                            // This is a Cards view
+                            bunnyButton.style.display = 'inline-grid'
+                            bunnyButton.style.fontSize = '135%'
+                            bunnyButton.style.padding = '10px'
+
+                        } else if ( downloadElement.closest('td.torrent-search--grouped__download') ) {
+                            // This is a Grouped view, move bunnyButton into it's own <td>
+                            let clonedParent = downloadElement.parentElement.cloneNode()
+                            clonedParent.appendChild(bunnyButton)
+                            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
+
+                            bunnyButton.style.padding = '4px'
+
+                            // Hide the <li> parentElement to avoid a empty gap
+                            SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
+
+                        } else if ( downloadElement.closest('td.user-bookmarks__actions') ) {
+                            // This is the Bookmarks view, move bunnyButton into it's own <li>
+                            let clonedParent = downloadElement.parentElement.cloneNode()
+                            clonedParent.appendChild(bunnyButton)
+                            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
+
+                            bunnyButton.style.padding = '4px'
+                            
+                            // Hide the <li> parentElement to avoid a empty gap
+                            SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
+
+                        }
 
                         try {
                             if ( downloadElement.closest('tr').querySelector('td.torrent-activity-indicator--seeding') != null ) {
