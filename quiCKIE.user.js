@@ -87,6 +87,7 @@
 // @match   https://www.deepbassnine.com/collages.php?id=*
 // @match   https://www.deepbassnine.com/torrents.php*
 
+// @match   https://digitalcore.club/
 // @match   https://digitalcore.club/alltorrents*
 // @match   https://digitalcore.club/movies*
 // @match   https://digitalcore.club/tvseries*
@@ -96,6 +97,7 @@
 // @match   https://digitalcore.club/xxx*
 // @match   https://digitalcore.club/other*
 // @match   https://digitalcore.club/torrent/*
+// @match   https://digitalcore.club/torrent-lists/*
 
 // @match   https://www.empornium.sx/collage/*
 // @match   https://www.empornium.sx/top10.php*
@@ -754,17 +756,63 @@ if ( primaryDomain == 'animebytes' ) {
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( primaryDomain == 'digitalcore' ) {
-
-    let trackerHandlingOptions = {
-        downloadElementsSelector: 'a[href^="/api/v1/torrents/download/"]',
-        enablePaginationLooping: true,
-    }
+    // ---------------------------------- DigitalCore ---------------------------------
+    //
 
     if ( pageURL.match(/\/torrent\/\d+/) ) {
-        trackerHandlingOptions.downloadElementsSelector = 'a[href^="/api/v1/torrents/download"] > i[class*="fa-download"]'
-    }
 
-    quickieTrackerHandler(trackerHandlingOptions)
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]:has(i.fa-download)',
+            afterBunnyButtonCreation: function(elements) {
+                for ( let bunnyButton of elements.bunnyButtons ) {
+                    bunnyButton.textContent = '🐰 quiCKIE'
+                    bunnyButton.setAttribute('style', `${bunnyButton.style.cssText}
+                        border-radius: 3px;
+                        font-size: 12px;
+                        padding: 1px 39.817px;
+                        margin-left: 11.033px;
+                        border: #323232 solid 1px;
+                        vertical-align: middle;
+                        color: #ccc;
+                        background: #252525;`)
+                }
+            },
+        }
+
+        let observer = new MutationObserver(function(mutations) {
+            quickieTrackerHandler(trackerHandlingOptions)
+        })
+        let target = document.getElementById('contentContainer')
+        let config = { childList: true }
+        observer.observe(target, config)
+
+    } else {
+
+        let trackerHandlingOptions = { 
+            downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]',
+        }
+        let pageObserver = new MutationObserver(function(pageMutations) {
+
+            waitForElement('div[ng-hide="vm.loadingTorrents"]:not(.ng-hide) tbody', document.getElementById('contentContainer')).then(tbodyElement => {
+
+                try {
+
+                    let torrentObserver = new MutationObserver(function(torrentMutations) {
+
+                        quickieTrackerHandler(trackerHandlingOptions)
+                    })
+
+                    torrentObserver.observe(tbodyElement, { childList: true } )
+                } catch(error) {
+                    return
+                }
+            })
+        })
+
+        let target = document.getElementById('contentContainer')
+        let config = { childList: true }
+        pageObserver.observe(target, config)
+    }
 
 } else if ( primaryDomain == 'e-hentai' ) {
     // ----------------------------------- E-Hentai -----------------------------------
