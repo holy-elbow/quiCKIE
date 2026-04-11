@@ -84,7 +84,6 @@ class ContextMenu {
   closeMenu(menu) {
     if (this.isOpened) {
       this.isOpened = false;
-        
 
       menu.remove();
     }
@@ -99,27 +98,32 @@ class ContextMenu {
     const contextMenu = this.renderMenu();
     document.addEventListener("click", () => this.closeMenu(contextMenu));
     window.addEventListener("blur", () => this.closeMenu(contextMenu));
-    document.addEventListener("contextmenu", (e) => {
-      this.targetNode.forEach((target) => {
-        if (!e.target.contains(target)) {
-          // contextMenu.remove();
-        }
-      });
-    });
+    // document.addEventListener("contextmenu", (e) => {
+    //   this.targetNode.forEach((target) => {
+    //     if (!e.target.contains(target)) {
+    //       contextMenu.remove();
+    //     }
+    //   });
+    // });
 
     this.targetNode.forEach((target) => {
-        // This element (bunnyButton) has not yet had a contextmenu event attached to it
+        // This target element (bunnyButton) has not yet had a contextmenu event attached to it
 
         target.addEventListener("contextmenu", (e) => {
           
-        // For later reference, mark this element (BunnyButton) as having been the element that was right-clicked on to open the context menu
-        target.id = '__CONTEXTCLICKED__'
+        // For later reference, mark this target element (BunnyButton) as having been the element that was right-clicked on to open the context menu
+        let targetElementId = `quiCKIE_bb_${Date.now()}`
+        target.id = targetElementId
 
         e.preventDefault();
         this.isOpened = true;
 
         const { clientX, clientY } = e;
         document.body.appendChild(contextMenu);
+
+        contextMenu.querySelectorAll('button.contextMenu-button').forEach( button => {
+                button.setAttribute('data-targetid', targetElementId)
+        } )
 
         const positionY =
           clientY + contextMenu.scrollHeight >= window.innerHeight
