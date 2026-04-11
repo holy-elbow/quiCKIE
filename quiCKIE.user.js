@@ -800,17 +800,50 @@ if ( primaryDomain == 'animebytes' ) {
 
         observer.observe(target, config)
 
-    } else {
+    } else if ( pageURL.match(/^https:\/\/digitalcore\.club\/?$/) ) {
 
         let trackerHandlingOptions = {
-            downloadElementsSelector: 'torrents-table[torrents^="vm.torrents"] a[href^="/api/v1/torrents/download"]',
+            downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]',
+            downloadElementsTrackProcessed: true,
+            enablePaginationLooping: true
+        }
+
+        quickieTrackerHandler(trackerHandlingOptions)
+
+/*         let pageObserver = new MutationObddserver(async function (pageMutations) {
+ *
+ *             let carouselElement = await waitForElement('div[class*="carousel"]', document.getElementById('contentContainer'))
+ *
+ *             try {
+ *
+ *                 let carouselObserver = new MutationObserver(function (carouselMutations) {
+ *                     quickieTrackerHandler(trackerHandlingOptions)
+ *                 })
+ *
+ *                 carouselObserver.observe(carouselElement, { childList: true })
+ *             } catch (error) {
+ *                 console.log(error)
+ *                 return
+ *             }
+ *         })
+ *
+ *         let target = document.getElementById('contentContainer')
+ *         let config = { childList: true }
+ *         pageObserver.observe(target, config) */
+
+    } else {
+
+
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]',
             downloadElementsTrackProcessed: true,
         }
 
         let pageObserver = new MutationObserver(async function(pageMutations) {
 
 
-            let tbodyElement = await waitForElement('div[ng-hide="vm.loadingTorrents"]:not(.ng-hide) tbody', document.getElementById('contentContainer'))
+            let tbodyElement = await waitForElement('torrents-table[torrents] tbody', document.getElementById('contentContainer'))
+            
 
             try {
 
