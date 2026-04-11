@@ -801,7 +801,7 @@ if ( primaryDomain == 'animebytes' ) {
 
         observer.observe(target, config)
 
-    } else if ( pagePath.match(/\/?$/) ) {
+    } else if ( pagePath.match(/^\/?$/) ) {
 
         let trackerHandlingOptions = {
             downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]',
