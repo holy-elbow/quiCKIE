@@ -776,6 +776,7 @@ if ( primaryDomain == 'animebytes' ) {
 
         let trackerHandlingOptions = {
             downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]:has(i.fa-download)',
+            downloadElementsTrackProcessed: true,
             bunnyButtonText: '🐰 quiCKIE',
             bunnyButtonAddStyles: `
                 background: #252525;
@@ -802,7 +803,7 @@ if ( primaryDomain == 'animebytes' ) {
     } else {
 
         let trackerHandlingOptions = {
-            downloadElementsSelector: 'torrents-table[torrents^="vm.torrents"] a[href^="/api/v1/torrents/download"]'',
+            downloadElementsSelector: 'torrents-table[torrents^="vm.torrents"] a[href^="/api/v1/torrents/download"]',
             downloadElementsTrackProcessed: true,
         }
 
