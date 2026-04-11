@@ -3088,7 +3088,7 @@ function quickieTrackerHandler({
     // Using the provided arguments, generate bunnyButtons for matching elements on this page
 
     logger.info('quickieTrackerHandler Settings')
-    logger.nodes(arguments[0])
+    logger.log(arguments[0])
 
     // If the .torrent file should be forced to download through the browser
     forceTorrentFile == true ? SETTINGS.forceTorrentFile = true : null
@@ -3118,7 +3118,7 @@ function quickieTrackerHandler({
                 let allDownloadElements = document.querySelectorAll(`${downloadElementsSelector}:not([data-quickie_processed="true"])`)
 
                 logger.info('allDownloadElements')
-                logger.nodes(allDownloadElements)
+                logger.log(allDownloadElements)
 
                 // There is a function to be performed after the bunnyButtons are created, so populate a object to store the elements
                 logElements == true ? loggedElements = { bunnyButtons: [], downloadElements: [] , pairedElements: [] } : null
@@ -3202,7 +3202,7 @@ function quickieTrackerHandler({
 
                         } catch (error) {
                             // There was en error, likely due to either impossible method chaining for this downloadElement (signifying 'false') or invalid JavaScript
-                            logger.nodes(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe seedingStatusSelector returned an error.\n\nIf you are reading this message and the 🌱 is present on the bunnyButtons that are indeed seeding, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the seeding torrents are not displaying the 🌱, it is most likely that either the seedingStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nseedingStatusSelector: ${seedingStatusSelector}\n\nError:${error}\n\n`)
+                            logger.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe seedingStatusSelector returned an error.\n\nIf you are reading this message and the 🌱 is present on the bunnyButtons that are indeed seeding, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the seeding torrents are not displaying the 🌱, it is most likely that either the seedingStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nseedingStatusSelector: ${seedingStatusSelector}\n\nError:${error}\n\n`)
                         }
 
                         try {
@@ -3216,7 +3216,7 @@ function quickieTrackerHandler({
 
                         } catch (error) {
                             // There was en error, likely due to either impossible method chaining for this downloadElement (signifying 'false') or invalid JavaScript
-                            logger.nodes(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe snatchedStatusSelector returned an error.\n\nIf you are reading this message and the 🍁 is present on the bunnyButtons that are indeed snatched, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the snatched torrents are not displaying the 🍁, it is most likely that either the snatchedStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nsnatchedStatusSelector: ${snatchedStatusSelector}\n\nError:${error}\n\n`)
+                            logger.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe snatchedStatusSelector returned an error.\n\nIf you are reading this message and the 🍁 is present on the bunnyButtons that are indeed snatched, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the snatched torrents are not displaying the 🍁, it is most likely that either the snatchedStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nsnatchedStatusSelector: ${snatchedStatusSelector}\n\nError:${error}\n\n`)
                         }
 
                         try {
@@ -3230,7 +3230,7 @@ function quickieTrackerHandler({
 
                         } catch (error) {
                             // There was en error, likely due to either impossible method chaining for this downloadElement (signifying 'false') or invalid JavaScript
-                            logger.nodes(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe freeleechStatusSelector returned an error.\n\nIf you are reading this message and the 💎 is present on the bunnyButtons that are indeed freeleech, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the freeleech torrents are not displaying the 💎, it is most likely that either the freeleechStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nfreeleechStatusSelector: ${freeleechStatusSelector}\n\nError:${error}\n\n`)
+                            logger.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe freeleechStatusSelector returned an error.\n\nIf you are reading this message and the 💎 is present on the bunnyButtons that are indeed freeleech, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the freeleech torrents are not displaying the 💎, it is most likely that either the freeleechStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nfreeleechStatusSelector: ${freeleechStatusSelector}\n\nError:${error}\n\n`)
                         }
                     }
                 }
