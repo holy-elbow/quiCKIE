@@ -517,7 +517,8 @@ let trackerDomain = document.location.hostname.match(/^(\w+\.)?(.+?)\..+$/)[2].t
 let [ primaryDomain, allPrimaryDomains, primaryDomainToName, primaryDomainToHomepage, trackerNameToPrimaryDomain, presetCount ] = createGMConfigSettingsPanel(trackerDomain)
 
 // Retrieve the settings and presetMenuItems that are relevant to the current tracker
-let SETTINGS, presetMenuItems; [ SETTINGS, presetMenuItems ] = getTrackerSettings(primaryDomain)
+let SETTINGS = getTrackerSettings(primaryDomain)
+let presetMenuItems = createPresetItems([SETTINGS.primaryDomain])
 
 // All the emojis that may be displayed on bunnyButtons, defined as a RegExp so that they can be replaced during different stages of the script
 const emojiRegex = new RegExp('🐰|💸|💎|🌱|🍁|🤝|🕓|🧲|🧑|❌|✔️|💾|🧀', 'g')
@@ -1166,7 +1167,7 @@ if ( primaryDomain == 'animebytes' ) {
 
         }
 
-        let observer = new MutationObserver(function(mutations) {
+        let observer = new MutationObserver( function(mutations) {
             // Functionality to run when changes are detected to the target element
 
            quickieTrackerHandler(trackerHandlingOptions)
@@ -1196,7 +1197,7 @@ if ( primaryDomain == 'animebytes' ) {
     // Browse | Details
 
     let trackerHandlingOptions = {
-        downloadElementsSelector: 'a[href^="magnet:?xt\=urn:btih:"]',
+        downloadElementsSelector: 'a[href^="/download/"][href$=".torrent"]',
     }
 
     // The Details page, so apply styling to the single bunnyButton
@@ -1284,32 +1285,36 @@ if ( primaryDomain == 'animebytes' ) {
         trackerHandlingOptions.downloadElementsSelector = `#discog_table tbody ${trackerHandlingOptions.downloadElementsSelector}`
         trackerHandlingOptions.downloadElementsTrackProcessed = true
 
-        let pageObserver = new MutationObserver(function(pageMutations) {
+        let pageObserver = new MutationObserver( async function(pageMutations) {
             // The actions to take when new PAGES are loaded
 
             // DL elements are already present, meaning the user has the account setting 'Torrent group display' toggled to 'Open'
             document.querySelector(trackerHandlingOptions.downloadElementsSelector) ? quickieTrackerHandler(trackerHandlingOptions) : null
 
-            waitForElement('#discog_table tbody', document.getElementById('discog_table')).then(tbodyElement => {
-                // The actions to take after the <tbody> of a new page is loaded...
+            // Wait until the <tbody> of a new page is loaded...
+            try {
+                var tbodyElement = await waitForElement('#discog_table tbody', document.getElementById('discog_table'))
+            } catch (error) {
+                // There was an error, likely this mutation did not contain the waitForElement query target
+                return
+            }
 
-                try {
+            try {
 
-                    let tbodyObserver = new MutationObserver(function(tbodyMutations) {
-                        // The actions to take when the '+' button of a <tr> is clicked, which will load the DL buttons onto the page
+                let tbodyObserver = new MutationObserver( function() {
+                    // The actions to take when the '+' button of a <tr> is clicked, which will load the DL buttons onto the page
 
-                        quickieTrackerHandler(trackerHandlingOptions)
+                    quickieTrackerHandler(trackerHandlingOptions)
 
-                    })
+                })
 
-                    tbodyObserver.observe(tbodyElement, { childList: true } )
+                tbodyObserver.observe(tbodyElement, { childList: true } )
 
-                } catch(error) {
-                    // console.log(error)
-                    return
+            } catch(error) {
+                // console.log(error)
+                return
 
-                }
-            })
+            }
 
         })
 
@@ -2714,13 +2719,19 @@ function getTrackerSettings(primaryDomain) {
     // Define the main SETTINGS object and populate it with the current primaryDomain specific settings
 
     // @trackerSettings
-    SETTINGS = {
+    let SETTINGS = {
         primaryDomain: primaryDomain,
         forceTorrentFile: false,
         firstTrackerHandlerScan: true,
         firstThirdPartyScan: true,
 
         // The global quiCKIE saved settings
+        bunnyButtonPlacement: GM_config.get('bunnyButtonPlacement'),
+        globalLeftClickAction: GM_config.get('globalLeftClickAction'),
+        globalMiddleClickAction: GM_config.get('globalMiddleClickAction'),
+        globalForcedTorrentFile: GM_config.get('globalForcedTorrentFile'),
+        thirdPartyDelay: GM_config.get('thirdPartyDelay'),
+
         torrentClient: {
             'client': GM_config.get('torrentClient'),
 
@@ -2743,13 +2754,6 @@ function getTrackerSettings(primaryDomain) {
             'ruTorrentPassword': GM_config.get('ruTorrentPassword'),
         },
 
-
-        globalLeftClickAction: GM_config.get('globalLeftClickAction'),
-        globalMiddleClickAction: GM_config.get('globalMiddleClickAction'),
-        thirdPartyDelay: GM_config.get('thirdPartyDelay'),
-        bunnyButtonPlacement: GM_config.get('bunnyButtonPlacement'),
-        globalForcedTorrentFile: GM_config.get('globalForcedTorrentFile'),
-
         // The saved settings of the current tracker
         category: GM_config.get(`${primaryDomain}-category`),
         savePath: GM_config.get(`${primaryDomain}-savePath`),
@@ -2771,7 +2775,7 @@ function getTrackerSettings(primaryDomain) {
 
     }
 
-    // GM_config() saves what should be blank int/float fields as 0, which is qbitTorrent interprets problematically, so set 0 to ''
+    // GM_config() saves what should be blank int/float fields as 0, which qbitTorrent interprets problematically, so change 0 to ''
     SETTINGS.ratioLimit == 0 ? SETTINGS.ratioLimit = '' : null
     SETTINGS.seedTime == 0 ? SETTINGS.seedTime = '' : null
     SETTINGS.dlLimit <= 0 ? SETTINGS.dlLimit = '' : null
@@ -2779,9 +2783,7 @@ function getTrackerSettings(primaryDomain) {
     SETTINGS.instance <= 0 ? SETTINGS.instance = '' : null
     SETTINGS.paginationLoop < 500 ? SETTINGS.paginationLoop = '' : null
 
-    let presetMenuItems = createPresetItems([SETTINGS.primaryDomain])
-
-    return [SETTINGS, presetMenuItems]
+    return SETTINGS
 
 }
 
@@ -2795,7 +2797,9 @@ function createPresetItems(primaryDomains) {
             events: {
                 'click': function(event) {
                     // This menuItem was clicked, so use basic settings to add the torrent
-                    let bunnyButton = document.getElementById('__CONTEXTCLICKED__')
+
+                    let bunnyButtonId = this.dataset.targetid
+                    let bunnyButton = document.getElementById(bunnyButtonId)
 
                     let startPaused = false
                     if ( event.shiftKey && event.ctrlKey && event.button == 0 ) {
@@ -2803,8 +2807,6 @@ function createPresetItems(primaryDomains) {
                         startPaused = true
                     }
 
-                    let bunnyButtonId = `quiCKIE_bb_${Date.now()}`
-                    bunnyButton.id = bunnyButtonId
 
                     addTorrent({
                         torrentURL: bunnyButton.dataset.torrenturl,
@@ -2825,10 +2827,9 @@ function createPresetItems(primaryDomains) {
             events: {
                 'click': function(event) {
                     // This menuItem was clicked, so use basic settings to add the torrent, but in a paused state
-                    let bunnyButton = document.getElementById('__CONTEXTCLICKED__')
 
-                    let bunnyButtonId = `quiCKIE_bb_${Date.now()}`
-                    bunnyButton.id = bunnyButtonId
+                    let bunnyButtonId = this.dataset.targetid
+                    let bunnyButton = document.getElementById(bunnyButtonId)
 
                     addTorrent({
                         torrentURL: bunnyButton.dataset.torrenturl,
@@ -2885,7 +2886,9 @@ function createPresetItems(primaryDomains) {
             events: {
                 'click': function(event) {
                     // This menuItem was clicked, so use the selected preset
-                    let bunnyButton = document.getElementById('__CONTEXTCLICKED__')
+
+                    let bunnyButtonId = this.dataset.targetid
+                    let bunnyButton = document.getElementById(bunnyButtonId)
                     
                     let fileElement = document.createElement('a')
                     fileElement.href = bunnyButton.dataset.torrenturl
@@ -2893,12 +2896,12 @@ function createPresetItems(primaryDomains) {
                     document.body.appendChild(fileElement)
                     fileElement.click()
                     document.body.removeChild(fileElement)
-                    replaceEmojis(bunnyButton, '💾')
                     fileElement.remove()
+                    replaceEmojis(bunnyButton, '💾')
 
                 },
                 'mouseover': function(event) {
-                    this.title = `💾 Download the .torrent file\n\nℹ️ BunnyButtons based off MagnetLinks will instead open the link`
+                    this.title = `💾 Download the .torrent file\n\nℹ️ BunnyButtons based on MagnetLinks will instead open the MagnetLink`
                 }
             }
         },
@@ -3000,7 +3003,10 @@ function createPresetItems(primaryDomains) {
                     events: {
                         'click': function(event) {
                             // This menuItem was clicked, so use the selected preset to add the torrent
-                            let bunnyButton = document.getElementById('__CONTEXTCLICKED__')
+
+                            // The bunnyButtonId, which was set as a data set as a dataset attribute when the bunnyButton was right-clicked
+                            let bunnyButtonId = this.dataset.targetid
+                            let bunnyButton = document.getElementById(bunnyButtonId)
 
                             let torrentURL = bunnyButton.dataset.torrenturl
 
@@ -3010,8 +3016,6 @@ function createPresetItems(primaryDomains) {
                                 startPaused = true
                             }
 
-                            let bunnyButtonId = `quiCKIE_bb_${Date.now()}`
-                            bunnyButton.id = bunnyButtonId
                             addTorrent({
                                 torrentURL: torrentURL,
                                 torrentClient: SETTINGS.torrentClient,
@@ -3033,7 +3037,8 @@ function createPresetItems(primaryDomains) {
 
                         },
                         'mouseover': function(event) {
-                            let bunnyButton = document.getElementById('__CONTEXTCLICKED__')
+                            let bunnyButtonId = this.dataset.targetid
+                            let bunnyButton = document.getElementById(bunnyButtonId)
 
                             this.title = ` ─── 🚀 ${presetName} 🚀 ───
 🗃️ = ${presetSettings.category}
@@ -4654,7 +4659,7 @@ function waitForElement(cssTarget, observeTarget = document.body, observeSubTree
             return resolve(observeTarget.querySelector(cssTarget))
         }
 
-        const observer = new MutationObserver(mutations => {
+        const observer = new MutationObserver( mutations => {
             // The actions to take when there are new mutations to the observeTarget
 
             if ( observeTarget.querySelector(cssTarget) ) {
