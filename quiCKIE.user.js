@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.43
+// @version     1.43.1
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -3335,6 +3335,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                         
                         if ( downloadElement.closest('td.torrent-search--list__buttons') ) {
                             // This is a List view
+
                             bunnyButton.style.display = 'inline-grid'
                             bunnyButton.style.fontSize = '110%'
                             bunnyButton.style.padding = '10px'
@@ -3342,23 +3343,32 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
                         } else if ( downloadElement.closest('article.torrent-card') ) {
                             // This is a Cards view
+
                             bunnyButton.style.display = 'inline-grid'
                             bunnyButton.style.fontSize = '135%'
                             bunnyButton.style.padding = '10px'
 
                         } else if ( downloadElement.closest('td.torrent-search--grouped__download') ) {
-                            // This is a Grouped view, move bunnyButton into it's own <td>
-                            let clonedParent = downloadElement.parentElement.cloneNode()
-                            clonedParent.appendChild(bunnyButton)
-                            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
+                            // This is a Grouped view
+
+                            if ( window.screen.availWidth > 900 ) {
+                                // The screen is wide enough to accomadate another <td> for this bunnyButton
+
+                                let clonedParent = downloadElement.parentElement.cloneNode()
+                                clonedParent.appendChild(bunnyButton)
+                                downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
+
+                                // Hide the <td> parentElement to avoid a empty gap
+                                SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
+
+                            }
 
                             bunnyButton.style.padding = '4px'
 
-                            // Hide the <li> parentElement to avoid a empty gap
-                            SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
 
                         } else if ( downloadElement.closest('td.user-bookmarks__actions') ) {
                             // This is the Bookmarks view, move bunnyButton into it's own <li>
+
                             let clonedParent = downloadElement.parentElement.cloneNode()
                             clonedParent.appendChild(bunnyButton)
                             downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
