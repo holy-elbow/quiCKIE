@@ -3264,7 +3264,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
         downloadElementsTrackProcessed = true
 
         window.navigation.addEventListener('navigate', function() {
-            // Whenever the page is changed, process the new downloadElements
+            // Whenever the page\URL changes, process the new downloadElements
             processDownloadElements(0)
         })
 
