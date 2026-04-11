@@ -1213,8 +1213,8 @@ if ( primaryDomain == 'animebytes' ) {
             // DL elements are already present, meaning the user has the account setting 'Torrent group display' toggled to 'Open'
             document.querySelector(trackerHandlingOptions.downloadElementsSelector) ? quickieTrackerHandler(trackerHandlingOptions) : null
 
-            // Wait until the <tbody> of a new page is loaded...
             try {
+                // Wait until the <tbody> of a new page is loaded...
                 var tbodyElement = await waitForElement('#discog_table tbody', document.getElementById('discog_table'))
             } catch (error) {
                 // There was an error, likely this mutation did not contain the waitForElement query target
