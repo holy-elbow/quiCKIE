@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.43.5
+// @version     1.43.6
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -87,6 +87,19 @@
 // @match   https://www.deepbassnine.com/artist.php?id=*
 // @match   https://www.deepbassnine.com/collages.php?id=*
 // @match   https://www.deepbassnine.com/torrents.php*
+
+// @match   https://digitalcore.club/
+// @match   https://digitalcore.club/alltorrents*
+// @match   https://digitalcore.club/apps*
+// @match   https://digitalcore.club/bookmarks*
+// @match   https://digitalcore.club/games*
+// @match   https://digitalcore.club/movies*
+// @match   https://digitalcore.club/music*
+// @match   https://digitalcore.club/other*
+// @match   https://digitalcore.club/torrent-lists/*
+// @match   https://digitalcore.club/torrent/*
+// @match   https://digitalcore.club/tvseries*
+// @match   https://digitalcore.club/xxx*
 
 // @match   https://www.empornium.sx/collage/*
 // @match   https://www.empornium.sx/top10.php*
@@ -236,12 +249,12 @@ const verboseConsoleLogging = false
 // @quickieSettingsPanelTrackers
 const settingsPanelTrackers = [
     // Keep this list alphabetical, as each tracker here will appear as a row in the quiCKIE settings panel
-    
+
     // Each tracker requires 3 things; A TitleCase name, the homepage URL, and the primaryDomain of the tracker
-    
+
     // If the tracker has more than one domain that it can be accessed from, you may also include the 'otherDomains' property, which should consist of an array (list) of different domain names. This will make it so that these domains all share the same tracker settings.
     // otherDomains: ['domain1', 'domain2', 'domain3'],
-    
+
     // Here are examples of identify the domain of a tracker...
     //  https://broadcasthe.net/ --> broadcasthe
     //  https://www.myanonamouse.net/ --> myanonamouse
@@ -256,13 +269,13 @@ const settingsPanelTrackers = [
     {
         trackerName: 'AlphaRatio',
         homepageURL: 'https://alpharatio.cc',
-        primaryDomain: 'alpharatio', 
+        primaryDomain: 'alpharatio',
     },
 
     {
         trackerName: 'AnimeBytes',
         homepageURL: '',
-        primaryDomain: 'animebytes', 
+        primaryDomain: 'animebytes',
     },
 
     {
@@ -280,7 +293,7 @@ const settingsPanelTrackers = [
     {
         trackerName: 'BakaBT',
         homepageURL: 'https://bakabt.me',
-        primaryDomain: 'bakabt', 
+        primaryDomain: 'bakabt',
     },
 
     {
@@ -292,19 +305,19 @@ const settingsPanelTrackers = [
     {
         trackerName: 'Bibliotik',
         homepageURL: 'https://bibliotik.me',
-        primaryDomain: 'bibliotik', 
+        primaryDomain: 'bibliotik',
     },
 
     {
         trackerName: 'BitPorn',
         homepageURL: 'https://bitporn.eu',
-        primaryDomain: 'bitporn', 
+        primaryDomain: 'bitporn',
     },
 
     {
         trackerName: 'BroadcasTheNet',
         homepageURL: 'https://broadcasthe.net',
-        primaryDomain: 'broadcasthe', 
+        primaryDomain: 'broadcasthe',
     },
 
     {
@@ -326,9 +339,15 @@ const settingsPanelTrackers = [
     },
 
     {
+        trackerName: 'DigitalCore', // @holy-elbow
+        homepageURL: 'https://digitalcore.club/',
+        primaryDomain: 'digitalcore',
+    },
+
+    {
         trackerName: 'Empornium',
         homepageURL: 'https://www.empornium.sx',
-        primaryDomain: 'empornium', 
+        primaryDomain: 'empornium',
     },
 
     {
@@ -353,7 +372,7 @@ const settingsPanelTrackers = [
     {
         trackerName: 'GazelleGames',
         homepageURL: 'https://gazellegames.net',
-        primaryDomain: 'gazellegames', 
+        primaryDomain: 'gazellegames',
     },
 
     {
@@ -365,13 +384,13 @@ const settingsPanelTrackers = [
     {
         trackerName: 'HDBits',
         homepageURL: 'https://hdbits.org',
-        primaryDomain: 'hdbits', 
+        primaryDomain: 'hdbits',
     },
 
     {
         trackerName: 'IP-Torrents',
         homepageURL: 'https://iptorrents.me',
-        primaryDomain: 'iptorrents', 
+        primaryDomain: 'iptorrents',
     },
 
     {
@@ -395,7 +414,7 @@ const settingsPanelTrackers = [
     {
         trackerName: 'Lat-Team',
         homepageURL: 'https://lat-team.com',
-        primaryDomain: 'lat-team', 
+        primaryDomain: 'lat-team',
     },
 
     {
@@ -407,7 +426,7 @@ const settingsPanelTrackers = [
     {
         trackerName: 'Materialize',
         homepageURL: 'https://materialize.is',
-        primaryDomain: 'materialize', 
+        primaryDomain: 'materialize',
     },
 
     {
@@ -419,7 +438,7 @@ const settingsPanelTrackers = [
     {
         trackerName: 'MyAnonaMouse',
         homepageURL: 'https://www.myanonamouse.net',
-        primaryDomain: 'myanonamouse', 
+        primaryDomain: 'myanonamouse',
     },
 
     {
@@ -431,25 +450,25 @@ const settingsPanelTrackers = [
     {
         trackerName: 'Nyaa',
         homepageURL: 'https://nyaa.si',
-        primaryDomain: 'nyaa', 
+        primaryDomain: 'nyaa',
     },
 
     {
         trackerName: 'Oldtoons',
         homepageURL: 'https://oldtoons.world',
-        primaryDomain: 'oldtoons', 
+        primaryDomain: 'oldtoons',
     },
 
     {
         trackerName: 'Orpheus',
         homepageURL: 'https://orpheus.network',
-        primaryDomain: 'orpheus', 
+        primaryDomain: 'orpheus',
     },
 
     {
         trackerName: 'PassThePopcorn',
         homepageURL: 'https://passthepopcorn.me',
-        primaryDomain: 'passthepopcorn', 
+        primaryDomain: 'passthepopcorn',
     },
 
     {
@@ -467,7 +486,7 @@ const settingsPanelTrackers = [
     {
         trackerName: 'Redacted',
         homepageURL: 'https://redacted.sh',
-        primaryDomain: 'redacted', 
+        primaryDomain: 'redacted',
     },
 
     {
@@ -485,7 +504,7 @@ const settingsPanelTrackers = [
     {
         trackerName: 'TheGeeks',
         homepageURL: 'https://thegeeks.click',
-        primaryDomain: 'thegeeks', 
+        primaryDomain: 'thegeeks',
     },
 
     {
@@ -497,7 +516,7 @@ const settingsPanelTrackers = [
     {
         trackerName: 'TV-Vault',
         homepageURL: 'https://tv-vault.me',
-        primaryDomain: 'tv-vault', 
+        primaryDomain: 'tv-vault',
     },
 
 ]
@@ -522,8 +541,9 @@ let presetMenuItems = createPresetItems([SETTINGS.primaryDomain])
 // All the emojis that may be displayed on bunnyButtons, defined as a RegExp so that they can be replaced during different stages of the script
 const emojiRegex = new RegExp('🐰|🌱|🍁|💎|🏆|💸|🤝|🕓|🧲|🧑|❌|✔️|💾|🧀', 'g')
 
-// The URL of the current page, useful for figuring out exactly what page you are on using pageURL.match(/regex/)
+// The full URL and Path of the current page, useful for figuring out exactly what page you are on using pageURL.match(/regex/)
 const pageURL = document.URL
+const pagePath = document.location.pathname
 
 
 // =================================== TRACKER SPECIFIC HANDLING ======================================
@@ -539,7 +559,7 @@ if ( primaryDomain == 'animebytes' ) {
         // ---------- REQUIRED ----------
 
         // A valid CSS selector that is unique to ONLY the download elements (download buttons)
-        downloadElementsSelector: 'a[href^="/torrent/"][title="Download torrent"]', 
+        downloadElementsSelector: 'a[href^="/torrent/"][title="Download torrent"]',
 
         // ---------- OPTIONAL ----------
 
@@ -547,7 +567,7 @@ if ( primaryDomain == 'animebytes' ) {
         bunnyButtonfontSize: 'inherit', // Default = 'inherit' || Options = Any percentile | A valid 'font-size' css value
 
         // The text that will be displayed by each bunnyButton, useful for advanced styling or to remove the surrounding spaces to better fit the page; '🐰'
-        bunnyButtonText: ' 🐰 ', // Default = ' 🐰 ' || Options = Any string 
+        bunnyButtonText: ' 🐰 ', // Default = ' 🐰 ' || Options = Any string
 
         // If the bunnyButton should be placed after the downloadElement.parentElement, which may result in the bunnyButton being on the same row as the downloadElement
         bunnyButtonParentPlacement: false, // Default = false || Options = true | false
@@ -559,7 +579,7 @@ if ( primaryDomain == 'animebytes' ) {
         bunnyButtonAddStyles: '', // Default = '' || Options = A string containing css style properties
 
         // Additional class names that will be applied to each bunnyButton, useful for advanced styling
-        bunnyButtonAddClasses: [], // Default = [] || Options = An array of strings 
+        bunnyButtonAddClasses: [], // Default = [] || Options = An array of strings
 
         // A string representing a valid JavaScript comparison, that if 'true' indicates a torrent has the status of 'seeding', so the bunnyButton emoji will be changed to '🌱' (see the BroadcasTheNet\Empornium\Orpheus\PassThePopcorn\Redacted blocks for examples)
         // The string may start with 'downloadElement' then be followed by a chain of '.closest()' and\or '.querySelector()' methods in order to locate a target element relative to the downloadElement. If the target element is found, the check is considered 'true'
@@ -577,7 +597,7 @@ if ( primaryDomain == 'animebytes' ) {
         freeleechStatusSelector: `downloadElement.closest('td').querySelector('img[alt^="Freeleech"]')`, // Default = null || Options = 'downloadElement...'
 
         // A function that will be called after all the bunnyButtons have been created, useful for advanced styling or further clean-up (see the BakaBT\Empornium\MyAnonaMouse blocks for examples)
-        // The 'elements' parameter will be an object consisting of three arrays: elements = { bunnyButtons: [], downloadElements: [], pairedElements:[] } 
+        // The 'elements' parameter will be an object consisting of three arrays: elements = { bunnyButtons: [], downloadElements: [], pairedElements:[] }
         // ⚠️ quiCKIE is a NON-DESTRUCTIVE UserScript that does NOT break or destroy the default site elements. This ensures quiCKIE is friendly\compatible with other UserScripts. Always adhere to this principle by only manipulating the bunnyButtons created by quiCKIE itself
         afterBunnyButtonCreation: false, // Default = false || options = false | function(elements) {...}
 
@@ -756,6 +776,88 @@ if ( primaryDomain == 'animebytes' ) {
 
     quickieTrackerHandler(trackerHandlingOptions)
 
+} else if ( primaryDomain == 'digitalcore' ) {
+    // ---------------------------------- DigitalCore ---------------------------------
+    // Browse | Details | Home
+
+    if ( pageURL.match(/\/torrent\/\d+/) ) {
+        // The torrent details page
+
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]:has(i.fa-download)',
+            downloadElementsTrackProcessed: true,
+            bunnyButtonText: '🐰 quiCKIE',
+            bunnyButtonAddStyles: `
+                background: #252525;
+                border-radius: 3px;
+                border: #323232 solid 1px;
+                color: #ccc;
+                font-size: 12px;
+                margin-left: 11.033px;
+                padding: 1px 39.817px;
+                vertical-align: middle;`
+
+        }
+
+        let observer = new MutationObserver(function(mutations) {
+
+            quickieTrackerHandler(trackerHandlingOptions)
+        })
+
+        let target = document.getElementById('contentContainer')
+        let config = { childList: true }
+
+        observer.observe(target, config)
+
+    } else if ( pagePath.match(/^\/?$/) ) {
+        // The homepage
+
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]',
+            downloadElementsTrackProcessed: true,
+            enablePaginationLooping: true,
+        }
+
+        quickieTrackerHandler(trackerHandlingOptions)
+
+    } else {
+
+        let trackerHandlingOptions = {
+            downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]',
+            downloadElementsTrackProcessed: true,
+        }
+
+        let pageObserver = new MutationObserver(async function(pageMutations) {
+
+
+            // Wait until the <tbody> of is loaded...
+            let tbodyElement = await waitForElement('torrents-table[torrents] tbody', document.getElementById('contentContainer'))
+
+
+            try {
+
+                let torrentObserver = new MutationObserver(function(torrentMutations) {
+                    // The actions to take when there are changes to the <tbody>
+
+                    quickieTrackerHandler(trackerHandlingOptions)
+
+                })
+
+                torrentObserver.observe(tbodyElement, { childList: true })
+
+            } catch(error) {
+                return
+            }
+
+        })
+
+        let target = document.getElementById('contentContainer')
+        let config = { childList: true }
+
+        pageObserver.observe(target, config)
+
+    }
+
 } else if ( primaryDomain == 'e-hentai' ) {
     // ----------------------------------- E-Hentai -----------------------------------
     // Torrents
@@ -785,7 +887,7 @@ if ( primaryDomain == 'animebytes' ) {
     // This is a collage page, so place the bunnyButton alongside the parentElement
     if ( pageURL.match(/\/collage\/\d+/) ) {
 
-        trackerHandlingOptions.bunnyButtonParentPlacement = true 
+        trackerHandlingOptions.bunnyButtonParentPlacement = true
         trackerHandlingOptions.afterBunnyButtonCreation = function(elements) {
             // The actions to take after the bunnyButtons have been created...
 
@@ -799,7 +901,7 @@ if ( primaryDomain == 'animebytes' ) {
             }
         }
     }
-        
+
 
     // This is a details page, so apply styling to certain bunnyButtons
     if ( pageURL.match(/torrents\.php\?id=\d+/) ) {
@@ -809,7 +911,7 @@ if ( primaryDomain == 'animebytes' ) {
 
             // Determine the seeding\snatched status of this torrent
             let mainDownloadButton = document.querySelector(`#user-sidebar ${trackerHandlingOptions.downloadElementsSelector}`)
-                
+
             for ( let bunnyButton of elements.bunnyButtons ) {
 
                 // Style the bunnyButtons that match this CSS selector, giving them a bar-type look to more closely match the larger site buttons
@@ -846,7 +948,7 @@ if ( primaryDomain == 'animebytes' ) {
                     }
 
                 }
-                
+
             }
 
         }
@@ -1302,7 +1404,7 @@ if ( primaryDomain == 'animebytes' ) {
 
     if ( pageURL.match(/(browse|top)/) ) {
         // The Browse and Top pages, both of which have pagination
-        trackerHandlingOptions.bunnyButtonParentPlacement = true 
+        trackerHandlingOptions.bunnyButtonParentPlacement = true
         trackerHandlingOptions.enablePaginationLooping = true
     }
 
@@ -1724,11 +1826,11 @@ function createGMConfigSettingsPanel(trackerDomain) {
                 'size': 25,
                 'click': function() {
                     // Prompt the user to select a file for which to import GM_config settings
-                    
+
                     let inputElement = document.createElement('input');
                     inputElement.type = 'file';
 
-                    inputElement.onchange = (event) => { 
+                    inputElement.onchange = (event) => {
 
                         // Getting a hold of the file reference
                         let file = event.target.files[0]
@@ -1951,7 +2053,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
                     trackerHyperlinkElement.href = primaryDomainToHomepage[panelDomain]
                     trackerHyperlinkElement.target = '_blank'
                     labelData.appendChild(trackerHyperlinkElement)
-                        
+
                     // Move the trackerLabel field into the <a> hyperlink
                     let trackerLabelElement = document.getElementById(`quiCKIE_config_${panelDomain}-category_field_label`)
                     trackerLabelElement.removeAttribute('for')
@@ -2596,7 +2698,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
                 let buttonsHolderElement = document.getElementById('quiCKIE_config_buttons_holder')
                 buttonsHolderElement.appendChild(importButton)
                 buttonsHolderElement.appendChild(exportButton)
-                
+
                 // Remove the now empty <div> elements
                 for ( let emptyElement of document.getElementById('quiCKIE_config').querySelectorAll('div.config_var:empty') ) {
                     emptyElement.remove()
@@ -2771,7 +2873,7 @@ function createPresetItems(primaryDomains) {
                 }
             }
         },
-        
+
         'sendPaused': {
             content: '☁️ Send Paused',
             events: {
@@ -2807,7 +2909,7 @@ function createPresetItems(primaryDomains) {
             }
         },
 
-        'client': {   
+        'client': {
             content: `🖥️ ${SETTINGS.torrentClient.client}`,
             events: {
                 'click': function(event) {
@@ -2829,7 +2931,7 @@ function createPresetItems(primaryDomains) {
                     this.title = `🖥️ Open the ${SETTINGS.torrentClient.client} Web Interface`
                 }
             }
-        }, 
+        },
 
         'torrentfile' : {
             content: '💾 TorrentFile',
@@ -2839,7 +2941,7 @@ function createPresetItems(primaryDomains) {
 
                     let bunnyButtonId = this.dataset.targetid
                     let bunnyButton = document.getElementById(bunnyButtonId)
-                    
+
                     let fileElement = document.createElement('a')
                     fileElement.href = bunnyButton.dataset.torrenturl
 
@@ -2917,7 +3019,7 @@ function createPresetItems(primaryDomains) {
                     dividerText = presetName.replaceAll(/./g, '═')
                 } else if ( presetName.includes('.') ) {
                     dividerText = presetName.replaceAll(/./g, '·')
-                } 
+                }
 
                 var presetItem = {
                     content: dividerText,
@@ -3151,7 +3253,7 @@ function quickieTrackerHandler({
 
                         // If enabled, mark this downloadElement as having been processed by assigning it a unique attribute
                         downloadElementsTrackProcessed == true ? downloadElement.setAttribute('data-quickie_processed', 'true') : null
-                            
+
                         // Store the processed elements in the object to be passed to the afterBunnyButtonCreation() function
                         if ( logElements == true ) {
                             loggedElements['bunnyButtons'].push(bunnyButton)
@@ -3193,12 +3295,12 @@ function quickieTrackerHandler({
                         try {
 
                             if ( eval(`${seedingStatusSelector}`) && bunnyButton.dataset.emojospecified != 'true' ) {
-                                // A seedingStatusSelector was matched and an emoji has not already been specified for this bunnyButton 
+                                // A seedingStatusSelector was matched and an emoji has not already been specified for this bunnyButton
                                 replaceEmojis(bunnyButton, '🌱')
                                 bunnyButton.title = bunnyButton.title.replace(/🔗/, '🌱 Seeding\n🔗')
                                 continue
 
-                            } 
+                            }
 
                         } catch (error) {
                             // There was en error, likely due to either impossible method chaining for this downloadElement (signifying 'false') or invalid JavaScript
@@ -3207,8 +3309,8 @@ function quickieTrackerHandler({
 
                         try {
 
-                            if ( eval(`${snatchedStatusSelector}`) && bunnyButton.dataset.emojospecified != 'true' ) { 
-                                // A snatchedStatusSelector was matched and an emoji has not already been specified for this bunnyButton 
+                            if ( eval(`${snatchedStatusSelector}`) && bunnyButton.dataset.emojospecified != 'true' ) {
+                                // A snatchedStatusSelector was matched and an emoji has not already been specified for this bunnyButton
                                 replaceEmojis(bunnyButton, '🍁')
                                 bunnyButton.title = bunnyButton.title.replace(/🔗/, '🍁 Snatched\n🔗')
                                 continue
@@ -3221,8 +3323,8 @@ function quickieTrackerHandler({
 
                         try {
 
-                            if ( eval(`${freeleechStatusSelector}`) && bunnyButton.dataset.emojospecified != 'true' ) { 
-                                // A freeleechStatusSelector was matched and an emoji has not already been specified for this bunnyButton 
+                            if ( eval(`${freeleechStatusSelector}`) && bunnyButton.dataset.emojospecified != 'true' ) {
+                                // A freeleechStatusSelector was matched and an emoji has not already been specified for this bunnyButton
                                 replaceEmojis(bunnyButton, '💎')
                                 bunnyButton.title = bunnyButton.title.replace(/🖥️/, '💎 Freeleech 💎\n\n🖥️')
                                 continue
@@ -3244,7 +3346,7 @@ function quickieTrackerHandler({
 
         } catch (error) {
             logger.error(error)
-        } 
+        }
 
     }
 
@@ -3283,7 +3385,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
             }
 
         })
-        
+
         let target, config
 
         if ( document.location.pathname.match(/(\/torrents[^/]*)$/) ) {
@@ -3295,7 +3397,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
             target = document.querySelector('section.panelV2.blocks__top-torrents div.data-table-wrapper tbody')
             config = { childList: true }
         }
-            
+
 
         observer.observe(target, config)
 
@@ -3367,7 +3469,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                         // This is NOT the torrent details page, so it likely uses one of the three views: List, Cards, or Grouped
 
                         downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
-                        
+
                         if ( downloadElement.closest('td.torrent-search--list__buttons') ) {
                             // This is a List view
 
@@ -3408,7 +3510,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                             downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
 
                             bunnyButton.style.padding = '4px'
-                            
+
                             // Hide the <li> parentElement to avoid a empty gap
                             SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
 
@@ -3440,7 +3542,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
                     }
 
-                    // Hide the downloadElement, as specified by the current tracker settings 
+                    // Hide the downloadElement, as specified by the current tracker settings
                     SETTINGS.hideDL == true ? downloadElement.style.display = 'none' : null
 
                     if ( downloadElementsTrackProcessed ) {
@@ -3494,7 +3596,7 @@ function createBunnyButton({
     bunnyButton.textContent = buttonText
 
     // Indicate that this torrentURL will also Freeleech a torrent
-    if ( torrentURL.match(/(&usetoken=1|&fl)/) ) { 
+    if ( torrentURL.match(/(&usetoken=1|&fl)/) ) {
         bunnyButton.textContent = bunnyButton.textContent.replace(/🐰/g, '💸')
         bunnyButton.setAttribute('data-emojospecified', 'true')
     }
@@ -3716,7 +3818,7 @@ function bunnyButtonClickedActions(bunnyButton, torrentSettings, settingsValue) 
 
 function replaceEmojis(targetElement, newEmoji) {
     // Replace the emojis of the targetElement with the newEmoji
-    
+
     targetElement.textContent = targetElement.textContent.replace(emojiRegex, newEmoji)
 
 }
@@ -4734,11 +4836,11 @@ function base64encode(inputData) {
 
 function saveToFile(fileData, filename) {
     // Save the provided fileData to a local file
-    
+
     mimeTypes = {
-        // The different MIME types this function is setup to handle 
+        // The different MIME types this function is setup to handle
         // MIME Types: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
-            
+
         'json': 'application/json;charset=utf-8;',
         'text': 'text/plain;charset=utf-8;',
         'txt': 'text/plain;charset=utf-8;',
@@ -4758,7 +4860,7 @@ function saveToFile(fileData, filename) {
 
     }
 
-    let blobType 
+    let blobType
 
     if ( Object.keys(mimeTypes).includes(filetype) ) {
         // The filetype has a registered mime type
@@ -4766,7 +4868,7 @@ function saveToFile(fileData, filename) {
 
     } else {
         // The filetype is not registerd, so assume it to be a text type
-        blobType = 'text/plain;charset=utf-8;' 
+        blobType = 'text/plain;charset=utf-8;'
     }
 
     // Create the blob object that will contain the data to be written
