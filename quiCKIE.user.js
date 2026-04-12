@@ -808,44 +808,65 @@ if ( primaryDomain == 'animebytes' ) {
             downloadElementsTrackProcessed: true,
         }
 
-        let pageObserver = new MutationObserver(async function(pageMutations) {
+        let carouselElement = await waitForElement('div[class="carousel-inner"]', document.getElementById('contentContainer'))
 
-            try {
-                var carouselElement = await waitForElement('div[class="carousel-inner"]', document.getElementById('contentContainer'))
-            } catch (error) {
-                console.log(error)
-                return
-            }
+        let allCarouselItems = carouselElement.querySelectorAll('div.item')
+
+        for ( let carouselItem of allCarouselItems ) {
+            // Monitor each Carousel item for when its 'class=' attribute changes
             
-            try {
-                let carouselObserver = new MutationObserver(async function(carouselMutations) {
-                    try {
-                        var tbodyElement = await waitForElement('torrents-table[torrents] tbody', document.querySelector('div[class*="active"]'))
-                    } catch (error) {
-                        console.log(error)
-                        return
-                    }
-
-                    try {
-
-                        let tbodyObserver = new MutationObserver(function() {
-                            quickieTrackerHandler(trackerHandlingOptions)
-                        })
-                        tbodyObserver.observe(tbodyElement, { childList: true } )
-                    } catch (error) {
-                        console.log(error)
-                        return
-                    }
-                })
-                 carouselObserver.observe(carouselElement, { childList: true } )
-            } catch (error) {
-                console.log(error)
-                return
+            let itemObserver = new MutationObserver() {
+                quickieTrackerHandler(trackerHandlingOptions)
+                itemObserver.disconnect()
             }
-        })
-        let target = document.getElementById('contentContainer')
-        let config = { childList: true }
-        pageObserver.observe(target, config)
+
+            itemObserver.observe(carouselItem, { attributesFilter: ['class'] })
+        }
+
+        // let pageObserver = new MutationObserver(async function(pageMutations) {
+
+            // try {
+            //     var carouselElement = await waitForElement('div[class="carousel-inner"]', document.getElementById('contentContainer'))
+            // } catch (error) {
+            //     console.log(error)
+            //     return
+            // }
+            
+
+            // try {
+            //     let carouselObserver = new MutationObserver(async function(carouselMutations) {
+
+                    // let activeCarouselDiv = await waitForElement('> div.active', carouselElement)
+
+
+                    // try {
+                    //     var tbodyElement = await waitForElement('torrents-table[torrents] tbody', document.querySelector('div[class*="active"]'))
+                    // } catch (error) {
+                    //     console.log(error)
+                    //     return
+                    // }
+
+                    // try {
+
+                    //     let tbodyObserver = new MutationObserver(function() {
+                    //         quickieTrackerHandler(trackerHandlingOptions)
+                    //     })
+                    //     tbodyObserver.observe(tbodyElement, { childList: true } )
+                    // } catch (error) {
+                    //     console.log(error)
+                    //     return
+                    // }
+                // })
+                // carouselObserver.observe(carouselElement, { childList: true } )
+            // } catch (error) {
+                // console.log(error)
+                // return
+            // }
+
+        // })
+        // let target = document.getElementById('contentContainer')
+        // let config = { childList: true }
+        // pageObserver.observe(target, config)
 
     } else {
 
