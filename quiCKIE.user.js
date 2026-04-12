@@ -806,31 +806,46 @@ if ( primaryDomain == 'animebytes' ) {
         let trackerHandlingOptions = {
             downloadElementsSelector: 'a[href^="/api/v1/torrents/download"]',
             downloadElementsTrackProcessed: true,
-            enablePaginationLooping: true
         }
 
-        quickieTrackerHandler(trackerHandlingOptions)
+        let pageObserver = new MutationObserver(async function(pageMutations) {
 
-/*         let pageObserver = new MutationObddserver(async function (pageMutations) {
- *
- *             let carouselElement = await waitForElement('div[class*="carousel"]', document.getElementById('contentContainer'))
- *
- *             try {
- *
- *                 let carouselObserver = new MutationObserver(function (carouselMutations) {
- *                     quickieTrackerHandler(trackerHandlingOptions)
- *                 })
- *
- *                 carouselObserver.observe(carouselElement, { childList: true })
- *             } catch (error) {
- *                 console.log(error)
- *                 return
- *             }
- *         })
- *
- *         let target = document.getElementById('contentContainer')
- *         let config = { childList: true }
- *         pageObserver.observe(target, config) */
+            try {
+                var carouselElement = await waitForElement('div[class="carousel-inner"]', document.getElementById('contentContainer'))
+            } catch (error) {
+                console.log(error)
+                return
+            }
+            
+            try {
+                let carouselObserver = new MutationObserver(async function(carouselMutations) {
+                    try {
+                        var tbodyElement = await waitForElement('torrents-table[torrents] tbody', document.querySelector('div[class*="active"]'))
+                    } catch (error) {
+                        console.log(error)
+                        return
+                    }
+
+                    try {
+
+                        let tbodyObserver = new MutationObserver(function() {
+                            quickieTrackerHandler(trackerHandlingOptions)
+                        })
+                        tbodyObserver.observe(tbodyElement, { childList: true } )
+                    } catch (error) {
+                        console.log(error)
+                        return
+                    }
+                })
+                 carouselObserver.observe(carouselElement, { childList: true } )
+            } catch (error) {
+                console.log(error)
+                return
+            }
+        })
+        let target = document.getElementById('contentContainer')
+        let config = { childList: true }
+        pageObserver.observe(target, config)
 
     } else {
 
