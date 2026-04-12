@@ -808,7 +808,7 @@ if ( primaryDomain == 'animebytes' ) {
             downloadElementsTrackProcessed: true,
         }
 
-        let carouselElement = await waitForElement('div[class="carousel-inner"]', document.getElementById('contentContainer'))
+        let carouselElement = await waitForElement('div.carousel-inner', document.getElementById('contentContainer'))
 
         let allCarouselItems = carouselElement.querySelectorAll('div.item')
 
