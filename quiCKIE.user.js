@@ -4,7 +4,7 @@
 
 // @name        qui - quiCKIE
 // @author      WirlyWirly + contributors 🫶
-// @version     1.43
+// @version     1.43.5
 // @homepage    https://github.com/WirlyWirly/quiCKIE
 // @description A UserScript to quickly send torrents from a tracker to a torrent client, with customizable per-site settings and presets 🐰
 //              Orignally written for qui, later extended to support more torrent clients
@@ -18,6 +18,7 @@
 // @resource    presetsMenuCSS https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/contextMenu.css?raw=true
 
 // @require     https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/contextMenu.js?raw=true
+// @require     https://raw.githubusercontent.com/WirlyWirly/UserScripts/main/HelperScripts/simpleLogger.js
 // @require     https://cdn.jsdelivr.net/gh/sizzlemctwizzle/GM_config@43fd0fe4de1166f343883511e53546e87840aeaf/gm_config.js
 
 // ----------------------------------- Development --------------------------------------
@@ -236,6 +237,9 @@
 // @updateURL   https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/quiCKIE.user.js?raw=true
 // @downloadURL https://raw.githubusercontent.com/WirlyWirly/quiCKIE/main/quiCKIE.user.js?raw=true
 // ==/UserScript==
+
+// Set to true to enable verbose console logging, useful during development or troubleshooting
+const verboseConsoleLogging = false
 
 // This string helps prevent various JavaScript oddities when working with variables
 'use strict'
@@ -524,6 +528,9 @@ const settingsPanelTrackers = [
 // Example: https://broadcasthe.net/ --> broadcasthe
 let trackerDomain = document.location.hostname.match(/^(\w+\.)?(.+?)\..+$/)[2].toLowerCase()
 
+// A simple logger, which will only console log messages when it has been enabled
+let logger = new simpleLogger({ enabled: verboseConsoleLogging, scriptName: 'quiCKIE'})
+
 // Everything related to the GM_config library, which is used for creating and presenting the settings panel: https://github.com/sizzlemctwizzle/GM_config
 let [ primaryDomain, allPrimaryDomains, primaryDomainToName, primaryDomainToHomepage, trackerNameToPrimaryDomain, presetCount ] = createGMConfigSettingsPanel(trackerDomain)
 
@@ -532,7 +539,7 @@ let SETTINGS = getTrackerSettings(primaryDomain)
 let presetMenuItems = createPresetItems([SETTINGS.primaryDomain])
 
 // All the emojis that may be displayed on bunnyButtons, defined as a RegExp so that they can be replaced during different stages of the script
-const emojiRegex = new RegExp('🐰|💸|💎|🌱|🍁|🤝|🕓|🧲|🧑|❌|✔️|💾|🧀', 'g')
+const emojiRegex = new RegExp('🐰|🌱|🍁|💎|🏆|💸|🤝|🕓|🧲|🧑|❌|✔️|💾|🧀', 'g')
 
 // The full URL and Path of the current page, useful for figuring out exactly what page you are on using pageURL.match(/regex/)
 const pageURL = document.URL
@@ -1384,6 +1391,7 @@ if ( primaryDomain == 'animebytes' ) {
                 var tbodyElement = await waitForElement('#discog_table tbody', document.getElementById('discog_table'))
             } catch (error) {
                 // There was an error, likely this mutation did not contain the waitForElement query target
+                logger.debug(error)
                 return
             }
 
@@ -1398,8 +1406,8 @@ if ( primaryDomain == 'animebytes' ) {
 
                 tbodyObserver.observe(tbodyElement, { childList: true } )
 
-            } catch(error) {
-                // console.log(error)
+            } catch (error) {
+                logger.debug(error)
                 return
 
             }
@@ -1523,6 +1531,8 @@ function createGMConfigSettingsPanel(trackerDomain) {
 
     }
 
+    logger.info(`primaryDomain: ${primaryDomain}`)
+
     // Verify that the trackerDomain is registered as an entry in the settingsPanelTrackers object, if not then abort all further exectuion of this script
     if ( registeredTracker == false ) { console.error(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe domain of the current site if not registered to a tracker supported by quiCKIE: ${trackerDomain}\n\nAll further quiCKIE code will be aborted as to prevent further errors.\n\nℹ️ If you are seeing this message while adding a new tracker, verify that you have included this trackerDomain to a tracker in Step #2 of the 'Adding a New Tracker' guide`); throw new Error('Aborting further quiCKIE execution') }
 
@@ -1541,6 +1551,8 @@ function createGMConfigSettingsPanel(trackerDomain) {
     if ( presetCount == undefined ) {
         presetCount = 3
     }
+
+    logger.info(`presetCount: ${presetCount}`)
 
     // @trackerFieldGeneration
     // This array will later be used to generate the <th> for each column in the settings panel. Create an entry in
@@ -1895,8 +1907,9 @@ function createGMConfigSettingsPanel(trackerDomain) {
 
                                 window.location.reload()
 
-                            } catch {
+                            } catch (error) {
                                 // The JSON parse has failed, so abort the import
+                                logger.error(error)
                                 window.alert(`quiCKIE\n\nThe imported settings file was not valid JSON\n\nThe settings were not imported`)
                             }
                        }
@@ -2667,22 +2680,22 @@ function createGMConfigSettingsPanel(trackerDomain) {
                         try {
                             document.getElementById(`quiCKIE_config_${clientFieldName}ApiKey_field_label`).style.display = ''
                             document.getElementById(`quiCKIE_config_field_${clientFieldName}ApiKey`).style.display = ''
-                        } catch(error) {}
+                        } catch (error) {}
 
                         try {
                             document.getElementById(`quiCKIE_config_${clientFieldName}URL_field_label`).style.display = ''
                             document.getElementById(`quiCKIE_config_field_${clientFieldName}URL`).style.display = ''
-                        } catch(error) {}
+                        } catch (error) {}
 
                         try {
                             document.getElementById(`quiCKIE_config_${clientFieldName}Username_field_label`).style.display = ''
                             document.getElementById(`quiCKIE_config_field_${clientFieldName}Username`).style.display = ''
-                        } catch(error) {}
+                        } catch (error) {}
 
                         try {
                             document.getElementById(`quiCKIE_config_${clientFieldName}Password_field_label`).style.display = ''
                             document.getElementById(`quiCKIE_config_field_${clientFieldName}Password`).style.display = ''
-                        } catch(error) {}
+                        } catch (error) {}
 
                     }
 
@@ -2691,22 +2704,22 @@ function createGMConfigSettingsPanel(trackerDomain) {
                         try {
                             document.getElementById(`quiCKIE_config_${clientFieldName}ApiKey_field_label`).style.display = 'none'
                             document.getElementById(`quiCKIE_config_field_${clientFieldName}ApiKey`).style.display = 'none'
-                        } catch(error) {}
+                        } catch (error) {}
 
                         try {
                             document.getElementById(`quiCKIE_config_${clientFieldName}URL_field_label`).style.display = 'none'
                             document.getElementById(`quiCKIE_config_field_${clientFieldName}URL`).style.display = 'none'
-                        } catch(error) {}
+                        } catch (error) {}
 
                         try {
                             document.getElementById(`quiCKIE_config_${clientFieldName}Username_field_label`).style.display = 'none'
                             document.getElementById(`quiCKIE_config_field_${clientFieldName}Username`).style.display = 'none'
-                        } catch(error) {}
+                        } catch (error) {}
 
                         try {
                             document.getElementById(`quiCKIE_config_${clientFieldName}Password_field_label`).style.display = 'none'
                             document.getElementById(`quiCKIE_config_field_${clientFieldName}Password`).style.display = 'none'
-                        } catch(error) {}
+                        } catch (error) {}
 
                     }
                 }
@@ -3230,6 +3243,9 @@ function quickieTrackerHandler({
 }) {
     // Using the provided arguments, generate bunnyButtons for matching elements on this page
 
+    logger.info('quickieTrackerHandler Settings')
+    logger.log(arguments[0])
+
     // If the .torrent file should be forced to download through the browser
     forceTorrentFile == true ? SETTINGS.forceTorrentFile = true : null
 
@@ -3256,6 +3272,9 @@ function quickieTrackerHandler({
             setTimeout(() => {
                 // Using the provided CSS selector, get an array of all the downloadElements that have not yet been processed
                 let allDownloadElements = document.querySelectorAll(`${downloadElementsSelector}:not([data-quickie_processed="true"])`)
+
+                logger.info('allDownloadElements')
+                logger.log(allDownloadElements)
 
                 // There is a function to be performed after the bunnyButtons are created, so populate a object to store the elements
                 logElements == true ? loggedElements = { bunnyButtons: [], downloadElements: [] , pairedElements: [] } : null
@@ -3337,9 +3356,9 @@ function quickieTrackerHandler({
 
                             } 
 
-                        } catch(error) {
+                        } catch (error) {
                             // There was en error, likely due to either impossible method chaining for this downloadElement (signifying 'false') or invalid JavaScript
-                            // console.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe seedingStatusSelector returned an error.\n\nIf you are reading this message and the 🌱 is present on the bunnyButtons that are indeed seeding, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the seeding torrents are not displaying the 🌱, it is most likely that either the seedingStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nseedingStatusSelector: ${seedingStatusSelector}\n\nError:${error}\n\n`)
+                            logger.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe seedingStatusSelector returned an error.\n\nIf you are reading this message and the 🌱 is present on the bunnyButtons that are indeed seeding, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the seeding torrents are not displaying the 🌱, it is most likely that either the seedingStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nseedingStatusSelector: ${seedingStatusSelector}\n\nError:${error}\n\n`)
                         }
 
                         try {
@@ -3351,9 +3370,9 @@ function quickieTrackerHandler({
                                 continue
                             }
 
-                        } catch(error) {
+                        } catch (error) {
                             // There was en error, likely due to either impossible method chaining for this downloadElement (signifying 'false') or invalid JavaScript
-                            // console.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe snatchedStatusSelector returned an error.\n\nIf you are reading this message and the 🍁 is present on the bunnyButtons that are indeed snatched, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the snatched torrents are not displaying the 🍁, it is most likely that either the snatchedStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nsnatchedStatusSelector: ${snatchedStatusSelector}\n\nError:${error}\n\n`)
+                            logger.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe snatchedStatusSelector returned an error.\n\nIf you are reading this message and the 🍁 is present on the bunnyButtons that are indeed snatched, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the snatched torrents are not displaying the 🍁, it is most likely that either the snatchedStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nsnatchedStatusSelector: ${snatchedStatusSelector}\n\nError:${error}\n\n`)
                         }
 
                         try {
@@ -3365,9 +3384,9 @@ function quickieTrackerHandler({
                                 continue
                             }
 
-                        } catch(error) {
+                        } catch (error) {
                             // There was en error, likely due to either impossible method chaining for this downloadElement (signifying 'false') or invalid JavaScript
-                            // console.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe freeleechStatusSelector returned an error.\n\nIf you are reading this message and the 💎 is present on the bunnyButtons that are indeed freeleech, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the freeleech torrents are not displaying the 💎, it is most likely that either the freeleechStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nfreeleechStatusSelector: ${freeleechStatusSelector}\n\nError:${error}\n\n`)
+                            logger.log(`---------- ⚠️ quiCKIE ⚠️ ----------\n\nThe freeleechStatusSelector returned an error.\n\nIf you are reading this message and the 💎 is present on the bunnyButtons that are indeed freeleech, you can safely ignore this message. This error is normal, as comparisons that don't return 'true' are not always able to complete their code and will instead return this error.\n\nIf even the freeleech torrents are not displaying the 💎, it is most likely that either the freeleechStatusSelector is incorrect or is not valid JavaScript.\n\ndownloadElement: ${downloadElement}\n\nfreeleechStatusSelector: ${freeleechStatusSelector}\n\nError:${error}\n\n`)
                         }
                     }
                 }
@@ -3379,8 +3398,8 @@ function quickieTrackerHandler({
 
             }, delay )
 
-        } catch(error) {
-            // console.log(error)
+        } catch (error) {
+            logger.error(error)
         } 
 
     }
@@ -3391,7 +3410,7 @@ function quickieTrackerHandler({
 
 
 function unit3dTrackerHandler(downloadElementsSelector) {
-    // A tracker handler focused on the layout of the UNIT3D Framework. Generate a bunnyButton for each queried DownloadElement
+    // A tracker handler focused on the layout of the UNIT3D Framework. Generate a bunnyButton for each queried downloadElement matching the provided CSS selector
     // ! This function uses 'Oldtoons' as the model and is not WirlyWirly guaranteed for other sites
 
     // Mutable variables dependent on the current page
@@ -3405,27 +3424,39 @@ function unit3dTrackerHandler(downloadElementsSelector) {
     // If there is a specified paginationLoop, mark the processed elements so that bunnyButtons are not repeatedly generated
     SETTINGS.paginationLoop >= 500 ? downloadElementsTrackProcessed = true : null
 
-    let unit3dLooping = false
+    if ( document.location.pathname.match(/(\/|\/torrents[^/]*)$/) && SETTINGS.paginationLoop < 500 ) {
+        // This is the search page or homepage, both of which require a MutationObserver
 
-    if ( document.location.pathname.match(/\/$/) && SETTINGS.paginationLoop < 500 ) {
-        // This is the homepage, so enable time-based paginationLooping
-        unit3dLooping = true
-        SETTINGS.paginationLoop = 750
         downloadElementsTrackProcessed = true
 
-    } else if ( document.location.pathname.match(/(\/torrents[^/]*)$/) ) {
-        // This is the search page, so enable URL change based pagination handling
+        let observer = new MutationObserver( function(mutations) {
+            // Functionality to run when changes are detected to the target element
 
-        SETTINGS.paginationLoop = ''
-        downloadElementsTrackProcessed = true
+            try {
+                processDownloadElements(0)
+            } catch (error) {
+                logger.debug(error)
+            }
 
-        window.navigation.addEventListener('navigate', function() {
-            // Whenever the page\URL changes, process the new downloadElements
-            processDownloadElements(0)
         })
+        
+        let target, config
+
+        if ( document.location.pathname.match(/(\/torrents[^/]*)$/) ) {
+            // The search page observer configs
+            target = document.querySelector('div.page__torrents > script[nonce]')
+            config = { attributes: true }
+        } else {
+            // The homepage observer configs
+            target = document.querySelector('section.panelV2.blocks__top-torrents div.data-table-wrapper tbody')
+            config = { childList: true }
+        }
+            
+
+        observer.observe(target, config)
 
     } else if ( pageURL.match(/\/torrents\/\d+/) ) {
-        // The torrents details page, so change the look of the BunnyButton
+        // The torrents details page, so change the style of the BunnyButton
         torrentDetailsPage = true
 
         // Give the bunnyButton a bar appearance, to fit in better with the other buttons
@@ -3478,8 +3509,12 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                             // The snatchedStatusSelector was matched
                             replaceEmojis(bunnyButton, '🍁')
                             bunnyButton.title = bunnyButton.title.replace(/🔗/, '🍁 Completed\n🔗')
-                        } else if ( document.querySelector('span.torrent-icons i.torrent-icons__freeleech.fa-star') != null ) {
-                            // The freeleechStatusSelector was matched
+                        } else if ( document.querySelector('span.torrent-icons i.torrent-icons__featured') != null ) {
+                            // This is a featured torrent
+                            replaceEmojis(bunnyButton, '🏆')
+                            bunnyButton.title = bunnyButton.title.replace(/🖥️/, '🏆 Featured 🏆\n💎 Freeleech 💎\n\n🖥️')
+                        } else if ( document.querySelector('span.torrent-icons i.torrent-icons__freeleech.fa-star, i.torrent-icons__freeleech.fa-calendar-star, span.torrent-icons i.fa.fa-globe') != null ) {
+                            // The freeleechStatusSelector was matched: Star, Calendar, Globe
                             replaceEmojis(bunnyButton, '💎')
                             bunnyButton.title = bunnyButton.title.replace(/🖥️/, '💎 Freeleech 💎\n\n🖥️')
                         }
@@ -3491,6 +3526,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                         
                         if ( downloadElement.closest('td.torrent-search--list__buttons') ) {
                             // This is a List view
+
                             bunnyButton.style.display = 'inline-grid'
                             bunnyButton.style.fontSize = '110%'
                             bunnyButton.style.padding = '10px'
@@ -3498,23 +3534,31 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
                         } else if ( downloadElement.closest('article.torrent-card') ) {
                             // This is a Cards view
+
                             bunnyButton.style.display = 'inline-grid'
                             bunnyButton.style.fontSize = '135%'
                             bunnyButton.style.padding = '10px'
 
                         } else if ( downloadElement.closest('td.torrent-search--grouped__download') ) {
-                            // This is a Grouped view, move bunnyButton into it's own <td>
-                            let clonedParent = downloadElement.parentElement.cloneNode()
-                            clonedParent.appendChild(bunnyButton)
-                            downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
+                            // This is a Grouped view
+
+                            if ( window.screen.availWidth > 900 ) {
+                                // The screen is wide enough to accomadate another <td> for this bunnyButton
+
+                                let clonedParent = downloadElement.parentElement.cloneNode()
+                                clonedParent.appendChild(bunnyButton)
+                                downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
+
+                                // Hide the <td> parentElement to avoid a empty gap
+                                SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
+
+                            }
 
                             bunnyButton.style.padding = '4px'
 
-                            // Hide the <li> parentElement to avoid a empty gap
-                            SETTINGS.hideDL == true ? downloadElement.parentElement.style.display = 'none' : null
-
                         } else if ( downloadElement.closest('td.user-bookmarks__actions') ) {
                             // This is the Bookmarks view, move bunnyButton into it's own <li>
+
                             let clonedParent = downloadElement.parentElement.cloneNode()
                             clonedParent.appendChild(bunnyButton)
                             downloadElement.parentElement.insertAdjacentElement(bunnyButtonPlacement, clonedParent)
@@ -3535,14 +3579,19 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                                 // The snatchedStatusSelector was matched
                                 replaceEmojis(bunnyButton, '🍁')
                                 bunnyButton.title = bunnyButton.title.replace(/🔗/, '🍁 Completed\n🔗')
-                            } else if ( downloadElement.closest('tr').querySelector('i.torrent-icons__freeleech.fa-star') != null ) {
-                                // The freeleechStatusSelector was matched
+                            } else if ( downloadElement.closest('tr').querySelector('i.torrent-icons__featured') != null ) {
+                                // This is a featured torrent
+                                replaceEmojis(bunnyButton, '🏆')
+                                bunnyButton.title = bunnyButton.title.replace(/🖥️/, '🏆 Featured 🏆\n💎 Freeleech 💎\n\n🖥️')
+                            } else if ( downloadElement.closest('tr').querySelector('i.torrent-icons__freeleech.fa-star, i.torrent-icons__freeleech.fa-calendar-star, i.fa.fa-globe') != null ) {
+                                // The freeleechStatusSelector was matched: Star, Calendar, Globe
                                 replaceEmojis(bunnyButton, '💎')
                                 bunnyButton.title = bunnyButton.title.replace(/🖥️/, '💎 Freeleech 💎\n\n🖥️')
                             }
 
-                        } catch(error) {
+                        } catch (error) {
                             // An error occured, most likely the page view-type is not a table and therefore the 'tr' is not available
+                            logger.debug(error)
                         }
 
                     }
@@ -3570,7 +3619,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
             SETTINGS.firstTrackerHandlerScan = false
 
-            if ( SETTINGS.paginationLoop >= 500 || unit3dLooping == true ) {
+            if ( SETTINGS.paginationLoop >= 500 ) {
                 // The tracker handler will continuosly scan the page for new downloadElements
                 processDownloadElements(SETTINGS.paginationLoop)
             }
@@ -3719,7 +3768,7 @@ function getPageSeparator(downloadElement, manualSeparator = false) {
                separatorText = siblingElement.textContent
             }
 
-        } catch(error) {
+        } catch (error) {
         }
 
     }
@@ -3903,7 +3952,7 @@ function addTorrent({
             let quiURLCaptures = torrentClient.quiURL.match(/^(https?:\/\/.+)\/(instances\/\d+)/) // [1] == domain, [2] == instance
             postData.qui.url = `${quiURLCaptures[1]}/api/${quiURLCaptures[2]}/torrents`
 
-        } catch(error) {
+        } catch (error) {
             // Failed to parse quiURL for the API endpoint
             replaceEmojis(bunnyButton, '❌')
             window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved quiURL\n\nℹ️ Check your quiURL for typos, making sure it is in the expected format and that it starts with the appropriate http(s) protocol\n\nHover the quiURL emoji for examples\n\nquiURL: ${torrentClient.quiURL}`)
@@ -3931,7 +3980,7 @@ function addTorrent({
         try {
             // qBitTorrent Example: http://localhost:8080
             postData.qBitTorrent.url = torrentClient.qBitTorrentURL.match(/^(https?:\/\/.+?)\/?$/)[1]
-        } catch(error) {
+        } catch (error) {
             replaceEmojis(bunnyButton, '❌')
             window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved qBitTorrentURL\n\nℹ️ The URL must start with the appropriate http(s) protocol\n\nHover the qBitTorrentURL emoji for examples\n\nqBitTorrentURL: ${torrentClient.qBitTorrentURL}`)
             return
@@ -3954,7 +4003,7 @@ function addTorrent({
         try {
             // TransmissionURL Example: http://localhost:9091 | http://localhost:9091/custom/rpc
             postData.transmission.url = torrentClient.transmissionURL.match(/^(https?:\/\/.+?)\/?$/)[1]
-        } catch(error) {
+        } catch (error) {
             replaceEmojis(bunnyButton, '❌')
             window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved transmissionURL\n\nℹ️ The URL must start with the appropriate http(s) protocol\n\nHover the transmissionURL emoji for examples\n\ntransmissionURL: ${torrentClient.transmissionURL}`)
             return
@@ -3976,7 +4025,7 @@ function addTorrent({
         try {
             // Deluge Example: http://localhost:8112
             postData.deluge.url = torrentClient.delugeURL.match(/^(https?:\/\/.+?)\/?$/)[1]
-        } catch(error) {
+        } catch (error) {
             replaceEmojis(bunnyButton, '❌')
             window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved delgueURL\n\nℹ️ The URL must start with the appropriate http(s) protocol\n\nHover the delgueURL emoji for examples\n\ndelugeURL: ${torrentClient.delgueURL}`)
             return
@@ -3998,7 +4047,7 @@ function addTorrent({
         try {
             // ruTorrent Example: http://localhost:8080
             postData.ruTorrent.url = torrentClient.ruTorrentURL.match(/^(https?:\/\/.+?)\/?$/)[1]
-        } catch(error) {
+        } catch (error) {
             replaceEmojis(bunnyButton, '❌')
             window.alert(`❌ quiCKIE ❌\n\nFailed to parse the saved ruTorrentURL\n\nℹ️ The URL must start with the appropriate http(s) protocol\n\nHover the ruTorrentURL emoji for examples\n\nruTorrentURL: ${torrentClient.ruTorrentURL}`)
             return
@@ -4380,7 +4429,7 @@ async function transmissionPOST(postData) {
     if ( postData.formData.get('torrent') ) {
         // fileBlob: POST using the available .torrent blob, but first convert it to base64 as required by Transmission
 
-        let base64String = await encodeToBase64(postData.formData.get('torrent'))
+        let base64String = await base64encode(postData.formData.get('torrent'))
 
         transmissionData.arguments.metainfo = base64String
         transmissionData = JSON.stringify(transmissionData)
@@ -4412,7 +4461,7 @@ async function transmissionPOST(postData) {
             let transmissionSessionId = ''
             try {
                 transmissionSessionId = response.responseText.match(/X-Transmission-Session-Id: (\w+)/)[1]
-            } catch(error) {
+            } catch (error) {
 
             }
 
@@ -4521,7 +4570,7 @@ async function delugePOST(postData) {
     if ( postData.formData.get('torrent') != null ) {
         // fileBlob: POST using the available .torrent blob, but first convert it to base64 as required by Deluge
 
-        let base64String = await encodeToBase64(postData.formData.get('torrent'))
+        let base64String = await base64encode(postData.formData.get('torrent'))
 
         delugeData.method = 'core.add_torrent_file'
         delugeData.params.push('quiCKIE.torrent')
@@ -4562,7 +4611,7 @@ async function delugePOST(postData) {
 
             try {
                 delugeSessionId = response.responseHeaders.match(/_session_id=(\w+)/)[1]
-            } catch(error) {
+            } catch (error) {
                 // Did not get a cookie when trying to login, so the login failed
             }
 
@@ -4787,6 +4836,8 @@ function scanForThirdPartyTorrentURLS(delay) {
 
 // =================================== HELPER FUNCTIONS ======================================
 
+
+
 function waitForElement(cssTarget, observeTarget = document.body, observeSubTree = true) {
     // Wait until the cssTarget exists within the observeTarget and then resolve the promise
     // Source: https://stackoverflow.com/a/61511955
@@ -4812,6 +4863,7 @@ function waitForElement(cssTarget, observeTarget = document.body, observeSubTree
         try {
             observer.observe(observeTarget, { childList: true, subtree: observeSubTree })
         } catch (error) {
+            // console.log(error)
         }
 
     })
@@ -4819,24 +4871,25 @@ function waitForElement(cssTarget, observeTarget = document.body, observeSubTree
 }
 
 
-function encodeToBase64(data) {
-    // Convert the data parameter (blob, string, etc) to a base64 string
+function base64encode(inputData) {
+    // Encode the inputData (blob, string, etc) to a base64 string
 
     return new Promise( function(resolve) {
+
         const reader = new FileReader()
         reader.onloadend = function() {
-            // After the file has been read\loaded, clean the base64 and resolve the promise
+            // After the file has been read\loaded, clean the base64 string and resolve the promise
             resolve(reader.result.replace(/^data:.+;base64,/, ''))
         }
 
-        reader.readAsDataURL(data)
+        reader.readAsDataURL(inputData)
     })
 
 }
 
 
 function saveToFile(fileData, filename) {
-    // Download the provided fileData to a local file
+    // Save the provided fileData to a local file
     
     mimeTypes = {
         // The different MIME types this function is setup to handle 
