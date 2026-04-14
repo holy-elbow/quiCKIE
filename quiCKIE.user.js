@@ -1496,7 +1496,7 @@ if ( primaryDomain == 'animebytes' ) {
 
 if ( SETTINGS.thirdPartyScan != 'Off' ) {
     // After a brief delay, query the document for any thirdParty '[data-quickie_torrenturl]' elements for which a bunnyButton should be created
-    SETTINGS.thirdPartyDelay < 50 ? SETTINGS.thirdPartyDelay = 200 : null
+    SETTINGS.thirdPartyDelay < 100 ? SETTINGS.thirdPartyDelay = 200 : null
     scanForThirdPartyTorrentURLS(SETTINGS.thirdPartyDelay)
 }
 
@@ -1733,7 +1733,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
             'globalLeftClickAction': "─── 🖱️ Left-Click \\ Tap 🖱️ ───\n\nThe action to take when performing a Left-Click\\Tap on a Bunny button\n\nℹ️ Affects all trackers that have the '🖱️' setting set to 'Global'",
             'globalMiddleClickAction': '─── 🖱️ Middle-Click 🖱️ ───\n\nThe action to take when performing a Middle-Click on a BunnyButton',
             'bunnyButtonPlacement': '─── ↔️ Placement  ↔️ ───\n\nThe placement of the BunnyButtons relative to the sites download buttons',
-            'thirdPartyDelay': "─── 🤝 3rd Party Delay 🤝 ───\n\nThe delay in milliseconds to wait until scanning for third-party links that have quiCKIE integration\n\nOnly affects trackers that have the '🤝' column set to 'On'\n\nℹ️ This delay only affects the FIRST scan of third-party quiCKIE links, not every scan thereafter",
+            'thirdPartyDelay': "─── 🤝 3rd Party Delay 🤝 ───\n\nThe delay in milliseconds to wait until scanning for third-party links that have quiCKIE integration\n\nℹ️ This only applies to trackers that have the '🤝' column enabled\n\n⚠️ Settings this too low can cause race issues between quiCKIE and the third-party UserScript, so the recommended time is +500ms",
             'hiddenTrackers': "─── 🙈 Hidden trackers 🙈 ───\n\nA comma separated list of trackers to be removed from the quiCKIE settings panel\n\nUse the name (case-insensitive) displayed in the '🌎 Tracker' column\n\nHover over the tracker name for a '🙈' button that will quickly add the tracker to this hidden list\n\nℹ️ This does not disable quiCKIE on those trackers, it simply hides the tracker from cluttering this settings Panel\n\nExample:  HDBits, secret-cinema, NYAA",
             'globalForcedTorrentFile': '─── 🧲 Torrent File  🧲 ───\n\nForce all BunnyButtons to download the .torrent file through the browser before sending it to the client\n\nℹ️ By default, quiCKIE will determine for itself if the torrentURL can be sent directly to the client or should first be downloaded through the browser\n\nℹ️ Magnet links are ALWAYS sent directly to the client, as they are not proper http links that can be downloaded through the browser',
 
@@ -1798,7 +1798,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
             'uplimit': '─── ⬆️ Upload Limit ⬆️ ───\n\nThe speed limit in KB/s to apply when uploading\\seeding these torrents',
             'instance': '─── 🎯 Target Instance 🎯 ───\n\nSpecify a particular qui instance ID for where to send these torrents\n\nLeave this field blank to use the global instance saved as the quiURL\n\nℹ️ This does NOT support a full url, only a qui instance ID number',
             'paginationloop': "─── 🔁 Pagination Loop 🔁 ───\n\nSpecify a time in milliseconds to repeatedly scan the page for new download buttons\n\nThis is useful for sites with pagination, which is when the browser doesn't do a full refresh between pages\\searches. Since the page isn't actually refreshing, your UserScripts won't be triggered and you'll end up without BunnyButtons for the new DL buttons\n\nℹ️ For UNIT3D trackers, this feature is automatically enabled on certain pages\n\n⚠️ You should NOT enable this feature unless you are on a site that actually has pagination\n\n⚠️ Setting this too low can impact your browser, so the recommended time is +2000ms while the minimum is 500ms",
-            'thirdpartyscan': "─── 🤝 3rd Party Integrations 🤝 ───\n\nScan for third-party DL (Download) buttons with quiCKIE integration\n\nThe developer of a third-party UserScript may setup quiCKIE integration for their UserScript, that way the DL buttons their UserScript generates will also receive a BunnyButton\n\nℹ️ On + 🌎: Allow third-party UserScripts to specify for which quiCKIE supported tracker their BunnyButtons should pull tracker settings from. If this is not specified by the third-party UserScript, the settings for the current tracker will be used\n\n⚠️ You should NOT enable this feature unless you have installed a trusted UserScript that actually has quiCKIE integration",
+            'thirdpartyscan': "─── 🤝 3rd Party Integrations 🤝 ───\n\nScan for third-party DL (Download) buttons with quiCKIE integration\n\nThe developer of a third-party UserScript may setup quiCKIE integration for their UserScript, that way the DL buttons their UserScript generates will also receive a BunnyButton\n\nℹ️ On + 🌎: Allow third-party UserScripts to specify for which quiCKIE supported tracker their BunnyButtons should pull tracker settings from. If a tracker is not specified by the third-party UserScript, the settings for the current tracker will be used\n\n⚠️ You should NOT enable this feature unless you have installed a trusted UserScript that actually has quiCKIE integration",
             'leftclick' : "─── 🖱️ Left-Click \\ Tap 🖱️ ───\n\nSpecify what action should be taken when the BunnyButton is left-clicked on a PC or tapped on a mobile\n\nℹ️ The 'Global' option will use the setting specified above",
             'hidedl': "─── 🙈 Hide Download Button 🙈 ───\n\nHide the trackers download button from view\n\nThis will NOT apply to any DL buttons from third-party UserScripts\n\nℹ️ Hiding is not the same as removing. The button will still be there, it will just have a css style of 'display: none' applied making it hidden and unclickable. This may result in weird gaps\\results on some pages",
             'startpaused': "─── ⏸️ Start Paused ⏸️ ───\n\nPause torrents when they are added so that they do not automatically begin downloading\n\nUseful for when you want to give yourself a chance to pick which files of the torrent should be downloaded\n\nℹ️ Shift-Ctrl-Click on a BunnyButton or Preset to override the Start Paused setting to be True",
@@ -4208,7 +4208,7 @@ async function getFileBlob(postData) {
 
                 console.log(response)
 
-                window.alert(`❌ quiCKIE ❌\n\nThe file quiCKIE downloaded that would be sent to ${postData.torrentClient} was not a .torrent file. Aborting the addition, make sure the torrentURL of this BunnyButton is downloading a valid .torrent file\n\nFileType: ${blobData.type}\n\nStatus Code: ${response.status}\n\ntorrentURL: ${fileURL}\n\nThe full response has been printed in the console`)
+                window.alert(`❌ quiCKIE ❌\n\nThe file quiCKIE downloaded that would be sent to ${postData.torrentClient} was not a .torrent file\n\nAborting the addition, make sure the torrentURL of this BunnyButton is downloading a valid .torrent file\n\nFileType: ${blobData.type}\n\nResponse Status Code: ${response.status}\n\ntorrentURL: ${fileURL}\n\nThe full response has been printed in the console`)
                 return
 
             } else {
@@ -4726,19 +4726,24 @@ async function ruTorrentPOST(postData) {
 function scanForThirdPartyTorrentURLS(delay) {
     // Check for elements that have the unique 'data-quickie_torrenturl' attribute designating them as integrated thirdParty torrentURLs for which to generate a BunnyButton. This process will loop every 5000ms.
 
+    // Check if the user has enabled tracker-specific settings for thirdParty DL elements
+    let thirdPartyTrackerSpecificSettings = false
+    SETTINGS.thirdPartyScan == 'On + 🌎' ? thirdPartyTrackerSpecificSettings = true : null
+
     setTimeout(() => {
 
-        let allThirdPartyElements = document.querySelectorAll('[data-quickie_torrenturl]')
+        let allThirdPartyDownloadElements = document.querySelectorAll('[data-quickie_torrenturl]')
 
-        if ( allThirdPartyElements.length > 0 ) {
+        if ( allThirdPartyDownloadElements.length > 0 ) {
 
-            // Use an existing BunnyButton as the base for which to pull styles from
+            // The first bunnyButton on the page, which will be used as a base from where to pull a separator and CSS styles
             let existingBB = document.querySelector('a.quickie_bunnyButton:not(a.quickie_thirdParty)')
 
-            for (let downloadElement of allThirdPartyElements) {
+            for ( let downloadElement of allThirdPartyDownloadElements ) {
                 // For each thirdPartyElement, create a BunnyButton using the elements 'data-quickie_torrenturl' attribute
 
                 let torrentSettings = {
+                    // The default tracker settings that will be used by this bunnyButton
                     primaryDomain: primaryDomain,
                     category: SETTINGS.category,
                     savePath: SETTINGS.savePath,
@@ -4755,20 +4760,22 @@ function scanForThirdPartyTorrentURLS(delay) {
                     skipHash: SETTINGS.skipHash,
                 }
 
-                // If allowed, check for the tracker-specific settings for this thirdParty DL element
-                if ( SETTINGS.thirdPartyScan == 'On + 🌎' ) {
+                // The user has enabled 'On + 🌎', so get the tracker-appropriate torrent settings that will be used for this bunnyButton
+                if ( thirdPartyTrackerSpecificSettings == true ) {
 
-                    if ( SETTINGS.firstThirdPartyScan ) {
-                        // This being the first scan, update the presetMenuItems object so that it includes properties for ALL trackers
+                    if ( SETTINGS.firstThirdPartyScan == true ) {
+                        // This being the first scan, update the global presetMenuItems object so that it includes a property for not only the current tracker, but properties for ALL trackers
                         presetMenuItems = createPresetItems(allPrimaryDomains)
                         SETTINGS.firstThirdPartyScan = false
-
                     }
 
                     // [quickie_tracker] : Check if the thirdParty element has specified from which tracker the bunnyButtons should get their settings
                     if ( downloadElement.dataset.quickie_tracker != undefined ) {
+
+                        // Using the provided trackerName, get the primaryDomain for the corresponding tracker
                         let thirdPartyDomain = trackerNameToPrimaryDomain[`${downloadElement.dataset.quickie_tracker.toLowerCase()}`]
 
+                        // Get and update the torrentSettings with those appropriate of the thirdPartyDomain
                         torrentSettings.primaryDomain = thirdPartyDomain
                         torrentSettings.category = GM_config.get(`${thirdPartyDomain}-category`)
                         torrentSettings.savePath = GM_config.get(`${thirdPartyDomain}-savePath`)
@@ -4784,7 +4791,7 @@ function scanForThirdPartyTorrentURLS(delay) {
                         torrentSettings.autoTMM = GM_config.get(`${thirdPartyDomain}-autoTMM`)
                         torrentSettings.skipHash = GM_config.get(`${thirdPartyDomain}-skipHash`)
 
-                        // Empty problematic settings values
+                        // Empty problematic integer values before they cause unexpected results in the torrent client
                         torrentSettings.ratioLimit == 0 ? torrentSettings.ratioLimit = '' : null
                         torrentSettings.seedTime == 0 ? torrentSettings.seedTime = '' : null
                         torrentSettings.dlLimit <= 0 ? torrentSettings.dlLimit = '' : null
@@ -4798,7 +4805,7 @@ function scanForThirdPartyTorrentURLS(delay) {
                 // [quickie_forcetorrentfile] : Check if the thirdParty element has specified that the torrentURL be downloaded through the browser instead of being determined by quiCKIE
                 downloadElement.dataset.quickie_forcetorrentfile == 'true' ? SETTINGS.forceTorrentFile = true : null
 
-                // [quickie_separator] : Check if the thirdParty element would like to use a specific text separator between the element and the bunnyButton
+                // Determine the current separator used by an existing bunnyButton
                 let separatorNode
                 SETTINGS.bunnyButtonPlacement == 'After' ? separatorNode = existingBB.previousSibling : separatorNode = existingBB.nextSibling
 
@@ -4809,16 +4816,17 @@ function scanForThirdPartyTorrentURLS(delay) {
                     separatorNode.nodeType != 3 ? separatorText = ' ' : separatorText = separatorNode.textContent
                 }
 
+                // [quickie_separator] : Check if the thirdParty element has specified a specific separator to use between itself and the bunnyButton
                 downloadElement.dataset.quickie_separator ? separatorText = downloadElement.dataset.quickie_separator : null
 
                 // Create a bunnyButton using the unique 'quickie_torrenturl' attribute of the thirdParty element
                 let bunnyButton = createBunnyButton({torrentURL: downloadElement.dataset.quickie_torrenturl, buttonText: ' 🤝 ', torrentSettings: torrentSettings})
 
+                // Apply the CSS styles used by the existingBB
                 bunnyButton.style = existingBB.style.cssText
                 bunnyButton.classList.add('quickie_thirdParty')
 
-
-                // Append the bunnyButton after the thirdParty element
+                // Append the bunnyButton relative to the thirdParty element
                 let bunnyButtonPlacement
                 SETTINGS.bunnyButtonPlacement == 'After' ? bunnyButtonPlacement = 'afterend' : bunnyButtonPlacement = 'beforebegin'
                 downloadElement.insertAdjacentElement(bunnyButtonPlacement, bunnyButton)
@@ -4827,14 +4835,17 @@ function scanForThirdPartyTorrentURLS(delay) {
                 // Remove the attribute that would match it as a thirdParty element in future loops
                 downloadElement.removeAttribute('data-quickie_torrenturl')
 
-                // Signify that there were new thirdParty elements, so the presets-menu function should run
-                newThirdParties = true
-
-                // Append the presets-menu to the newly created bunnyButtons
-                attachPresetsMenu('a.quickie_newBunnyButton', torrentSettings.primaryDomain)
+                if ( thirdPartyTrackerSpecificSettings == true ) {
+                    // Append the presets-menu to the newly created bunnyButton, which must be done per bunnyButton to make sure it receives the tracker-appropriate menuItems
+                    attachPresetsMenu('a.quickie_newBunnyButton', torrentSettings.primaryDomain)
+                }
 
             }
 
+            if ( thirdPartyTrackerSpecificSettings == false ) {
+                // Append the presets-menu to all the newly created bunnyButtons at once, since they'll all be receiving the same menuItems
+                attachPresetsMenu('a.quickie_newBunnyButton', SETTINGS.primaryDomain)
+            }
 
         }
 
@@ -4847,7 +4858,6 @@ function scanForThirdPartyTorrentURLS(delay) {
 
 
 // =================================== HELPER FUNCTIONS ======================================
-
 
 
 function waitForElement(cssTarget, observeTarget = document.body, observeSubTree = true) {
