@@ -653,8 +653,26 @@ if ( primaryDomain == 'animebytes' ) {
     // Home | Browse| Bookmarks
 
     let trackerHandlingOptions = {
-        downloadELementsSelector: 'a[href^="https://animez.to/torrents/"][href$="/download"]',
+        downloadElementsSelector: 'a[href^="https://animez.to/torrents/"][href$="/download"]',
     }
+    
+    if ( pageURL.match(/\/torrents\/\d+/) ) {
+
+        trackerHandlingOptions.bunnyButtonText = '🐰 quiCKIE'
+        trackerHandlingOptions.bunnyButtonAddStyles = `
+            background: #4263eb;
+            border-radius: 8px;
+            border 1px solid transparent;
+            color: #f9fafb;
+            box-shadow: 0 1px 1px rgba(229, 231, 235, .06);
+            padding: 0.6875rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5rem;
+        `
+    }
+            
+
     quickieTrackerHandler(trackerHandlingOptions)
 
 } else if ( primaryDomain == 'anthelion' ) {
