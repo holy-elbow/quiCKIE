@@ -1725,7 +1725,7 @@ function createGMConfigSettingsPanel(trackerDomain) {
     }
 
     const panelTextData = {
-        // The data that will be used as the '.textContent' and '.title' in the settings panel's elements. The key names are the '.toLowerCase()' of trackerFieldSuffixes and presetFieldSuffixes items.
+        // The data that will be used as the '.textContent' and '.title' in the settings panel's elements. The key names are the '.toLowerCase()' of the items in the trackerFieldSuffixes array and the items in the presetFieldSuffixes array.
 
         'globalsTitles': {
             'torrentClient': "─── 🖥️ Torrent Client 🖥️ ───\n\nThe torrent client for where to send torrents\n\nNot all clients will support all the available quiCKIE settings\n\nquiCKIE was initially written for qui, with support for other clients being added much later on. As a result, the names of the various settings may not correlate exactly with what other clients would call them.",
@@ -4734,6 +4734,7 @@ function scanForThirdPartyTorrentURLS(delay) {
 
     setTimeout(() => {
 
+        // The query that will locate all the elements containing the `data-quickie_torrenturl` attribute
         let allThirdPartyDownloadElements = document.querySelectorAll('[data-quickie_torrenturl]')
 
         if ( allThirdPartyDownloadElements.length > 0 ) {
