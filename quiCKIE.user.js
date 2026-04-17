@@ -4865,6 +4865,8 @@ function scanForThirdPartyTorrentURLS(delay) {
             for ( let downloadElement of allThirdPartyDownloadElements ) {
                 // For each thirdPartyElement, create a BunnyButton using the elements 'data-quickie_torrenturl' attribute
 
+                let bunnyButtonText = ' 🤝 '
+
                 let torrentSettings = {
                     // The default tracker settings that will be used by this bunnyButton
                     primaryDomain: primaryDomain,
@@ -4901,6 +4903,9 @@ function scanForThirdPartyTorrentURLS(delay) {
                             // The [quickie_tracker] is valid as either a quiCKIE supported trackerName or primaryDomain
 
                             let thirdPartyDomain = trackerNameToPrimaryDomain[thirdPartyTracker] ?? thirdPartyTracker
+
+                            // Indicate this DL button is using thirdParty tracker settings by changing the displayed emoji
+                            bunnyButtonText = ' 🌎 '
 
                             // Get and update the torrentSettings with those appropriate of the thirdPartyDomain
                             torrentSettings.primaryDomain = thirdPartyDomain
@@ -4948,7 +4953,7 @@ function scanForThirdPartyTorrentURLS(delay) {
                 downloadElement.dataset.quickie_separator ? separatorText = downloadElement.dataset.quickie_separator : null
 
                 // Create a bunnyButton using the unique 'quickie_torrenturl' attribute of the thirdParty element
-                let bunnyButton = createBunnyButton({torrentURL: downloadElement.dataset.quickie_torrenturl, buttonText: ' 🤝 ', torrentSettings: torrentSettings})
+                let bunnyButton = createBunnyButton({torrentURL: downloadElement.dataset.quickie_torrenturl, buttonText: bunnyButtonText, torrentSettings: torrentSettings})
 
                 // Apply the CSS styles used by the existingBB
                 bunnyButton.style = existingBB.style.cssText
