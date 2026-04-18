@@ -3281,10 +3281,10 @@ function createPresetItems(primaryDomains) {
 
 }
 
-
-GM_addStyle(GM_getResourceText('presetsMenuCSS'))
+let presetsMenuCSS = GM_getResourceText('presetsMenuCSS')
+GM_addStyle(presetsMenuCSS)
 function attachPresetsMenu(targetSelector, primaryDomain = primaryDomain) {
-    // append the menuItems to the target elements
+    // For the targetSelector elements, use the provided primaryDomain to append the appropriate menu items from the global presetMenuItems object
 
     const presetsMenu = new ContextMenu({
         // targetSelector == CSS Selector
@@ -3506,17 +3506,17 @@ function quickieTrackerHandler({
 }
 
 
+// @unit3dTrackerHandler
 function unit3dTrackerHandler(downloadElementsSelector) {
-    // A tracker handler focused on the layout of the UNIT3D Framework. Generate a bunnyButton for each queried downloadElement matching the provided CSS selector
-    // ! This function uses 'Oldtoons' as the model and is not WirlyWirly guaranteed for other sites
+    // A tracker handler designed to support trackers running on the UNIT3D framework
+    // ! This function is based on the HTML layout of 'Oldtoons' and is not WirlyWirly guaranteed for other UNIT3D sites
 
-    // Mutable variables dependent on the current page
-    let bunnyButtonPlacement
-    let torrentDetailsPage = false
-    let queryFromElement = document
+    // Mutable settings dependent on the current page
     let bunnyButtonAddStyles = ''
-    let bunnyButtonAddClasses
+    let bunnyButtonPlacement
     let bunnyButtonText = ' 🐰 '
+    let queryFromElement = document
+    let torrentDetailsPage = false
 
     if ( pagePath.match(/\/torrents\/\d+/) ) {
         // The torrents details page, so change the style of the only BunnyButton
@@ -3572,13 +3572,12 @@ function unit3dTrackerHandler(downloadElementsSelector) {
 
         }
 
-
         if ( target != null ) {
             // Yes, there is a valid target to observe for mutations
             observer.observe(target, config)
 
         } else {
-            // No, there is not a valid target to observe for mutations, so fallback to time-base paginationLooping
+            // No, there is not a valid target to observe for mutations, so fallback to time-based paginationLooping
             queryFromElement = document
             SETTINGS.paginationLoop = 500
         }
@@ -3600,7 +3599,7 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                 for (let downloadElement of allDownloadElements) {
                     // For each downloadElement, generate and insert a bunnyButton
 
-                    let bunnyButton = createBunnyButton({ torrentURL: downloadElement.href, buttonText: bunnyButtonText, torrentSettings: SETTINGS, addButtonStyles: bunnyButtonAddStyles, addButtonClasses: bunnyButtonAddClasses })
+                    let bunnyButton = createBunnyButton({ torrentURL: downloadElement.href, buttonText: bunnyButtonText, torrentSettings: SETTINGS, addButtonStyles: bunnyButtonAddStyles })
 
                     if ( torrentDetailsPage == true ) {
                         // This is the torrentDetails page, which only lists 1 torrent at a time
@@ -3683,20 +3682,21 @@ function unit3dTrackerHandler(downloadElementsSelector) {
                         }
 
                         try {
+
                             if ( downloadElement.closest('tr').querySelector('td.torrent-activity-indicator--seeding') != null ) {
-                                // The seedingStatusSelector was matched
+                                // This is a Seeding torrent
                                 bunnyButtonTorrentStatus(bunnyButton, 'seeding')
 
                             } else if ( downloadElement.closest('tr').querySelector('td.torrent-activity-indicator--completed') != null ) {
-                                // The snatchedStatusSelector was matched
+                                // This is a Snatched torrent
                                 bunnyButtonTorrentStatus(bunnyButton, 'snatched')
 
                             } else if ( downloadElement.closest('tr').querySelector('i.torrent-icons__featured') != null ) {
-                                // This is a featured torrent
+                                // This is a Featured torrent
                                 bunnyButtonTorrentStatus(bunnyButton, 'featuredFreeleech')
 
                             } else if ( downloadElement.closest('tr').querySelector('i.torrent-icons__freeleech.fa-star, i.torrent-icons__freeleech.fa-calendar-star, i.fa.fa-globe') != null ) {
-                                // The freeleechStatusSelector was matched: Star, Calendar, Globe
+                                // This is a Freeleech torrent [Star, CalendarStar, GlobalFreeleech]
                                 bunnyButtonTorrentStatus(bunnyButton, 'freeleech')
 
                             }
